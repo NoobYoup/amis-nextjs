@@ -37,7 +37,7 @@ export default function Header() {
         { text: 'Thủ tục', path: '/procedures' },
         { text: 'Tin tức', path: '/news' },
         { text: 'Liên hệ', path: '/contact' },
-        { text: 'Hình ảnh', path: '/gallery' },
+        { text: 'Hình ảnh', path: '/activities' },
         { text: 'Góp ý', path: '/feedback' },
     ];
 

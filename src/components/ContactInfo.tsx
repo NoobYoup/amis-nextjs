@@ -23,10 +23,7 @@ export default function ContactInfo() {
     return (
         <section style={{ padding: '80px 0', background: '#f8f9fa' }}>
             <Container maxWidth="lg">
-                <Typography
-                    variant="h3"
-                    sx={{ fontWeight: 700, textAlign: 'center', mb: 2, color: 'var(--primary-color)' }}
-                >
+                <Typography variant="h3" sx={{ fontWeight: 700, textAlign: 'center', color: 'var(--primary-color)' }}>
                     Thông tin liên hệ
                 </Typography>
                 <Typography variant="h6" sx={{ display: 'block', textAlign: 'center', mb: 4, color: '#555' }}>

@@ -30,10 +30,7 @@ export default function Features() {
     return (
         <section style={{ padding: '80px 0' }}>
             <Container maxWidth="lg">
-                <Typography
-                    variant="h3"
-                    sx={{ fontWeight: 700, textAlign: 'center', mb: 2, color: 'var(--primary-color)' }}
-                >
+                <Typography variant="h3" sx={{ fontWeight: 700, textAlign: 'center', color: 'var(--primary-color)' }}>
                     Chương trình đào tạo
                 </Typography>
                 <Typography variant="h6" sx={{ display: 'block', textAlign: 'center', mb: 4, color: '#555' }}>
