@@ -2,7 +2,6 @@
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Image from 'next/image';
 
@@ -13,10 +12,9 @@ export default function Hero() {
         >
             <Container maxWidth="lg">
                 <Grid container alignItems="center" spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                    <Grid item size={{ xs: 2, sm: 4, md: 6 }}>
+                    <Grid size={{ xs: 2, sm: 4, md: 6 }}>
                         <Box>
                             <Typography
-                                Typography
                                 variant="h3"
                                 sx={{ fontWeight: 800, textShadow: '2px 2px 6px rgba(0,0,0,0.2)' }}
                             >
@@ -36,7 +34,7 @@ export default function Hero() {
                             </Button> */}
                         </Box>
                     </Grid>
-                    <Grid item size={{ xs: 2, sm: 4, md: 6 }}>
+                    <Grid size={{ xs: 2, sm: 4, md: 6 }}>
                         <Box sx={{ textAlign: 'center' }}>
                             <Image
                                 src="/images/hero_backround.jpg"

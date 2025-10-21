@@ -23,7 +23,7 @@ export default function Partners() {
                 </Typography>
                 <Grid container spacing={4} justifyContent="center">
                     {partners.map((partner, index) => (
-                        <Grid item size={{ xs: 2, sm: 4, md: 3 }} key={index}>
+                        <Grid size={{ xs: 2, sm: 4, md: 3 }} key={index}>
                             <Box sx={{ textAlign: 'center' }}>
                                 <Image
                                     src={partner.src}

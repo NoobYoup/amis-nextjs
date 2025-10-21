@@ -31,7 +31,7 @@ export default function ContactInfo() {
                 </Typography>
                 <Grid container spacing={4}>
                     {contacts.map((contact, index) => (
-                        <Grid item size={{ sm: 6 }} key={index}>
+                        <Grid size={{ xs: 12, sm: 6 }} key={index}>
                             <Paper sx={{ p: 4, borderRadius: 3, textAlign: 'center' }} elevation={3}>
                                 <Box>{contact.icon}</Box>
                                 <Typography variant="h6" sx={{ fontWeight: 700, mt: 2 }}>
