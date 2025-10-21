@@ -38,7 +38,7 @@ export default function Features() {
                 </Typography>
                 <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                     {features.map((f) => (
-                        <Grid size={{ xs: 2, sm: 4, md: 4 }} key={f.title}>
+                        <Grid size={{ xs: 6, sm: 4, md: 4 }} key={f.title}>
                             <Paper sx={{ p: 4, borderRadius: 3, height: '100%' }} elevation={4}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                                     <Icon

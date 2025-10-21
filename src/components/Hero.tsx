@@ -12,7 +12,7 @@ export default function Hero() {
         >
             <Container maxWidth="lg">
                 <Grid container alignItems="center" spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                    <Grid size={{ xs: 2, sm: 4, md: 6 }}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                         <Box>
                             <Typography
                                 variant="h3"
@@ -34,14 +34,18 @@ export default function Hero() {
                             </Button> */}
                         </Box>
                     </Grid>
-                    <Grid size={{ xs: 2, sm: 4, md: 6 }}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                         <Box sx={{ textAlign: 'center' }}>
                             <Image
                                 src="/images/hero_backround.jpg"
                                 alt="AMIS"
-                                width={700}
-                                height={420}
-                                style={{ borderRadius: 12 }}
+                                width={400}
+                                height={400}
+                                style={{
+                                    borderRadius: 12,
+                                    width: '100%',
+                                    height: '100%',
+                                }}
                             />
                         </Box>
                     </Grid>

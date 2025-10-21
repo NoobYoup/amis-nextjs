@@ -21,16 +21,26 @@ export default function Partners() {
                 <Typography variant="h6" sx={{ display: 'block', textAlign: 'center', color: '#555' }}>
                     Hợp tác với các tổ chức giáo dục hàng đầu thế giới để mang lại chất lượng giáo dục tốt nhất
                 </Typography>
-                <Grid container spacing={4} justifyContent="center">
+                <Grid container spacing={4} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {partners.map((partner, index) => (
-                        <Grid size={{ xs: 2, sm: 4, md: 3 }} key={index}>
-                            <Box sx={{ textAlign: 'center' }}>
+                        <Grid size={{ xs: 6, md: 3 }} key={index}>
+                            <Box
+                                sx={{
+                                    textAlign: 'center',
+                                }}
+                            >
                                 <Image
                                     src={partner.src}
                                     alt={partner.alt}
-                                    width={250}
-                                    height={250}
-                                    style={{ borderRadius: 8, objectFit: 'contain' }}
+                                    width={400}
+                                    height={400}
+                                    style={{
+                                        borderRadius: 8,
+                                        objectFit: 'contain',
+
+                                        width: '100%',
+                                        height: '100%',
+                                    }}
                                 />
                             </Box>
                         </Grid>

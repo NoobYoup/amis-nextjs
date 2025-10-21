@@ -16,7 +16,7 @@ export default function Stats() {
             <Container maxWidth="lg">
                 <Grid container spacing={3} justifyContent="center" alignItems="center">
                     {stats.map((s) => (
-                        <Grid size={{ xs: 2, sm: 4, md: 3 }} key={s.label}>
+                        <Grid size={{ xs: 6, md: 3 }} key={s.label}>
                             <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 3 }} elevation={3}>
                                 <Typography variant="h3" sx={{ color: '#7cb342', fontWeight: 800 }}>
                                     {s.value}
