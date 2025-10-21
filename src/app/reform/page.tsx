@@ -179,7 +179,7 @@ export default function Reform() {
 
             <Container maxWidth="lg">
                 {/* Statistics */}
-                <Grid container spacing={3} sx={{ mb: 6 }}>
+                {/* <Grid container spacing={3} sx={{ mb: 6 }}>
                     {stats.map((stat, index) => (
                         <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                             <Card
@@ -215,7 +215,7 @@ export default function Reform() {
                             </Card>
                         </Grid>
                     ))}
-                </Grid>
+                </Grid> */}
 
                 {/* Tabs Navigation */}
                 <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}>
@@ -252,8 +252,8 @@ export default function Reform() {
                         </Typography>
                         <Card sx={{ mb: 4, p: 3 }}>
                             <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8 }}>
-                                Cải cách hành chính là nhiệm vụ quan trọng, góp phần nâng cao chất lượng giáo dục và
-                                đào tạo. Trường AMIS luôn chú trọng công khai, minh bạch trong mọi hoạt động.
+                                Cải cách hành chính là nhiệm vụ quan trọng, góp phần nâng cao chất lượng giáo dục và đào
+                                tạo. Trường AMIS luôn chú trọng công khai, minh bạch trong mọi hoạt động.
                             </Typography>
                             <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
                                 Theo Thông tư số 09/2024/TT-BGDĐT, nhà trường thực hiện công khai đầy đủ các thông tin
