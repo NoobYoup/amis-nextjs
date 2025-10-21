@@ -13,7 +13,7 @@ export default function Partners() {
     ];
 
     return (
-        <section style={{ padding: '80px 0' }}>
+        <section style={{ paddingTop: '80px' }}>
             <Container maxWidth="lg">
                 <Typography
                     variant="h3"

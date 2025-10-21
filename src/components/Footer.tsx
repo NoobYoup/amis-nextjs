@@ -9,7 +9,7 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 
 export default function Footer() {
     return (
-        <Box component="footer" sx={{ background: '#183f6d', color: 'white', py: 4 }}>
+        <Box component="footer" sx={{ background: '#183f6d', color: 'white', py: 4, mt: 6 }}>
             <Container maxWidth="lg">
                 <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                     <Box sx={{ flex: '1 1 260px' }}>

@@ -19,6 +19,7 @@ import React, { useState } from 'react';
 
 export default function Header() {
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const [activeLink, setActiveLink] = useState('');
 
     const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
         if (
@@ -46,8 +47,20 @@ export default function Header() {
             <List>
                 {menuItems.map((item) => (
                     <ListItem key={item.text} disablePadding>
-                        <ListItemButton component={Link} href={item.path}>
-                            <ListItemText primary={item.text} />
+                        <ListItemButton
+                            component={Link}
+                            href={item.path}
+                            onClick={() => setActiveLink(item.path)}
+                            sx={{
+                                backgroundColor: activeLink === item.path ? 'rgba(0,0,0,0.04)' : 'transparent',
+                            }}
+                        >
+                            <ListItemText
+                                primary={item.text}
+                                sx={{
+                                    color: activeLink === item.path ? 'var(--primary-color)' : 'var(--secondary-color)',
+                                }}
+                            />
                         </ListItemButton>
                     </ListItem>
                 ))}
@@ -68,7 +81,7 @@ export default function Header() {
         >
             <Container maxWidth="lg">
                 <Toolbar disableGutters sx={{ gap: 2 }}>
-                    <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
+                    <Link href="/" style={{ display: 'flex', alignItems: 'center' }} onClick={() => setActiveLink('/')}>
                         <Image src="/images/logo_amis.png" alt="AMIS" width={48} height={48} />
                         <Typography variant="h6" component="span" sx={{ ml: 1, color: '#183f6d', fontWeight: 700 }}>
                             AMIS
@@ -84,10 +97,10 @@ export default function Header() {
                                 component={Link}
                                 href={item.path}
                                 variant="text"
+                                onClick={() => setActiveLink(item.path)}
                                 sx={{
-                                    color: 'var(--secondary-color)',
-                                    '&:hover': { color: 'var(--primary-color)' },
-                                    '&:focus': { color: 'var(--primary-color)' },
+                                    color: activeLink === item.path ? 'var(--primary-color)' : 'var(--secondary-color)',
+                                    '&:hover': { color: 'var(--accent-color)' },
                                 }}
                             >
                                 {item.text}
