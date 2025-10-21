@@ -8,7 +8,11 @@ import Image from 'next/image';
 export default function Hero() {
     return (
         <section
-            style={{ background: 'linear-gradient(135deg,#7cb342 0%,#4caf50 100%)', color: 'white', padding: '80px 0' }}
+            style={{
+                background: 'linear-gradient(135deg, #7cb342 0%, #4caf50 100%)',
+                color: 'white',
+                padding: '80px 0',
+            }}
         >
             <Container maxWidth="lg">
                 <Grid container alignItems="center" spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>

@@ -15,7 +15,10 @@ export default function Partners() {
     return (
         <section style={{ padding: '80px 0' }}>
             <Container maxWidth="lg">
-                <Typography variant="h3" sx={{ fontWeight: 700, textAlign: 'center', mb: 2 }}>
+                <Typography
+                    variant="h3"
+                    sx={{ fontWeight: 700, textAlign: 'center', mb: 2, color: 'var(--primary-color)' }}
+                >
                     Đối tác của AMIS
                 </Typography>
                 <Typography variant="h6" sx={{ display: 'block', textAlign: 'center', color: '#555' }}>
@@ -24,11 +27,7 @@ export default function Partners() {
                 <Grid container spacing={4} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {partners.map((partner, index) => (
                         <Grid size={{ xs: 6, md: 3 }} key={index}>
-                            <Box
-                                sx={{
-                                    textAlign: 'center',
-                                }}
-                            >
+                            <Box>
                                 <Image
                                     src={partner.src}
                                     alt={partner.alt}
@@ -37,7 +36,6 @@ export default function Partners() {
                                     style={{
                                         borderRadius: 8,
                                         objectFit: 'contain',
-
                                         width: '100%',
                                         height: '100%',
                                     }}

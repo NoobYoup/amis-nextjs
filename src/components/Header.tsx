@@ -79,7 +79,17 @@ export default function Header() {
 
                     <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
                         {menuItems.map((item) => (
-                            <Button key={item.text} component={Link} href={item.path} variant="text">
+                            <Button
+                                key={item.text}
+                                component={Link}
+                                href={item.path}
+                                variant="text"
+                                sx={{
+                                    color: 'var(--secondary-color)',
+                                    '&:hover': { color: 'var(--primary-color)' },
+                                    '&:focus': { color: 'var(--primary-color)' },
+                                }}
+                            >
                                 {item.text}
                             </Button>
                         ))}
