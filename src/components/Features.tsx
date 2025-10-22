@@ -4,14 +4,14 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Icon from '@mui/material/Icon';
-import MenuIcon from '@mui/icons-material/Menu';
+import ChatIcon from '@mui/icons-material/Chat';
 import GroupIcon from '@mui/icons-material/Group';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 
 const features = [
     {
         title: 'Kỹ năng giao tiếp',
-        icon: <MenuIcon />,
+        icon: <ChatIcon />,
         desc: 'Phát triển khả năng giao tiếp hiệu quả bằng tiếng Anh và tiếng Việt',
     },
     {
