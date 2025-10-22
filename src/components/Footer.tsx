@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import YouTubeIcon from '@mui/icons-material/YouTube';
+// import TikTokIcon from '@mui/icons-material/TikTok';
 
 export default function Footer() {
     return (
@@ -37,6 +38,17 @@ export default function Footer() {
                             >
                                 <YouTubeIcon sx={{ mr: 1 }} /> YouTube
                             </Link>
+                            <Link
+                                href="https://www.tiktok.com/@_truongquoctemyuc_"
+                                target="_blank"
+                                style={{ color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center' }}
+                            >
+                                <i
+                                    className="fa-brands fa-tiktok"
+                                    style={{ marginRight: '12px', fontSize: '16px' }}
+                                ></i>{' '}
+                                TikTok
+                            </Link>
                         </Box>
                     </Box>
                     <Box sx={{ flex: '1 1 200px' }}>
@@ -56,7 +68,7 @@ export default function Footer() {
                     <Typography>
                         &copy; 2025 AMIS School. Powered by{' '}
                         <Link
-                            href={'https://linktr.ee/noobyoup'}
+                            href={'https://www.facebook.com/noobyoup'}
                             style={{ textDecoration: 'underline', color: 'var(--primary-color)' }}
                             target="_blank"
                         >
