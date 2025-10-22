@@ -53,7 +53,16 @@ export default function Footer() {
                     </Box>
                 </Box>
                 <Box sx={{ textAlign: 'center', mt: 4 }}>
-                    <Typography>&copy; 2025 AMIS School. Powered by Trung.</Typography>
+                    <Typography>
+                        &copy; 2025 AMIS School. Powered by{' '}
+                        <Link
+                            href={'https://linktr.ee/noobyoup'}
+                            style={{ textDecoration: 'underline', color: 'var(--primary-color)' }}
+                            target="_blank"
+                        >
+                            Trung
+                        </Link>
+                    </Typography>
                 </Box>
             </Container>
         </Box>

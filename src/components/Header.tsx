@@ -69,16 +69,7 @@ export default function Header() {
     );
 
     return (
-        <AppBar
-            position="sticky"
-            color="inherit"
-            sx={{
-                position: 'sticky',
-                top: 0,
-                left: 0,
-                right: 0,
-            }}
-        >
+        <AppBar position="sticky" color="inherit">
             <Container maxWidth="lg">
                 <Toolbar disableGutters sx={{ gap: 2 }}>
                     <Link href="/" style={{ display: 'flex', alignItems: 'center' }} onClick={() => setActiveLink('/')}>
