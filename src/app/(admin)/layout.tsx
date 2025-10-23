@@ -1,5 +1,33 @@
-import '@/styles/globals.css';
+'use client';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-    return <>{children}</>;
+import React from 'react';
+import { Box } from '@mui/material';
+import Sidebar from '@/components/Sidebar';
+
+interface AdminLayoutProps {
+  children: React.ReactNode;
 }
+
+const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
+  const handleLogout = () => {
+    console.log('Logout clicked');
+  };
+
+  return (
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Sidebar onLogout={handleLogout} />
+      <Box
+        component="main"
+        sx={{
+          flex: 1,
+          overflow: 'auto',
+          backgroundColor: 'var(--background)',
+        }}
+      >
+        {children}
+      </Box>
+    </Box>
+  );
+};
+
+export default AdminLayout;
