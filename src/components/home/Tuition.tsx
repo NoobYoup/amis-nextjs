@@ -37,9 +37,7 @@ export default function Tuition() {
         { grade: 'Lớp 9', tuition: '7,690,000' },
     ];
 
-    const includedFees = [
-        'Chi phí ăn sáng, ăn trưa và ăn xế',
-    ];
+    const includedFees = ['Chi phí ăn sáng, ăn trưa và ăn xế'];
 
     const notIncludedFees = [
         'Phí đồng phục',
@@ -103,9 +101,7 @@ export default function Tuition() {
                                     },
                                 }}
                             >
-                                <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>
-                                    {row.grade}
-                                </TableCell>
+                                <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>{row.grade}</TableCell>
                                 <TableCell
                                     sx={{
                                         fontWeight: 700,
@@ -183,7 +179,7 @@ export default function Tuition() {
 
                 {/* Included and Not Included */}
                 <Grid container spacing={3} sx={{ mb: 5 }}>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                         <Typography
                             variant="h5"
                             sx={{
@@ -214,7 +210,7 @@ export default function Tuition() {
                         </List>
                     </Grid>
 
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                         <Typography
                             variant="h5"
                             sx={{
@@ -296,9 +292,7 @@ export default function Tuition() {
                                             },
                                         }}
                                     >
-                                        <TableCell sx={{ fontWeight: 500 }}>
-                                            {row.description}
-                                        </TableCell>
+                                        <TableCell sx={{ fontWeight: 500 }}>{row.description}</TableCell>
                                         <TableCell
                                             sx={{
                                                 fontWeight: 700,
@@ -337,7 +331,7 @@ export default function Tuition() {
                             { period: 'Đợt 3', date: '01/01/2026', months: '2 tháng' },
                             { period: 'Đợt 4', date: '01/03/2026', months: '3 tháng' },
                         ].map((schedule, index) => (
-                            <Grid item xs={12} sm={6} md={3} key={index}>
+                            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                                 <Paper
                                     sx={{
                                         p: 3,
