@@ -12,7 +12,6 @@ import {
     ListItemText,
     Collapse,
     IconButton,
-    Divider,
     Button,
     useMediaQuery,
     useTheme,
@@ -30,7 +29,6 @@ import {
     AttachFile as AttachFileIcon,
 } from '@mui/icons-material';
 import { SidebarMenuItem } from '@/types/sidebar';
-import Link from 'next/link';
 
 const SIDEBAR_WIDTH = 280;
 const SIDEBAR_COLLAPSED_WIDTH = 80;
@@ -98,29 +96,36 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         setMobileOpen(!mobileOpen);
     }, [mobileOpen]);
 
-    const isMenuItemActive = useCallback((href?: string) => {
-        return href ? pathname === href || pathname.startsWith(href) : false;
-    }, [pathname]);
+    const isMenuItemActive = useCallback(
+        (href?: string) => {
+            return href ? pathname === href || pathname.startsWith(href) : false;
+        },
+        [pathname],
+    );
 
-    const isMenuItemExactActive = useCallback((href?: string) => {
-        return href ? pathname === href : false;
-    }, [pathname]);
+    const isMenuItemExactActive = useCallback(
+        (href?: string) => {
+            return href ? pathname === href : false;
+        },
+        [pathname],
+    );
 
-    const isMenuItemOrSubItemActive = useCallback((item: SidebarMenuItem) => {
-        if (item.href && isMenuItemActive(item.href)) return true;
-        if (item.subItems) {
-            return item.subItems.some((sub) => isMenuItemExactActive(sub.href));
-        }
-        return false;
-    }, [isMenuItemActive, isMenuItemExactActive]);
+    const isMenuItemOrSubItemActive = useCallback(
+        (item: SidebarMenuItem) => {
+            if (item.href && isMenuItemActive(item.href)) return true;
+            if (item.subItems) {
+                return item.subItems.some((sub) => isMenuItemExactActive(sub.href));
+            }
+            return false;
+        },
+        [isMenuItemActive, isMenuItemExactActive],
+    );
 
     // Auto-expand main item if a sub-item is active
     useEffect(() => {
-        const activeMainItem = menuItems.find(item =>
-            item.subItems?.some(sub => pathname === sub.href)
-        );
+        const activeMainItem = menuItems.find((item) => item.subItems?.some((sub) => pathname === sub.href));
         if (activeMainItem && !expandedItems.includes(activeMainItem.id)) {
-            setExpandedItems(prev => [...prev, activeMainItem.id]);
+            setExpandedItems((prev) => [...prev, activeMainItem.id]);
         }
     }, [pathname, expandedItems]);
 

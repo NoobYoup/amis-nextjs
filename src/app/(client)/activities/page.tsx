@@ -10,12 +10,10 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Chip from '@mui/material/Chip';
-import Button from '@mui/material/Button';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Pagination from '@mui/material/Pagination';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import PersonIcon from '@mui/icons-material/Person';
 import ImageIcon from '@mui/icons-material/Image';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 
@@ -112,9 +110,6 @@ export default function ActivitiesPage() {
         (activity) => selectedCategory === 'all' || activity.category === selectedCategory,
     );
 
-    // Lấy featured activities
-    const featuredActivities = activities.filter((activity) => activity.featured);
-
     // Phân trang
     const totalPages = Math.ceil(filteredActivities.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -152,98 +147,6 @@ export default function ActivitiesPage() {
             </Box>
 
             <Container maxWidth="lg">
-                {/* Featured Section */}
-                {/* {featuredActivities.length > 0 && (
-                    <Box sx={{ mb: 6 }}>
-                        <Typography
-                            variant="h4"
-                            sx={{ fontWeight: 700, mb: 3, color: 'var(--primary-color)' }}
-                        >
-                            Hoạt động nổi bật
-                        </Typography>
-                        <Grid container spacing={3}>
-                            {featuredActivities.map((activity) => (
-                                <Grid item xs={12} md={6} key={activity.id}>
-                                    <Card
-                                        sx={{
-                                            height: '100%',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            transition: 'transform 0.3s, box-shadow 0.3s',
-                                            '&:hover': {
-                                                transform: 'translateY(-8px)',
-                                                boxShadow: 6,
-                                            },
-                                        }}
-                                    >
-                                        <Box sx={{ position: 'relative' }}>
-                                            <CardMedia
-                                                component="img"
-                                                height="300"
-                                                image={activity.thumbnail}
-                                                alt={activity.title}
-                                            />
-                                            {activity.videoUrl && (
-                                                <Box
-                                                    sx={{
-                                                        position: 'absolute',
-                                                        top: '50%',
-                                                        left: '50%',
-                                                        transform: 'translate(-50%, -50%)',
-                                                    }}
-                                                >
-                                                    <PlayCircleOutlineIcon
-                                                        sx={{ fontSize: 64, color: 'white', opacity: 0.9 }}
-                                                    />
-                                                </Box>
-                                            )}
-                                            <Chip
-                                                label={activity.category}
-                                                sx={{
-                                                    position: 'absolute',
-                                                    top: 16,
-                                                    right: 16,
-                                                    bgcolor: 'var(--primary-color)',
-                                                    color: 'white',
-                                                    fontWeight: 600,
-                                                }}
-                                            />
-                                        </Box>
-                                        <CardContent sx={{ flexGrow: 1 }}>
-                                            <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-                                                {activity.title}
-                                            </Typography>
-                                            <Typography
-                                                variant="body2"
-                                                color="text.secondary"
-                                                sx={{ mb: 2 }}
-                                            >
-                                                {activity.description}
-                                            </Typography>
-                                            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                                    <CalendarTodayIcon sx={{ fontSize: 16, color: 'var(--primary-color)' }} />
-                                                    <Typography variant="caption">{activity.date}</Typography>
-                                                </Box>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                                    <PersonIcon sx={{ fontSize: 16, color: 'var(--primary-color)' }} />
-                                                    <Typography variant="caption">{activity.author}</Typography>
-                                                </Box>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                                    <ImageIcon sx={{ fontSize: 16, color: 'var(--primary-color)' }} />
-                                                    <Typography variant="caption">
-                                                        {activity.images.length} ảnh
-                                                    </Typography>
-                                                </Box>
-                                            </Box>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-                            ))}
-                        </Grid>
-                    </Box>
-                )} */}
-
                 {/* Filter Tabs */}
                 <Box sx={{ mb: 4, borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs

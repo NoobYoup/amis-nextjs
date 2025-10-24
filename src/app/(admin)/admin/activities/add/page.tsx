@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Box,
@@ -19,11 +19,12 @@ import {
     CardMedia,
     IconButton,
     Alert,
+    SelectChangeEvent,
 } from '@mui/material';
 import { Close as CloseIcon, CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 import { ActivityFormData } from '@/types/activity';
 
-const categories = ['Học thuậ t', 'Thể thao', 'Văn nghệ', 'Ngoại khóa'];
+const categories = ['Học thuật', 'Thể thao', 'Văn nghệ', 'Ngoại khóa'];
 
 export default function AddActivityPage() {
     const router = useRouter();
@@ -46,7 +47,7 @@ export default function AddActivityPage() {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSelectChange = (e: any) => {
+    const handleSelectChange = (e: SelectChangeEvent) => {
         setFormData((prev) => ({ ...prev, category: e.target.value }));
     };
 
@@ -161,7 +162,11 @@ export default function AddActivityPage() {
                     Thêm hoạt động mới
                 </Typography>
 
-                {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+                {error && (
+                    <Alert severity="error" sx={{ mb: 3 }}>
+                        {error}
+                    </Alert>
+                )}
 
                 <Paper sx={{ p: 4 }}>
                     <form onSubmit={handleSubmit}>
@@ -286,7 +291,7 @@ export default function AddActivityPage() {
                                     </Typography>
                                     <Grid container spacing={2}>
                                         {imagePreviews.map((preview, index) => (
-                                            <Grid item xs={12} sm={6} md={4} key={index}>
+                                            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
                                                 <Card>
                                                     <Box sx={{ position: 'relative' }}>
                                                         <CardMedia
@@ -310,7 +315,10 @@ export default function AddActivityPage() {
                                                                 variant="contained"
                                                                 onClick={() => handleSetThumbnail(index)}
                                                                 sx={{
-                                                                    bgcolor: thumbnailPreview === preview ? 'var(--primary-color)' : '#666',
+                                                                    bgcolor:
+                                                                        thumbnailPreview === preview
+                                                                            ? 'var(--primary-color)'
+                                                                            : '#666',
                                                                     m: 1,
                                                                 }}
                                                             >
@@ -349,10 +357,7 @@ export default function AddActivityPage() {
                                 >
                                     Thêm hoạt động
                                 </Button>
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => router.push('/admin/activities')}
-                                >
+                                <Button variant="outlined" onClick={() => router.push('/admin/activities')}>
                                     Hủy
                                 </Button>
                             </Stack>

@@ -6,7 +6,6 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
@@ -18,11 +17,6 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import ClassIcon from '@mui/icons-material/Class';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
 import LiveTvIcon from '@mui/icons-material/LiveTv';
 
 interface OnlineClass {
@@ -35,16 +29,6 @@ interface OnlineClass {
     platform: string;
     link: string;
     status: 'live' | 'upcoming' | 'recorded';
-}
-
-interface LearningResource {
-    id: number;
-    title: string;
-    subject: string;
-    grade: string;
-    type: 'video' | 'document' | 'exercise';
-    duration?: string;
-    views: number;
 }
 
 export default function OnlineLearningPage() {
@@ -120,50 +104,6 @@ export default function OnlineLearningPage() {
         },
     ];
 
-    const learningResources: LearningResource[] = [
-        {
-            id: 1,
-            title: 'Bài giảng: Phép cộng và phép trừ trong phạm vi 1000',
-            subject: 'Toán học',
-            grade: 'Lớp 3',
-            type: 'video',
-            duration: '25 phút',
-            views: 450,
-        },
-        {
-            id: 2,
-            title: 'Bài tập: Luyện tập về phân số',
-            subject: 'Toán học',
-            grade: 'Lớp 4',
-            type: 'exercise',
-            views: 320,
-        },
-        {
-            id: 3,
-            title: 'Video: Cách viết đoạn văn tả người',
-            subject: 'Tiếng Việt',
-            grade: 'Lớp 5',
-            type: 'video',
-            duration: '30 phút',
-            views: 580,
-        },
-        {
-            id: 4,
-            title: 'Tài liệu: Ngữ pháp Tiếng Anh cơ bản',
-            subject: 'Tiếng Anh',
-            grade: 'Lớp 6',
-            type: 'document',
-            views: 290,
-        },
-    ];
-
-    const stats = [
-        { label: 'Lớp học trực tuyến', value: onlineClasses.length, icon: <ClassIcon /> },
-        { label: 'Bài giảng video', value: '150+', icon: <VideoLibraryIcon /> },
-        { label: 'Tài liệu học tập', value: '200+', icon: <AssignmentIcon /> },
-        { label: 'Học sinh tham gia', value: '500+', icon: <ScheduleIcon /> },
-    ];
-
     const grades = ['all', 'Lớp 3', 'Lớp 4', 'Lớp 5', 'Lớp 6', 'Lớp 7', 'Lớp 8', 'Lớp 9'];
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -223,41 +163,6 @@ export default function OnlineLearningPage() {
             </Box>
 
             <Container maxWidth="lg">
-                {/* Statistics */}
-                <Grid container spacing={3} sx={{ mb: 6 }}>
-                    {stats.map((stat, index) => (
-                        <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
-                            <Card
-                                sx={{
-                                    textAlign: 'center',
-                                    p: 3,
-                                    transition: 'transform 0.3s',
-                                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 },
-                                }}
-                            >
-                                <Box
-                                    sx={{
-                                        display: 'inline-flex',
-                                        p: 2,
-                                        borderRadius: '50%',
-                                        bgcolor: 'rgba(124, 179, 66, 0.1)',
-                                        color: 'var(--primary-color)',
-                                        mb: 2,
-                                    }}
-                                >
-                                    {stat.icon}
-                                </Box>
-                                <Typography variant="h3" sx={{ color: 'var(--primary-color)', fontWeight: 700 }}>
-                                    {stat.value}
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: '#666', mt: 1 }}>
-                                    {stat.label}
-                                </Typography>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
-
                 {/* Tabs Navigation */}
                 <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}>
                     <Tabs

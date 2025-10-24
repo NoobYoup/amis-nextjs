@@ -6,7 +6,6 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Accordion from '@mui/material/Accordion';
@@ -132,14 +131,6 @@ export default function Reform() {
         },
     ];
 
-    // Thống kê CCHC
-    const stats = [
-        { label: 'Chỉ số CCHC', value: '95.5', unit: 'điểm', icon: <TrendingUpIcon /> },
-        { label: 'Văn bản công khai', value: '150+', unit: 'văn bản', icon: <DescriptionIcon /> },
-        { label: 'Biểu mẫu trực tuyến', value: '50+', unit: 'mẫu', icon: <AssignmentIcon /> },
-        { label: 'Quy trình công khai', value: '30+', unit: 'quy trình', icon: <GavelIcon /> },
-    ];
-
     // Lọc văn bản
     const filteredDocuments = documents.filter((doc) => {
         const matchSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -178,45 +169,6 @@ export default function Reform() {
             </Box>
 
             <Container maxWidth="lg">
-                {/* Statistics */}
-                {/* <Grid container spacing={3} sx={{ mb: 6 }}>
-                    {stats.map((stat, index) => (
-                        <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
-                            <Card
-                                sx={{
-                                    textAlign: 'center',
-                                    p: 3,
-                                    height: '100%',
-                                    transition: 'transform 0.3s, box-shadow 0.3s',
-                                    '&:hover': {
-                                        transform: 'translateY(-4px)',
-                                        boxShadow: 4,
-                                    },
-                                }}
-                            >
-                                <Box
-                                    sx={{
-                                        display: 'inline-flex',
-                                        p: 2,
-                                        borderRadius: '50%',
-                                        bgcolor: 'rgba(124, 179, 66, 0.1)',
-                                        color: 'var(--primary-color)',
-                                        mb: 2,
-                                    }}
-                                >
-                                    {stat.icon}
-                                </Box>
-                                <Typography variant="h3" sx={{ color: 'var(--primary-color)', fontWeight: 700 }}>
-                                    {stat.value}
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: '#666', mt: 1 }}>
-                                    {stat.label}
-                                </Typography>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid> */}
-
                 {/* Tabs Navigation */}
                 <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}>
                     <Tabs

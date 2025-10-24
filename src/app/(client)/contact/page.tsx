@@ -6,7 +6,6 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
@@ -40,7 +39,7 @@ export default function ContactPage() {
         {
             icon: <PhoneIcon sx={{ fontSize: 40 }} />,
             title: 'Điện thoại',
-            content: 'Hotline: 028.39695278 - 028.39695280\nTiến sĩ Tony Nguyễn: 01234566818',
+            content: 'Hotline: 028.39695278 - 028.39695280\nTiến sĩ Tony Nguyễn: 0834566818',
             color: '#43a047',
         },
         {

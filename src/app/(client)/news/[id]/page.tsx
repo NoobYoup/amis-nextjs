@@ -16,6 +16,7 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PersonIcon from '@mui/icons-material/Person';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ShareIcon from '@mui/icons-material/Share';
+import Image from 'next/image';
 
 interface NewsArticle {
     id: number;
@@ -178,7 +179,7 @@ export default function NewsDetailPage() {
 
                             {/* Featured Image */}
                             <Box sx={{ mb: 4 }}>
-                                <img
+                                <Image
                                     src={article.thumbnail}
                                     alt={article.title}
                                     style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
@@ -264,7 +265,10 @@ export default function NewsDetailPage() {
                                                 >
                                                     {news.title}
                                                 </Typography>
-                                                <Typography variant="caption" sx={{ color: '#666', mt: 1, display: 'block' }}>
+                                                <Typography
+                                                    variant="caption"
+                                                    sx={{ color: '#666', mt: 1, display: 'block' }}
+                                                >
                                                     {news.date}
                                                 </Typography>
                                             </CardContent>

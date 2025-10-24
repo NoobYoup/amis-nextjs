@@ -16,7 +16,7 @@ export default function ContactInfo() {
         {
             title: 'Hotline tuyển sinh',
             icon: <PhoneIcon sx={{ fontSize: 36, color: '#7cb342' }} />,
-            description: '028.39695278 - 028.39695280\nTiến sĩ Tony Nguyễn: 01234566818',
+            description: '028.39695278 - 028.39695280\nTiến sĩ Tony Nguyễn: 0834566818',
         },
     ];
 

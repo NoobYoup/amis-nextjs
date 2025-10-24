@@ -14,7 +14,6 @@ import Tab from '@mui/material/Tab';
 import Chip from '@mui/material/Chip';
 import Pagination from '@mui/material/Pagination';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import PersonIcon from '@mui/icons-material/Person';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
 interface NewsArticle {
@@ -72,7 +71,8 @@ export default function NewsPage() {
         {
             id: 4,
             title: 'Ngày hội "Tuổi thơ rực rỡ" dành cho học sinh Tiểu học',
-            excerpt: 'Các em học sinh tiểu học đã có một ngày vui chơi với nhiều trò chơi dân gian và hoạt động ngoại khóa',
+            excerpt:
+                'Các em học sinh tiểu học đã có một ngày vui chơi với nhiều trò chơi dân gian và hoạt động ngoại khóa',
             category: 'Tiểu học',
             date: '2024-07-28',
             author: 'Đội Thiếu niên',
@@ -92,7 +92,8 @@ export default function NewsPage() {
         {
             id: 6,
             title: 'Tổ chức lớp học ngoại khóa "Khám phá thiên nhiên" cho học sinh lớp 3-4',
-            excerpt: 'Các em học sinh lớp 3 và 4 đã có chuyến tham quan thực tế tại vườn quốc gia để tìm hiểu về thiên nhiên',
+            excerpt:
+                'Các em học sinh lớp 3 và 4 đã có chuyến tham quan thực tế tại vườn quốc gia để tìm hiểu về thiên nhiên',
             category: 'Tiểu học',
             date: '2024-05-22',
             author: 'Tổ Khoa học',
@@ -161,8 +162,6 @@ export default function NewsPage() {
         },
     ];
 
-    const categories = ['all', ...Array.from(new Set(newsArticles.map((n) => n.category)))];
-
     const handleCategoryChange = (event: React.SyntheticEvent, newValue: string) => {
         setSelectedCategory(newValue);
         setCurrentPage(1);
@@ -174,7 +173,7 @@ export default function NewsPage() {
     };
 
     const filteredNews = newsArticles.filter(
-        (article) => selectedCategory === 'all' || article.category === selectedCategory
+        (article) => selectedCategory === 'all' || article.category === selectedCategory,
     );
 
     const totalPages = Math.ceil(filteredNews.length / itemsPerPage);

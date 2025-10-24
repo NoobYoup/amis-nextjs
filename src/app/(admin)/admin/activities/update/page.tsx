@@ -20,6 +20,7 @@ import {
     IconButton,
     Alert,
     CircularProgress,
+    SelectChangeEvent,
 } from '@mui/material';
 import { Close as CloseIcon, CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 import { ActivityFormData } from '@/types/activity';
@@ -56,7 +57,7 @@ export default function UpdateActivityPage() {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSelectChange = (e: any) => {
+    const handleSelectChange = (e: SelectChangeEvent) => {
         setFormData((prev) => ({ ...prev, category: e.target.value }));
     };
 
@@ -179,7 +180,11 @@ export default function UpdateActivityPage() {
                     Cập nhật hoạt động
                 </Typography>
 
-                {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+                {error && (
+                    <Alert severity="error" sx={{ mb: 3 }}>
+                        {error}
+                    </Alert>
+                )}
 
                 <Paper sx={{ p: 4 }}>
                     <form onSubmit={handleSubmit}>
@@ -304,7 +309,7 @@ export default function UpdateActivityPage() {
                                     </Typography>
                                     <Grid container spacing={2}>
                                         {imagePreviews.map((preview, index) => (
-                                            <Grid item xs={12} sm={6} md={4} key={index}>
+                                            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
                                                 <Card>
                                                     <Box sx={{ position: 'relative' }}>
                                                         <CardMedia
@@ -328,7 +333,10 @@ export default function UpdateActivityPage() {
                                                                 variant="contained"
                                                                 onClick={() => handleSetThumbnail(index)}
                                                                 sx={{
-                                                                    bgcolor: thumbnailPreview === preview ? 'var(--primary-color)' : '#666',
+                                                                    bgcolor:
+                                                                        thumbnailPreview === preview
+                                                                            ? 'var(--primary-color)'
+                                                                            : '#666',
                                                                     m: 1,
                                                                 }}
                                                             >
@@ -367,10 +375,7 @@ export default function UpdateActivityPage() {
                                 >
                                     Cập nhật hoạt động
                                 </Button>
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => router.push('/admin/activities')}
-                                >
+                                <Button variant="outlined" onClick={() => router.push('/admin/activities')}>
                                     Hủy
                                 </Button>
                             </Stack>

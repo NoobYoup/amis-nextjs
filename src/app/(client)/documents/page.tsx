@@ -107,11 +107,6 @@ export default function DocumentsPage() {
         },
     ];
 
-    const stats = [
-        { label: 'Tổng văn bản', value: documents.length, icon: <ArticleIcon /> },
-        { label: 'Văn bản mới', value: documents.filter((d) => d.isNew).length, icon: <DescriptionIcon /> },
-    ];
-
     const filteredDocuments = documents.filter((doc) => {
         const matchSearch =
             doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -143,40 +138,6 @@ export default function DocumentsPage() {
             </Box>
 
             <Container maxWidth="lg">
-                {/* <Grid container spacing={3} sx={{ mb: 6 }}>
-                    {stats.map((stat, index) => (
-                        <Grid size={{ xs: 12, sm: 6 }} key={index}>
-                            <Card
-                                sx={{
-                                    textAlign: 'center',
-                                    p: 3,
-                                    transition: 'transform 0.3s',
-                                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 },
-                                }}
-                            >
-                                <Box
-                                    sx={{
-                                        display: 'inline-flex',
-                                        p: 2,
-                                        borderRadius: '50%',
-                                        bgcolor: 'rgba(124, 179, 66, 0.1)',
-                                        color: 'var(--primary-color)',
-                                        mb: 2,
-                                    }}
-                                >
-                                    {stat.icon}
-                                </Box>
-                                <Typography variant="h3" sx={{ color: 'var(--primary-color)', fontWeight: 700 }}>
-                                    {stat.value}
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: '#666', mt: 1 }}>
-                                    {stat.label}
-                                </Typography>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid> */}
-
                 <Card sx={{ p: 3, mb: 4 }}>
                     <Grid container spacing={2}>
                         <Grid size={{ xs: 12, md: 3 }}>
