@@ -6,165 +6,243 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Divider from '@mui/material/Divider';
 import DownloadIcon from '@mui/icons-material/Download';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import DescriptionIcon from '@mui/icons-material/Description';
-import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import SchoolIcon from '@mui/icons-material/School';
 import PersonIcon from '@mui/icons-material/Person';
-import FolderIcon from '@mui/icons-material/Folder';
+import GavelIcon from '@mui/icons-material/Gavel';
+import SecurityIcon from '@mui/icons-material/Security';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
-interface Procedure {
+interface Regulation {
     id: number;
     title: string;
     category: string;
     description: string;
-    processingTime: string;
-    steps: string[];
-    documents: string[];
-    forms?: { name: string; url: string }[];
     icon: React.ReactNode;
+    content: {
+        title: string;
+        items: string[];
+    }[];
+    downloadUrl?: string;
 }
 
 export default function ProceduresPage() {
-    const [expanded, setExpanded] = useState<number | false>(false);
     const [selectedCategory, setSelectedCategory] = useState('all');
 
-    const procedures: Procedure[] = [
+    const regulations: Regulation[] = [
         {
             id: 1,
-            title: 'Thủ tục tuyển sinh',
-            category: 'Tuyển sinh',
-            description: 'Quy trình đăng ký và xét tuyển học sinh mới vào các cấp học',
-            processingTime: '15 ngày làm việc',
-            steps: [
-                'Nộp hồ sơ đăng ký trực tuyến hoặc trực tiếp tại trường',
-                'Trường tiếp nhận và kiểm tra hồ sơ',
-                'Tổ chức kiểm tra đầu vào (nếu có)',
-                'Công bố kết quả trúng tuyển',
-                'Học sinh làm thủ tục nhập học',
-            ],
-            documents: [
-                'Giấy khai sinh (bản sao)',
-                'Học bạ năm học trước (bản sao)',
-                'Giấy chứng nhận hoàn thành cấp học (nếu có)',
-                '4 ảnh 3x4 (chụp trong 6 tháng)',
-                'Giấy khám sức khỏe',
-            ],
-            forms: [
-                { name: 'Đơn đăng ký tuyển sinh', url: '/files/form-admission.pdf' },
-                { name: 'Phiếu khám sức khỏe', url: '/files/form-health.pdf' },
-            ],
+            title: 'Nội quy học sinh',
+            category: 'Học sinh',
+            description: 'Các quy tắc ứng xử và kỷ luật học sinh trong trường',
             icon: <SchoolIcon />,
+            downloadUrl: '/files/noi-quy-hoc-sinh.pdf',
+            content: [
+                {
+                    title: 'Quy tắc ứng xử cơ bản',
+                    items: [
+                        'Tôn trọng thầy cô và các cán bộ nhà trường',
+                        'Thân thiện và hỗ trợ các bạn học',
+                        'Tuân thủ quy định về trang phục, tóc tẩm',
+                        'Không sử dụng điện thoại trong giờ học',
+                        'Đến lớp đúng giờ, không vắng mặt không phép',
+                    ],
+                },
+                {
+                    title: 'Kỷ luật và xử phạt',
+                    items: [
+                        'Vi phạm nhẹ: Nhắc nhở, ghi chép',
+                        'Vi phạm trung bình: Cảnh cáo, viết kiểm điểm',
+                        'Vi phạm nặng: Cảnh cáo lần 2, thông báo phụ huynh',
+                        'Vi phạm rất nặng: Kỷ luật, có thể đình chỉ học',
+                    ],
+                },
+                {
+                    title: 'Quyền lợi học sinh',
+                    items: [
+                        'Được học tập trong môi trường an toàn, lành mạnh',
+                        'Được tham gia các hoạt động ngoại khóa',
+                        'Được tham gia các cuộc thi, hội thi',
+                        'Được hỗ trợ học tập và tư vấn tâm lý',
+                    ],
+                },
+            ],
         },
         {
             id: 2,
-            title: 'Thủ tục xin nghỉ học',
-            category: 'Học sinh',
-            description: 'Quy trình xin nghỉ học tạm thời hoặc bảo lưu kết quả học tập',
-            processingTime: '3-5 ngày làm việc',
-            steps: [
-                'Học sinh/phụ huynh điền đơn xin nghỉ học',
-                'Giáo viên chủ nhiệm xem xét và ký duyệt',
-                'Phòng Đào tạo phê duyệt',
-                'Thông báo kết quả cho học sinh/phụ huynh',
-            ],
-            documents: [
-                'Đơn xin nghỉ học (theo mẫu)',
-                'Giấy xác nhận lý do (nếu có)',
-                'Học bạ (nộp lại khi nghỉ học dài hạn)',
-            ],
-            forms: [{ name: 'Đơn xin nghỉ học', url: '/files/form-leave.doc' }],
+            title: 'Quy chế tuyển sinh',
+            category: 'Tuyển sinh',
+            description: 'Quy định về tuyển sinh và nhập học',
             icon: <PersonIcon />,
+            downloadUrl: '/files/quy-che-tuyen-sinh.pdf',
+            content: [
+                {
+                    title: 'Điều kiện tuyển sinh',
+                    items: [
+                        'Hoàn thành chương trình học cấp dưới',
+                        'Có giấy khai sinh hợp lệ',
+                        'Có sức khỏe phù hợp với học tập',
+                        'Không bị bệnh truyền nhiễm nguy hiểm',
+                    ],
+                },
+                {
+                    title: 'Hồ sơ cần thiết',
+                    items: [
+                        'Đơn đăng ký tuyển sinh',
+                        'Giấy khai sinh (bản sao)',
+                        'Học bạ năm học trước',
+                        'Giấy khám sức khỏe',
+                        '4 ảnh 3x4 chụp trong 6 tháng',
+                    ],
+                },
+                {
+                    title: 'Quy trình xét tuyển',
+                    items: [
+                        'Kiểm tra hồ sơ đầu vào',
+                        'Tổ chức kiểm tra năng lực (nếu có)',
+                        'Công bố kết quả xét tuyển',
+                        'Nhập học và hoàn tất thủ tục hành chính',
+                    ],
+                },
+            ],
         },
         {
             id: 3,
-            title: 'Thủ tục chuyển trường',
-            category: 'Học sinh',
-            description: 'Quy trình chuyển trường đến hoặc đi từ trường AMIS',
-            processingTime: '7 ngày làm việc',
-            steps: [
-                'Phụ huynh nộp đơn xin chuyển trường',
-                'Trường cũ xác nhận và cấp giấy chuyển trường',
-                'Trường mới tiếp nhận hồ sơ và xem xét',
-                'Thông báo kết quả và sắp xếp lớp học',
-                'Học sinh nhập học tại trường mới',
+            title: 'Quy chế học tập',
+            category: 'Học tập',
+            description: 'Quy định về quá trình học tập và đánh giá',
+            icon: <GavelIcon />,
+            downloadUrl: '/files/quy-che-hoc-tap.pdf',
+            content: [
+                {
+                    title: 'Yêu cầu học tập',
+                    items: [
+                        'Tham dự đầy đủ các buổi học',
+                        'Hoàn thành bài tập về nhà',
+                        'Tham gia kiểm tra, thi cử',
+                        'Tôn trọng quyền tác giả, không gian lận',
+                    ],
+                },
+                {
+                    title: 'Đánh giá học tập',
+                    items: [
+                        'Đánh giá thường xuyên qua bài tập, kiểm tra',
+                        'Đánh giá giữa kỳ và cuối kỳ',
+                        'Xếp loại: Xuất sắc, Giỏi, Khá, Trung bình, Yếu',
+                        'Cấp chứng chỉ hoàn thành khóa học',
+                    ],
+                },
+                {
+                    title: 'Hỗ trợ học tập',
+                    items: [
+                        'Dạy thêm cho học sinh yếu',
+                        'Tư vấn học tập từ giáo viên',
+                        'Thư viện và tài liệu học tập',
+                        'Hỗ trợ tâm lý và định hướng nghề nghiệp',
+                    ],
+                },
             ],
-            documents: [
-                'Đơn xin chuyển trường',
-                'Giấy chuyển trường từ trường cũ',
-                'Học bạ (bản chính)',
-                'Giấy khai sinh (bản sao)',
-                '4 ảnh 3x4',
-            ],
-            forms: [{ name: 'Đơn xin chuyển trường', url: '/files/form-transfer.doc' }],
-            icon: <FolderIcon />,
         },
         {
             id: 4,
-            title: 'Thủ tục cấp bản sao văn bằng, chứng chỉ',
-            category: 'Hành chính',
-            description: 'Quy trình xin cấp bản sao có xác nhận của nhà trường',
-            processingTime: '5-7 ngày làm việc',
-            steps: [
-                'Nộp đơn xin cấp bản sao tại Phòng Hành chính',
-                'Phòng Hành chính kiểm tra hồ sơ gốc',
-                'Sao y bản chính và đóng dấu xác nhận',
-                'Thông báo và trả kết quả',
+            title: 'Quy chế an toàn trường học',
+            category: 'An toàn',
+            description: 'Quy định về an toàn và bảo vệ học sinh',
+            icon: <SecurityIcon />,
+            downloadUrl: '/files/quy-che-an-toan.pdf',
+            content: [
+                {
+                    title: 'Trách nhiệm của nhà trường',
+                    items: [
+                        'Bảo đảm an toàn cơ sở vật chất',
+                        'Cấp cứu y tế khi cần thiết',
+                        'Bảo vệ học sinh khỏi bạo lực, xâm hại',
+                        'Quản lý an toàn giao thông',
+                    ],
+                },
+                {
+                    title: 'Trách nhiệm của học sinh',
+                    items: [
+                        'Tuân thủ quy tắc an toàn',
+                        'Báo cáo sự cố nguy hiểm cho thầy cô',
+                        'Không mang vật cấm vào trường',
+                        'Tham gia các hoạt động phòng chống tai nạn',
+                    ],
+                },
+                {
+                    title: 'Quy định về sức khỏe',
+                    items: [
+                        'Khám sức khỏe định kỳ hàng năm',
+                        'Tiêm chủng theo lịch quốc gia',
+                        'Báo cáo bệnh truyền nhiễm ngay',
+                        'Vệ sinh cá nhân và vệ sinh trường học',
+                    ],
+                },
             ],
-            documents: [
-                'Đơn xin cấp bản sao (theo mẫu)',
-                'Bản chính văn bằng/chứng chỉ (để đối chiếu)',
-                'CMND/CCCD (bản sao)',
-            ],
-            forms: [{ name: 'Đơn xin cấp bản sao', url: '/files/form-certificate.doc' }],
-            icon: <DescriptionIcon />,
         },
         {
             id: 5,
-            title: 'Thủ tục đăng ký học bổ sung',
-            category: 'Học tập',
-            description: 'Quy trình đăng ký các môn học bổ sung, ngoại khóa',
-            processingTime: '3 ngày làm việc',
-            steps: [
-                'Học sinh điền phiếu đăng ký môn học',
-                'Phụ huynh ký xác nhận',
-                'Nộp phiếu tại Phòng Đào tạo',
-                'Nhận thông báo lịch học và đóng học phí',
+            title: 'Quy chế khen thưởng - kỷ luật',
+            category: 'Khen thưởng',
+            description: 'Quy định về khen thưởng và xử phạt học sinh',
+            icon: <EmojiEventsIcon />,
+            downloadUrl: '/files/quy-che-khen-thuong.pdf',
+            content: [
+                {
+                    title: 'Hình thức khen thưởng',
+                    items: [
+                        'Khen thưởng lời nói',
+                        'Giấy khen, chứng chỉ',
+                        'Học sinh giỏi, học sinh tốt',
+                        'Bằng khen, huy chương',
+                    ],
+                },
+                {
+                    title: 'Tiêu chí khen thưởng',
+                    items: [
+                        'Học tập xuất sắc, giỏi',
+                        'Rèn luyện tốt, có đạo đức',
+                        'Tham gia hoạt động ngoại khóa nổi bật',
+                        'Có thành tích đặc biệt',
+                    ],
+                },
+                {
+                    title: 'Hình thức kỷ luật',
+                    items: [
+                        'Nhắc nhở, cảnh cáo',
+                        'Cảnh cáo lần 2, kỷ luật',
+                        'Đình chỉ học tập tạm thời',
+                        'Buộc thôi học (trường hợp đặc biệt)',
+                    ],
+                },
             ],
-            documents: ['Phiếu đăng ký học bổ sung', 'Giấy xác nhận của phụ huynh'],
-            forms: [{ name: 'Phiếu đăng ký học bổ sung', url: '/files/form-extra.pdf' }],
-            icon: <AssignmentTurnedInIcon />,
         },
     ];
-
-    const handleChange = (panel: number) => (event: React.SyntheticEvent, isExpanded: boolean) => {
-        setExpanded(isExpanded ? panel : false);
-    };
 
     const handleCategoryChange = (event: React.SyntheticEvent, newValue: string) => {
         setSelectedCategory(newValue);
     };
 
-    const categories = ['all', ...Array.from(new Set(procedures.map((p) => p.category)))];
+    const categories = ['all', ...Array.from(new Set(regulations.map((r) => r.category)))];
     
-    const filteredProcedures = procedures.filter((procedure) => 
-        selectedCategory === 'all' || procedure.category === selectedCategory
+    const filteredRegulations = regulations.filter((regulation) => 
+        selectedCategory === 'all' || regulation.category === selectedCategory
     );
 
     return (
         <Box sx={{ bgcolor: 'var(--background)', minHeight: '100vh' }}>
+            {/* Header */}
             <Box
                 sx={{
                     background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%)',
@@ -175,17 +253,17 @@ export default function ProceduresPage() {
             >
                 <Container maxWidth="lg">
                     <Typography variant="h2" sx={{ fontWeight: 700, textAlign: 'center', mb: 2 }}>
-                        Thủ tục hành chính
+                        Nội Quy & Quy Chế
                     </Typography>
                     <Typography variant="h6" sx={{ textAlign: 'center', opacity: 0.9 }}>
-                        Hướng dẫn các thủ tục và quy trình hành chính tại trường
+                        Các quy định và quy chế của trường AMIS
                     </Typography>
                 </Container>
             </Box>
 
-            <Container maxWidth="lg">
+            <Container maxWidth="lg" sx={{ pb: 6 }}>
                 {/* Tabs Navigation */}
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}>
+                <Box sx={{ borderBottom: 2, borderColor: 'divider', mb: 4 }}>
                     <Tabs
                         value={selectedCategory}
                         onChange={handleCategoryChange}
@@ -195,170 +273,192 @@ export default function ProceduresPage() {
                             '& .MuiTab-root': {
                                 fontWeight: 600,
                                 fontSize: '1rem',
+                                textTransform: 'none',
                             },
                             '& .Mui-selected': {
                                 color: 'var(--primary-color) !important',
                             },
                             '& .MuiTabs-indicator': {
                                 backgroundColor: 'var(--primary-color)',
+                                height: 3,
                             },
                         }}
                     >
                         <Tab label="Tất cả" value="all" />
-                        {Array.from(new Set(procedures.map((p) => p.category))).map((category) => (
+                        {categories.slice(1).map((category) => (
                             <Tab key={category} label={category} value={category} />
                         ))}
                     </Tabs>
                 </Box>
 
-                <Box sx={{ mb: 4 }}>
-                    {filteredProcedures.map((procedure) => (
-                        <Accordion
-                            key={procedure.id}
-                            expanded={expanded === procedure.id}
-                            onChange={handleChange(procedure.id)}
-                            sx={{ mb: 2, '&:before': { display: 'none' } }}
-                        >
-                            <AccordionSummary
-                                expandIcon={<ExpandMoreIcon />}
+                {/* Regulations Grid */}
+                <Grid container spacing={3}>
+                    {filteredRegulations.map((regulation) => (
+                        <Grid size={{ xs: 12, md: 6, lg: 4 }} key={regulation.id}>
+                            <Card
                                 sx={{
-                                    bgcolor: expanded === procedure.id ? 'rgba(124, 179, 66, 0.05)' : 'transparent',
-                                    '&:hover': { bgcolor: 'rgba(124, 179, 66, 0.05)' },
+                                    height: '100%',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                        boxShadow: 4,
+                                        transform: 'translateY(-4px)',
+                                    },
                                 }}
                             >
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                                {/* Card Header */}
+                                <Box
+                                    sx={{
+                                        p: 3,
+                                        background: 'linear-gradient(135deg, rgba(124, 179, 66, 0.1) 0%, rgba(124, 179, 66, 0.05) 100%)',
+                                        borderBottom: '2px solid var(--primary-color)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 2,
+                                    }}
+                                >
                                     <Box
                                         sx={{
                                             display: 'flex',
                                             p: 1.5,
                                             borderRadius: '50%',
-                                            bgcolor: 'rgba(124, 179, 66, 0.1)',
-                                            color: 'var(--primary-color)',
+                                            bgcolor: 'var(--primary-color)',
+                                            color: 'white',
+                                            fontSize: 28,
                                         }}
                                     >
-                                        {procedure.icon}
+                                        {regulation.icon}
                                     </Box>
-                                    <Box sx={{ flex: 1 }}>
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                            {procedure.title}
+                                    <Box>
+                                        <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+                                            {regulation.title}
                                         </Typography>
-                                        <Typography variant="body2" sx={{ color: '#666' }}>
-                                            {procedure.description}
-                                        </Typography>
+                                        <Chip
+                                            label={regulation.category}
+                                            size="small"
+                                            sx={{
+                                                bgcolor: 'var(--primary-color)',
+                                                color: 'white',
+                                                fontWeight: 600,
+                                            }}
+                                        />
                                     </Box>
-                                    <Chip
-                                        label={procedure.category}
-                                        size="small"
-                                        sx={{ display: { xs: 'none', sm: 'flex' } }}
-                                    />
                                 </Box>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <Grid container spacing={3}>
-                                    <Grid size={{ xs: 12, md: 6 }}>
-                                        <Card sx={{ p: 3, height: '100%' }}>
-                                            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                                                Quy trình thực hiện
-                                            </Typography>
-                                            <Stepper orientation="vertical">
-                                                {procedure.steps.map((step, index) => (
-                                                    <Step key={index} active>
-                                                        <StepLabel
-                                                            StepIconProps={{
-                                                                sx: {
-                                                                    color: 'var(--primary-color) !important',
-                                                                },
-                                                            }}
-                                                        >
-                                                            <Typography variant="body2">{step}</Typography>
-                                                        </StepLabel>
-                                                    </Step>
-                                                ))}
-                                            </Stepper>
-                                            <Box
+
+                                {/* Card Content */}
+                                <Box sx={{ p: 3, flex: 1, overflow: 'auto' }}>
+                                    <Typography variant="body2" sx={{ color: '#666', mb: 2 }}>
+                                        {regulation.description}
+                                    </Typography>
+
+                                    {/* Content Sections */}
+                                    {regulation.content.map((section, idx) => (
+                                        <Box key={idx} sx={{ mb: 2 }}>
+                                            <Typography
+                                                variant="subtitle2"
                                                 sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: 1,
-                                                    mt: 3,
-                                                    p: 2,
-                                                    bgcolor: 'rgba(124, 179, 66, 0.05)',
-                                                    borderRadius: 1,
+                                                    fontWeight: 700,
+                                                    color: 'var(--primary-color)',
+                                                    mb: 1,
                                                 }}
                                             >
-                                                <AccessTimeIcon sx={{ color: 'var(--primary-color)' }} />
-                                                <Box>
-                                                    <Typography variant="caption" sx={{ color: '#666' }}>
-                                                        Thời gian xử lý
-                                                    </Typography>
-                                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                                        {procedure.processingTime}
-                                                    </Typography>
-                                                </Box>
-                                            </Box>
-                                        </Card>
-                                    </Grid>
-
-                                    <Grid size={{ xs: 12, md: 6 }}>
-                                        <Card sx={{ p: 3, height: '100%' }}>
-                                            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                                                Hồ sơ cần thiết
+                                                {section.title}
                                             </Typography>
-                                            <Box component="ul" sx={{ pl: 2, mb: 3 }}>
-                                                {procedure.documents.map((doc, index) => (
-                                                    <Typography
-                                                        component="li"
-                                                        key={index}
-                                                        variant="body2"
-                                                        sx={{ mb: 1 }}
+                                            <List sx={{ py: 0 }}>
+                                                {section.items.slice(0, 2).map((item, itemIdx) => (
+                                                    <ListItem
+                                                        key={itemIdx}
+                                                        sx={{
+                                                            py: 0.5,
+                                                            px: 0,
+                                                            display: 'flex',
+                                                            alignItems: 'flex-start',
+                                                        }}
                                                     >
-                                                        {doc}
-                                                    </Typography>
+                                                        <ListItemIcon
+                                                            sx={{
+                                                                minWidth: 24,
+                                                                color: 'var(--primary-color)',
+                                                            }}
+                                                        >
+                                                            <CheckCircleIcon sx={{ fontSize: 16 }} />
+                                                        </ListItemIcon>
+                                                        <ListItemText
+                                                            primary={item}
+                                                            primaryTypographyProps={{
+                                                                variant: 'body2',
+                                                                sx: { color: '#555' },
+                                                            }}
+                                                        />
+                                                    </ListItem>
                                                 ))}
-                                            </Box>
-
-                                            {procedure.forms && procedure.forms.length > 0 && (
-                                                <>
-                                                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                                                        Biểu mẫu tải về
+                                                {section.items.length > 2 && (
+                                                    <Typography
+                                                        variant="caption"
+                                                        sx={{
+                                                            color: 'var(--primary-color)',
+                                                            fontWeight: 600,
+                                                            display: 'block',
+                                                            mt: 0.5,
+                                                        }}
+                                                    >
+                                                        +{section.items.length - 2} mục khác
                                                     </Typography>
-                                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                                                        {procedure.forms.map((form, index) => (
-                                                            <Button
-                                                                key={index}
-                                                                variant="outlined"
-                                                                startIcon={<DownloadIcon />}
-                                                                fullWidth
-                                                                sx={{
-                                                                    justifyContent: 'flex-start',
-                                                                    borderColor: 'var(--primary-color)',
-                                                                    color: 'var(--primary-color)',
-                                                                    '&:hover': {
-                                                                        borderColor: 'var(--accent-color)',
-                                                                        bgcolor: 'rgba(124, 179, 66, 0.05)',
-                                                                    },
-                                                                }}
-                                                            >
-                                                                {form.name}
-                                                            </Button>
-                                                        ))}
-                                                    </Box>
-                                                </>
+                                                )}
+                                            </List>
+                                            {idx < regulation.content.length - 1 && (
+                                                <Divider sx={{ my: 1.5 }} />
                                             )}
-                                        </Card>
-                                    </Grid>
-                                </Grid>
-                            </AccordionDetails>
-                        </Accordion>
-                    ))}
-                </Box>
+                                        </Box>
+                                    ))}
+                                </Box>
 
-                <Card sx={{ p: 4, textAlign: 'center', bgcolor: 'rgba(124, 179, 66, 0.05)' }}>
-                    <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
-                        Cần hỗ trợ thêm?
+                                {/* Card Footer - Download Button */}
+                                {regulation.downloadUrl && (
+                                    <Box
+                                        sx={{
+                                            p: 2,
+                                            borderTop: '1px solid #e0e0e0',
+                                            bgcolor: '#f9f9f9',
+                                        }}
+                                    >
+                                        <Button
+                                            fullWidth
+                                            variant="contained"
+                                            startIcon={<DownloadIcon />}
+                                            href={regulation.downloadUrl}
+                                            sx={{
+                                                bgcolor: 'var(--primary-color)',
+                                                '&:hover': {
+                                                    bgcolor: 'var(--accent-color)',
+                                                },
+                                            }}
+                                        >
+                                            Tải Về PDF
+                                        </Button>
+                                    </Box>
+                                )}
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
+
+                {/* Contact Section */}
+                <Card
+                    sx={{
+                        p: 4,
+                        mt: 6,
+                        textAlign: 'center',
+                        bgcolor: 'rgba(124, 179, 66, 0.05)',
+                        border: '2px solid var(--primary-color)',
+                    }}
+                >
+                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: 'var(--primary-color)' }}>
+                        📞 Cần Hỗ Trợ?
                     </Typography>
                     <Typography variant="body1" sx={{ color: '#666', mb: 3 }}>
-                        Liên hệ với Phòng Hành chính để được tư vấn chi tiết
+                        Liên hệ với Phòng Hành chính để được tư vấn chi tiết về các quy định
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
                         <Button
@@ -366,9 +466,10 @@ export default function ProceduresPage() {
                             sx={{
                                 bgcolor: 'var(--primary-color)',
                                 '&:hover': { bgcolor: 'var(--accent-color)' },
+                                px: 3,
                             }}
                         >
-                            Gọi: 024 1234 5678
+                            📱 Gọi: 024 1234 5678
                         </Button>
                         <Button
                             variant="outlined"
@@ -379,9 +480,10 @@ export default function ProceduresPage() {
                                     borderColor: 'var(--accent-color)',
                                     bgcolor: 'rgba(124, 179, 66, 0.05)',
                                 },
+                                px: 3,
                             }}
                         >
-                            Email: admin@amis.edu.vn
+                            ✉️ Email: admin@amis.edu.vn
                         </Button>
                     </Box>
                 </Card>
