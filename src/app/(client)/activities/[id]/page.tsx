@@ -30,7 +30,7 @@ interface Activity {
     author: string;
     thumbnail: string;
     images: string[];
-    videoUrl?: string;
+    videos?: string[];
 }
 
 export default function ActivityDetailPage() {
@@ -72,7 +72,10 @@ export default function ActivityDetailPage() {
                 '/images/logo_cambridge.png',
                 '/images/logo_michigan.png',
             ],
-            videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+            videos: [
+                'https://www.youtube.com/embed/dwKBtDgvRC8?si=gqrkjRhtwdNmwhv-',
+                'https://www.youtube.com/embed/OyTRHb6qLC8?si=4KApfMU6upnhOiBw',
+            ],
         },
         {
             id: 2,
@@ -226,34 +229,39 @@ export default function ActivityDetailPage() {
                 </Box>
 
                 {/* Video Section */}
-                {activity.videoUrl && (
-                    <Box sx={{ mb: 4 }}>
-                        <Card elevation={3}>
-                            <Box
-                                sx={{
-                                    position: 'relative',
-                                    paddingTop: '56.25%', // 16:9 aspect ratio
-                                    overflow: 'hidden',
-                                }}
-                            >
-                                <iframe
-                                    src={activity.videoUrl}
-                                    title={activity.title}
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                    style={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        width: '100%',
-                                        height: '100%',
-                                        border: 0,
-                                    }}
-                                />
-                            </Box>
-                        </Card>
-                    </Box>
-                )}
+                <Grid container spacing={2}>
+                    {activity.videos &&
+                        activity.videos.map((video, index) => (
+                            <Grid size={{ xs: 12, sm: 6 }} key={index}>
+                                <Box sx={{ mb: 4 }} key={index}>
+                                    <Card elevation={3}>
+                                        <Box
+                                            sx={{
+                                                position: 'relative',
+                                                paddingTop: '56.25%', // 16:9 aspect ratio
+                                                overflow: 'hidden',
+                                            }}
+                                        >
+                                            <iframe
+                                                src={video}
+                                                title={activity.title}
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: 0,
+                                                    left: 0,
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    border: 0,
+                                                }}
+                                            />
+                                        </Box>
+                                    </Card>
+                                </Box>
+                            </Grid>
+                        ))}
+                </Grid>
 
                 {/* Content */}
                 <Box
@@ -293,7 +301,7 @@ export default function ActivityDetailPage() {
                     </Typography>
                     <Grid container spacing={2}>
                         {activity.images.map((image, index) => (
-                            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
+                            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                                 <Card
                                     sx={{
                                         cursor: 'pointer',

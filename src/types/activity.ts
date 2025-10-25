@@ -7,7 +7,7 @@ export interface Activity {
     author: string;
     thumbnail: string;
     images: string[];
-    videoUrl?: string;
+    videos?: string[];
     createdAt: string;
     updatedAt: string;
 }
@@ -20,7 +20,7 @@ export interface ActivityFormData {
     author: string;
     thumbnail: File | string;
     images: (File | string)[];
-    videoUrl?: string;
+    videos?: string[];
 }
 
 export interface ActivityResponse {

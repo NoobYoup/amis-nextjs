@@ -25,7 +25,7 @@ import {
 import { Close as CloseIcon, CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 import { ActivityFormData } from '@/types/activity';
 
-const categories = ['Học thuậ t', 'Thể thao', 'Văn nghệ', 'Ngoại khóa'];
+const categories = ['Học thuật', 'Thể thao', 'Văn nghệ', 'Ngoại khóa'];
 
 export default function UpdateActivityPage() {
     const router = useRouter();
@@ -39,7 +39,7 @@ export default function UpdateActivityPage() {
         date: '',
         author: '',
         images: [],
-        videoUrl: '',
+        videos: [],
     });
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -89,27 +89,44 @@ export default function UpdateActivityPage() {
     };
 
     const handleFiles = (files: FileList) => {
+        const fileArray = Array.from(files).filter((file) => file.type.startsWith('image/'));
+        let loadedCount = 0;
         const newPreviews: string[] = [];
-        const newImages: (File | string)[] = [];
+        const newImages: File[] = [];
 
-        Array.from(files).forEach((file) => {
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    if (e.target?.result) {
-                        newPreviews.push(e.target.result as string);
+        if (fileArray.length === 0) return;
+
+        fileArray.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (e.target?.result) {
+                    newPreviews[index] = e.target.result as string;
+                    loadedCount++;
+
+                    // Update state only when all files are loaded
+                    if (loadedCount === fileArray.length) {
+                        setImagePreviews((prev) => [...prev, ...newPreviews]);
+                        setFormData((prev) => ({
+                            ...prev,
+                            images: [...(prev.images || []), ...newImages],
+                        }));
                     }
-                };
-                reader.readAsDataURL(file);
-                newImages.push(file);
-            }
+                }
+            };
+            reader.onerror = () => {
+                console.error(`Failed to read file: ${file.name}`);
+                loadedCount++;
+                if (loadedCount === fileArray.length) {
+                    setImagePreviews((prev) => [...prev, ...newPreviews.filter((p) => p)]);
+                    setFormData((prev) => ({
+                        ...prev,
+                        images: [...(prev.images || []), ...newImages],
+                    }));
+                }
+            };
+            reader.readAsDataURL(file);
+            newImages.push(file);
         });
-
-        setImagePreviews((prev) => [...prev, ...newPreviews]);
-        setFormData((prev) => ({
-            ...prev,
-            images: [...(prev.images || []), ...newImages],
-        }));
     };
 
     const handleRemoveImage = (index: number) => {
@@ -175,7 +192,7 @@ export default function UpdateActivityPage() {
 
     return (
         <Box sx={{ py: 4, bgcolor: 'var(--background)', minHeight: '100vh' }}>
-            <Container maxWidth="md">
+            <Container maxWidth="lg">
                 <Typography variant="h4" sx={{ fontWeight: 700, mb: 4, color: 'var(--foreground)' }}>
                     Cập nhật hoạt động
                 </Typography>
@@ -250,14 +267,17 @@ export default function UpdateActivityPage() {
                                 required
                             />
 
-                            {/* Video URL */}
+                            {/* Video URLs */}
                             <TextField
                                 fullWidth
                                 label="URL Video YouTube (tùy chọn)"
-                                name="videoUrl"
-                                value={formData.videoUrl || ''}
+                                name="videos"
+                                value={formData.videos || ''}
                                 onChange={handleInputChange}
-                                placeholder="https://www.youtube.com/embed/..."
+                                placeholder="https://www.youtube.com/embed/... (mỗi URL trên một dòng)"
+                                multiline
+                                rows={2}
+                                helperText="Nhập nhiều URL, mỗi URL trên một dòng"
                             />
 
                             {/* Image Upload */}

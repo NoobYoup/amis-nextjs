@@ -27,12 +27,7 @@ import {
     DialogContent,
     DialogActions,
 } from '@mui/material';
-import {
-    Edit as EditIcon,
-    Delete as DeleteIcon,
-    Add as AddIcon,
-    Image as ImageIcon,
-} from '@mui/icons-material';
+import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Image as ImageIcon } from '@mui/icons-material';
 import { Activity } from '@/types/activity';
 
 const mockActivities: Activity[] = [
@@ -45,7 +40,7 @@ const mockActivities: Activity[] = [
         author: 'Nguyễn Văn A',
         thumbnail: '/images/hero_backround.jpg',
         images: ['/images/hero_backround.jpg', '/images/logo_amis.png'],
-        videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+        videos: ['https://www.youtube.com/embed/dQw4w9WgXcQ', 'https://www.youtube.com/embed/dQw4w9WgXcQ'],
         createdAt: '2024-10-15T10:00:00Z',
         updatedAt: '2024-10-15T10:00:00Z',
     },
@@ -188,8 +183,7 @@ export default function ActivitiesPage() {
             const matchesSearch =
                 activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 activity.author.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesCategory =
-                selectedCategory === 'Tất cả' || activity.category === selectedCategory;
+            const matchesCategory = selectedCategory === 'Tất cả' || activity.category === selectedCategory;
             return matchesSearch && matchesCategory;
         });
     }, [activities, searchTerm, selectedCategory]);
@@ -312,7 +306,14 @@ export default function ActivitiesPage() {
                                     <TableCell>{activity.date}</TableCell>
                                     <TableCell>{activity.author}</TableCell>
                                     <TableCell sx={{ textAlign: 'center' }}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: 0.5,
+                                            }}
+                                        >
                                             <ImageIcon sx={{ fontSize: 18, color: 'var(--primary-color)' }} />
                                             <Typography variant="body2">{activity.images.length}</Typography>
                                         </Box>
@@ -348,7 +349,7 @@ export default function ActivitiesPage() {
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
-                    sx={{ bgcolor: '#fff', mt: 2 }}
+                    sx={{ bgcolor: '#fff', mt: 2, display: 'flex', justifyContent: 'center' }}
                 />
             </Container>
 

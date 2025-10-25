@@ -35,7 +35,7 @@ export default function AddActivityPage() {
         date: '',
         author: '',
         images: [],
-        videoUrl: '',
+        videos: [],
     });
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -79,27 +79,44 @@ export default function AddActivityPage() {
     };
 
     const handleFiles = (files: FileList) => {
+        const fileArray = Array.from(files).filter((file) => file.type.startsWith('image/'));
+        let loadedCount = 0;
         const newPreviews: string[] = [];
-        const newImages: (File | string)[] = [];
+        const newImages: File[] = [];
 
-        Array.from(files).forEach((file) => {
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    if (e.target?.result) {
-                        newPreviews.push(e.target.result as string);
+        if (fileArray.length === 0) return;
+
+        fileArray.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (e.target?.result) {
+                    newPreviews[index] = e.target.result as string;
+                    loadedCount++;
+
+                    // Update state only when all files are loaded
+                    if (loadedCount === fileArray.length) {
+                        setImagePreviews((prev) => [...prev, ...newPreviews]);
+                        setFormData((prev) => ({
+                            ...prev,
+                            images: [...(prev.images || []), ...newImages],
+                        }));
                     }
-                };
-                reader.readAsDataURL(file);
-                newImages.push(file);
-            }
+                }
+            };
+            reader.onerror = () => {
+                console.error(`Failed to read file: ${file.name}`);
+                loadedCount++;
+                if (loadedCount === fileArray.length) {
+                    setImagePreviews((prev) => [...prev, ...newPreviews.filter((p) => p)]);
+                    setFormData((prev) => ({
+                        ...prev,
+                        images: [...(prev.images || []), ...newImages],
+                    }));
+                }
+            };
+            reader.readAsDataURL(file);
+            newImages.push(file);
         });
-
-        setImagePreviews((prev) => [...prev, ...newPreviews]);
-        setFormData((prev) => ({
-            ...prev,
-            images: [...(prev.images || []), ...newImages],
-        }));
     };
 
     const handleRemoveImage = (index: number) => {
@@ -157,7 +174,7 @@ export default function AddActivityPage() {
 
     return (
         <Box sx={{ py: 4, bgcolor: 'var(--background)', minHeight: '100vh' }}>
-            <Container maxWidth="md">
+            <Container maxWidth="lg">
                 <Typography variant="h4" sx={{ fontWeight: 700, mb: 4, color: 'var(--foreground)' }}>
                     Thêm hoạt động mới
                 </Typography>
@@ -179,6 +196,7 @@ export default function AddActivityPage() {
                                 value={formData.title || ''}
                                 onChange={handleInputChange}
                                 required
+                                placeholder="Hội thảo khoa học quốc tế 2025"
                             />
 
                             {/* Description */}
@@ -191,6 +209,7 @@ export default function AddActivityPage() {
                                 multiline
                                 rows={4}
                                 required
+                                placeholder="Học sinh AMIS tham gia hội thảo khoa học quốc tế với nhiều nghiên cứu xuất sắc"
                             />
 
                             {/* Category */}
@@ -230,16 +249,20 @@ export default function AddActivityPage() {
                                 value={formData.author || ''}
                                 onChange={handleInputChange}
                                 required
+                                placeholder="Amis School"
                             />
 
-                            {/* Video URL */}
+                            {/* Video URLs */}
                             <TextField
                                 fullWidth
                                 label="URL Video YouTube (tùy chọn)"
-                                name="videoUrl"
-                                value={formData.videoUrl || ''}
+                                name="videos"
+                                value={formData.videos || ''}
                                 onChange={handleInputChange}
-                                placeholder="https://www.youtube.com/embed/..."
+                                placeholder="https://www.youtube.com/embed/... (mỗi URL trên một dòng)"
+                                multiline
+                                rows={2}
+                                helperText="Nhập nhiều URL, mỗi URL trên một dòng"
                             />
 
                             {/* Image Upload */}

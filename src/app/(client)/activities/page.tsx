@@ -26,7 +26,7 @@ interface Activity {
     author: string;
     thumbnail: string;
     images: string[];
-    videoUrl?: string;
+    videos?: string[];
     featured?: boolean;
 }
 
@@ -47,7 +47,7 @@ export default function ActivitiesPage() {
             author: 'Nguyễn Văn A',
             thumbnail: '/images/hero_backround.jpg',
             images: ['/images/hero_backround.jpg', '/images/logo_amis.png'],
-            videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+            videos: ['https://www.youtube.com/embed/dQw4w9WgXcQ', 'https://www.youtube.com/embed/jNQXAC9IVRw'],
             featured: true,
         },
         {
@@ -200,7 +200,7 @@ export default function ActivitiesPage() {
                                         alt={activity.title}
                                         sx={{ objectFit: 'cover', width: '100%', height: '100%' }}
                                     />
-                                    {activity.videoUrl && (
+                                    {activity.videos && activity.videos.length > 0 && (
                                         <Box
                                             sx={{
                                                 position: 'absolute',
@@ -212,6 +212,27 @@ export default function ActivitiesPage() {
                                             <PlayCircleOutlineIcon
                                                 sx={{ fontSize: 48, color: 'white', opacity: 0.9 }}
                                             />
+                                            {activity.videos.length > 1 && (
+                                                <Box
+                                                    sx={{
+                                                        position: 'absolute',
+                                                        bottom: -8,
+                                                        right: -8,
+                                                        bgcolor: 'var(--primary-color)',
+                                                        color: 'white',
+                                                        borderRadius: '50%',
+                                                        width: 24,
+                                                        height: 24,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        fontSize: '12px',
+                                                        fontWeight: 700,
+                                                    }}
+                                                >
+                                                    {activity.videos.length}
+                                                </Box>
+                                            )}
                                         </Box>
                                     )}
                                     <Chip
