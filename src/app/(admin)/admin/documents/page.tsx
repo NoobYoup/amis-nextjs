@@ -17,18 +17,11 @@ import {
     Grid,
     Card,
     IconButton,
-    Stack,
     Chip,
     TablePagination,
     InputAdornment,
 } from '@mui/material';
-import {
-    Edit as EditIcon,
-    Delete as DeleteIcon,
-    Add as AddIcon,
-    Search as SearchIcon,
-    Download as DownloadIcon,
-} from '@mui/icons-material';
+import { Edit as EditIcon, Add as AddIcon, Search as SearchIcon, Download as DownloadIcon } from '@mui/icons-material';
 
 interface Document {
     id: number;
@@ -47,7 +40,7 @@ const documentTypes = ['Thông tư', 'Quyết định', 'Quy chế', 'Kế hoạ
 const documentFields = ['Quản lý giáo dục', 'Tuyển sinh', 'Đánh giá', 'Kế hoạch', 'Học sinh', 'Chương trình'];
 
 export default function DocumentsPage() {
-    const [documents, setDocuments] = useState<Document[]>([
+    const documents: Document[] = [
         {
             id: 1,
             title: 'Thông tư 09/2024/TT-BGDĐT về công khai trong hoạt động của các cơ sở giáo dục',
@@ -117,7 +110,7 @@ export default function DocumentsPage() {
             fileUrl: '/files/guide-32.pdf',
             fileType: 'pdf',
         },
-    ]);
+    ];
 
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('all');

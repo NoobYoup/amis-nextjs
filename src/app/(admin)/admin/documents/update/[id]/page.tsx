@@ -22,7 +22,7 @@ const documentTypes = ['Thông tư', 'Quyết định', 'Quy chế', 'Kế hoạ
 const documentFields = ['Quản lý giáo dục', 'Tuyển sinh', 'Đánh giá', 'Kế hoạch', 'Học sinh', 'Chương trình'];
 
 // Mock data - replace with API call
-const mockDocuments: any = {
+const mockDocuments = {
     1: {
         id: 1,
         title: 'Thông tư 09/2024/TT-BGDĐT về công khai trong hoạt động của các cơ sở giáo dục',

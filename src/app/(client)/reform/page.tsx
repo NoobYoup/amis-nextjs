@@ -1,18 +1,15 @@
 'use client';
 
-import { useState } from 'react';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import Button from '@mui/material/Button';
-import Chip from '@mui/material/Chip';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import Divider from '@mui/material/Divider';
 import DownloadIcon from '@mui/icons-material/Download';
 import PublicIcon from '@mui/icons-material/Public';
 import PeopleIcon from '@mui/icons-material/People';
@@ -113,7 +110,9 @@ export default function Reform() {
 
             <Container maxWidth="lg" sx={{ pb: 6 }}>
                 {/* Header Info */}
-                <Card sx={{ p: 4, mb: 6, bgcolor: 'rgba(124, 179, 66, 0.05)', border: '2px solid var(--primary-color)' }}>
+                <Card
+                    sx={{ p: 4, mb: 6, bgcolor: 'rgba(124, 179, 66, 0.05)', border: '2px solid var(--primary-color)' }}
+                >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                         <PublicIcon sx={{ fontSize: 32, color: 'var(--primary-color)' }} />
                         <Typography variant="h5" sx={{ fontWeight: 700, color: 'var(--primary-color)' }}>
@@ -121,7 +120,8 @@ export default function Reform() {
                         </Typography>
                     </Box>
                     <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
-                        Trường AMIS cam kết công khai, minh bạch trong hoạt động giáo dục. Dưới đây là các thông tin được công khai theo quy định của Bộ Giáo dục và Đào tạo:
+                        Trường AMIS cam kết công khai, minh bạch trong hoạt động giáo dục. Dưới đây là các thông tin
+                        được công khai theo quy định của Bộ Giáo dục và Đào tạo:
                     </Typography>
                 </Card>
 
@@ -145,7 +145,8 @@ export default function Reform() {
                                 <Box
                                     sx={{
                                         p: 3,
-                                        background: 'linear-gradient(135deg, rgba(124, 179, 66, 0.1) 0%, rgba(124, 179, 66, 0.05) 100%)',
+                                        background:
+                                            'linear-gradient(135deg, rgba(124, 179, 66, 0.1) 0%, rgba(124, 179, 66, 0.05) 100%)',
                                         borderBottom: '2px solid var(--primary-color)',
                                         display: 'flex',
                                         alignItems: 'center',

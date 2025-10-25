@@ -27,6 +27,8 @@ import {
     AttachMoney as AttachMoneyIcon,
     Info as InfoIcon,
     AttachFile as AttachFileIcon,
+    FirstPage as FirstPageIcon,
+    LastPage as LastPageIcon,
 } from '@mui/icons-material';
 import { SidebarMenuItem } from '@/types/sidebar';
 
@@ -161,7 +163,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                         }}
                         aria-label={isOpen ? 'Thu gọn sidebar' : 'Mở rộng sidebar'}
                     >
-                        {isOpen ? <MenuIcon /> : <MenuIcon />}
+                        {isOpen ? <FirstPageIcon /> : <LastPageIcon />}
                     </IconButton>
                 )}
             </Box>
@@ -345,15 +347,29 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
 
             {/* Desktop Sidebar */}
             {!isMobile && (
-                <Box
-                    sx={{
-                        width: isOpen ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH,
-                        flexShrink: 0,
-                        transition: 'width 0.3s ease',
-                    }}
-                >
-                    {sidebarContent}
-                </Box>
+                <>
+                    <Box
+                        sx={{
+                            position: 'fixed',
+                            left: 0,
+                            top: 0,
+                            width: isOpen ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH,
+                            height: '100vh',
+                            transition: 'width 0.3s ease',
+                            zIndex: 1200,
+                        }}
+                    >
+                        {sidebarContent}
+                    </Box>
+                    {/* Spacer to prevent content overlap */}
+                    <Box
+                        sx={{
+                            width: isOpen ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH,
+                            flexShrink: 0,
+                            transition: 'width 0.3s ease',
+                        }}
+                    />
+                </>
             )}
 
             {/* Mobile Drawer */}

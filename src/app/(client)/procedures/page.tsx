@@ -22,7 +22,6 @@ import GavelIcon from '@mui/icons-material/Gavel';
 import SecurityIcon from '@mui/icons-material/Security';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
 
 interface Regulation {
     id: number;
@@ -235,9 +234,9 @@ export default function ProceduresPage() {
     };
 
     const categories = ['all', ...Array.from(new Set(regulations.map((r) => r.category)))];
-    
-    const filteredRegulations = regulations.filter((regulation) => 
-        selectedCategory === 'all' || regulation.category === selectedCategory
+
+    const filteredRegulations = regulations.filter(
+        (regulation) => selectedCategory === 'all' || regulation.category === selectedCategory,
     );
 
     return (
@@ -311,7 +310,8 @@ export default function ProceduresPage() {
                                 <Box
                                     sx={{
                                         p: 3,
-                                        background: 'linear-gradient(135deg, rgba(124, 179, 66, 0.1) 0%, rgba(124, 179, 66, 0.05) 100%)',
+                                        background:
+                                            'linear-gradient(135deg, rgba(124, 179, 66, 0.1) 0%, rgba(124, 179, 66, 0.05) 100%)',
                                         borderBottom: '2px solid var(--primary-color)',
                                         display: 'flex',
                                         alignItems: 'center',
@@ -407,9 +407,7 @@ export default function ProceduresPage() {
                                                     </Typography>
                                                 )}
                                             </List>
-                                            {idx < regulation.content.length - 1 && (
-                                                <Divider sx={{ my: 1.5 }} />
-                                            )}
+                                            {idx < regulation.content.length - 1 && <Divider sx={{ my: 1.5 }} />}
                                         </Box>
                                     ))}
                                 </Box>

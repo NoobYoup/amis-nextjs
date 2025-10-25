@@ -185,7 +185,9 @@ export default function TuitionPage() {
                                                     mb: 2,
                                                 }}
                                             >
-                                                {level === 'elementary' ? 'Tiểu Học (Grade 1-5)' : 'Trung Học Cơ Sở (Grade 6-9)'}
+                                                {level === 'elementary'
+                                                    ? 'Tiểu Học (Grade 1-5)'
+                                                    : 'Trung Học Cơ Sở (Grade 6-9)'}
                                             </Typography>
                                             <TableContainer>
                                                 <Table>
@@ -195,12 +197,20 @@ export default function TuitionPage() {
                                                                 Lớp / Grade
                                                             </TableCell>
                                                             <TableCell
-                                                                sx={{ color: 'white', fontWeight: 700, textAlign: 'center' }}
+                                                                sx={{
+                                                                    color: 'white',
+                                                                    fontWeight: 700,
+                                                                    textAlign: 'center',
+                                                                }}
                                                             >
                                                                 Học Phí/Tháng (VND)
                                                             </TableCell>
                                                             <TableCell
-                                                                sx={{ color: 'white', fontWeight: 700, textAlign: 'center' }}
+                                                                sx={{
+                                                                    color: 'white',
+                                                                    fontWeight: 700,
+                                                                    textAlign: 'center',
+                                                                }}
                                                             >
                                                                 Hành Động
                                                             </TableCell>
@@ -213,7 +223,8 @@ export default function TuitionPage() {
                                                                 <TableRow
                                                                     key={row.id}
                                                                     sx={{
-                                                                        backgroundColor: index % 2 === 0 ? '#f5f5f5' : 'white',
+                                                                        backgroundColor:
+                                                                            index % 2 === 0 ? '#f5f5f5' : 'white',
                                                                         '&:hover': {
                                                                             backgroundColor: 'rgba(124, 179, 66, 0.1)',
                                                                         },
@@ -284,9 +295,7 @@ export default function TuitionPage() {
                                 <Table>
                                     <TableHead>
                                         <TableRow sx={{ backgroundColor: 'var(--primary-color)' }}>
-                                            <TableCell sx={{ color: 'white', fontWeight: 700 }}>
-                                                Điều Kiện
-                                            </TableCell>
+                                            <TableCell sx={{ color: 'white', fontWeight: 700 }}>Điều Kiện</TableCell>
                                             <TableCell sx={{ color: 'white', fontWeight: 700, textAlign: 'center' }}>
                                                 Mức Giảm
                                             </TableCell>
@@ -456,9 +465,7 @@ export default function TuitionPage() {
                                                                 borderRadius: 1,
                                                             }}
                                                         >
-                                                            <Typography sx={{ fontWeight: 500 }}>
-                                                                {fee.name}
-                                                            </Typography>
+                                                            <Typography sx={{ fontWeight: 500 }}>{fee.name}</Typography>
                                                             <Stack direction="row" spacing={0.5}>
                                                                 <IconButton
                                                                     size="small"
