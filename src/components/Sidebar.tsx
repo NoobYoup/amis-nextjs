@@ -40,17 +40,14 @@ const menuItems: SidebarMenuItem[] = [
         icon: EventNoteIcon,
         subItems: [
             { id: 'activities-list', label: 'Danh sách hoạt động', href: '/admin/activities' },
-            { id: 'activities-add', label: 'Thêm hoạt động', href: '/admin/activities/add' },
+            // { id: 'activities-add', label: 'Thêm hoạt động', href: '/admin/activities/add' },
         ],
     },
     {
         id: 'tuition',
         label: 'Học phí',
         icon: AttachMoneyIcon,
-        subItems: [
-            { id: 'tuition-list', label: 'Danh sách học phí', href: '/admin/tuition' },
-            { id: 'tuition-add', label: 'Thêm học phí', href: '/admin/tuition/add' },
-        ],
+        subItems: [{ id: 'tuition-list', label: 'Danh sách học phí', href: '/admin/tuition' }],
     },
     {
         id: 'info',
@@ -65,10 +62,7 @@ const menuItems: SidebarMenuItem[] = [
         id: 'documents',
         label: 'Tài liệu',
         icon: AttachFileIcon,
-        subItems: [
-            { id: 'documents-list', label: 'Danh sách tài liệu', href: '/admin/documents' },
-            { id: 'documents-add', label: 'Thêm tài liệu', href: '/admin/documents/add' },
-        ],
+        subItems: [{ id: 'documents-list', label: 'Danh sách tài liệu', href: '/admin/documents' }],
     },
 ];
 
