@@ -35,7 +35,7 @@ const mockActivities: Activity[] = [
         id: 1,
         title: 'Hội thảo Khoa học Quốc tế 2024',
         description: 'Học sinh AMIS tham gia hội thảo khoa học quốc tế với nhiều nghiên cứu xuất sắc',
-        category: 'Học thuậ t',
+        category: 'Học thuật',
         date: '2024-10-15',
         author: 'Nguyễn Văn A',
         thumbnail: '/images/hero_backround.jpg',
