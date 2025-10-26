@@ -1,7 +1,6 @@
 import '@/styles/globals.css';
 import type { Metadata } from 'next';
-import BackToTop from '@/components/BackToTop';
-import ThemeRegistry from '@/components/theme-registry/theme.registry';
+import Providers from '@/components/Providers';
 
 export const metadata: Metadata = {
     title: 'AMIS School',
@@ -15,10 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.1.0/css/all.css" />
             </head>
             <body>
-                <ThemeRegistry>
-                    {children}
-                    <BackToTop />
-                </ThemeRegistry>
+                <Providers>{children}</Providers>
             </body>
         </html>
     );

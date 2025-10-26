@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff, School } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 
 export default function Login() {
     const router = useRouter();
@@ -62,10 +63,23 @@ export default function Login() {
             //     return;
             // }
 
+            // Gọi NextAuth signIn
+            const result = await signIn('credentials', {
+                email,
+                password,
+                redirect: false, // Không auto redirect, handle manual
+            });
+
+            if (!result?.ok) {
+                setError(result?.error || 'Đăng nhập thất bại. Vui lòng kiểm tra email/mật khẩu.');
+                return;
+            }
+
             // Demo success
             setSuccess('Đăng nhập thành công!');
             setTimeout(() => {
-                router.push('/admin/dashboard');
+                router.push('/admin/activities');
+                router.refresh();
             }, 1500);
         } catch (err) {
             setError('Có lỗi xảy ra. Vui lòng thử lại.');

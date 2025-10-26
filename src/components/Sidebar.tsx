@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation'; // Thêm useRouter
 import {
     Box,
     Drawer,
@@ -31,6 +31,7 @@ import {
     LastPage as LastPageIcon,
 } from '@mui/icons-material';
 import { SidebarMenuItem } from '@/types/sidebar';
+import { signOut } from 'next-auth/react'; // Thêm import signOut
 
 const SIDEBAR_WIDTH = 280;
 const SIDEBAR_COLLAPSED_WIDTH = 80;
@@ -77,6 +78,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
     const [mobileOpen, setMobileOpen] = useState(false);
     const pathname = usePathname();
+    const router = useRouter(); // Thêm router
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -119,171 +121,152 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
 
     // Auto-expand main item if a sub-item is active
     useEffect(() => {
-        const activeMainItem = menuItems.find((item) => item.subItems?.some((sub) => pathname === sub.href));
-        if (activeMainItem && !expandedItems.includes(activeMainItem.id)) {
-            setExpandedItems((prev) => [...prev, activeMainItem.id]);
-        }
-    }, [pathname, expandedItems]);
+        const activeMainItems = menuItems.filter(isMenuItemOrSubItemActive).map((item) => item.id);
+        setExpandedItems(activeMainItems);
+    }, [isMenuItemOrSubItemActive]);
+
+    // Define handleLogout nếu onLogout không được pass từ parent
+    const handleLogout = async () => {
+        await signOut({ redirect: false });
+        router.push('/login');
+        router.refresh();
+    };
 
     const sidebarContent = (
         <Box
             sx={{
+                width: isOpen ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH,
+                height: '100vh',
+                bgcolor: 'var(--secondary-color)',
+                color: '#fff',
                 display: 'flex',
                 flexDirection: 'column',
-                height: '100%',
-                backgroundColor: 'var(--secondary-color)',
-                color: '#fff',
+                overflow: 'hidden',
+                transition: 'width 0.3s ease',
             }}
         >
             {/* Header */}
             <Box
                 sx={{
-                    padding: isOpen ? '20px 16px' : '20px 8px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
+                    justifyContent: isOpen ? 'space-between' : 'center',
+                    p: 2,
+                    height: 64,
                     borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
                 }}
             >
                 {isOpen && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <DashboardIcon sx={{ fontSize: 28, color: 'var(--primary-color)' }} />
-                        <Box>
-                            <Box sx={{ fontSize: '16px', fontWeight: 'bold' }}>Admin</Box>
-                            <Box sx={{ fontSize: '12px', opacity: 0.7 }}>Quản lý</Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <DashboardIcon sx={{ fontSize: 28 }} />
+                        <Box component="span" sx={{ fontSize: '1.1rem', fontWeight: 600 }}>
+                            Admin Dashboard
                         </Box>
                     </Box>
                 )}
-                {!isMobile && (
-                    <IconButton
-                        onClick={toggleCollapse}
-                        sx={{
-                            color: '#fff',
-                            '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' },
-                        }}
-                        aria-label={isOpen ? 'Thu gọn sidebar' : 'Mở rộng sidebar'}
-                    >
-                        {isOpen ? <FirstPageIcon /> : <LastPageIcon />}
-                    </IconButton>
-                )}
+                <IconButton
+                    onClick={toggleCollapse}
+                    sx={{ color: '#fff' }}
+                    aria-label={isOpen ? 'Thu gọn sidebar' : 'Mở rộng sidebar'}
+                >
+                    {isOpen ? <FirstPageIcon /> : <LastPageIcon />}
+                </IconButton>
             </Box>
 
-            {/* Menu Items */}
+            {/* Menu List */}
             <List
                 sx={{
-                    flex: 1,
+                    flexGrow: 1,
                     overflowY: 'auto',
-                    padding: '8px 0',
+                    p: 1,
                     '&::-webkit-scrollbar': {
-                        width: '6px',
-                    },
-                    '&::-webkit-scrollbar-track': {
-                        background: 'rgba(255, 255, 255, 0.05)',
+                        width: '4px',
                     },
                     '&::-webkit-scrollbar-thumb': {
-                        background: 'rgba(255, 255, 255, 0.2)',
-                        borderRadius: '3px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                        borderRadius: '4px',
                     },
                 }}
             >
                 {menuItems.map((item) => {
                     const isActive = isMenuItemOrSubItemActive(item);
                     const isExpanded = expandedItems.includes(item.id);
-                    const Icon = item.icon;
 
                     return (
                         <React.Fragment key={item.id}>
                             <ListItem disablePadding>
                                 <ListItemButton
-                                    onClick={() => {
-                                        if (item.subItems) {
-                                            toggleSubMenu(item.id);
-                                        }
-                                    }}
+                                    onClick={() =>
+                                        item.subItems ? toggleSubMenu(item.id) : item.href && router.push(item.href)
+                                    }
+                                    selected={isActive}
                                     sx={{
+                                        borderRadius: 2,
+                                        mb: 0.5,
+                                        px: isOpen ? 2 : 1.5,
+                                        py: 1.5,
                                         minHeight: 48,
                                         justifyContent: isOpen ? 'initial' : 'center',
-                                        px: 2,
-                                        backgroundColor: isActive ? 'rgba(124, 179, 66, 0.2)' : 'transparent',
-                                        borderLeft: isActive
-                                            ? '4px solid var(--primary-color)'
-                                            : '4px solid transparent',
                                         color: isActive ? 'var(--primary-color)' : '#fff',
-                                        transition: 'all 0.3s ease',
+                                        backgroundColor: isActive ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
                                         '&:hover': {
                                             backgroundColor: 'rgba(255, 255, 255, 0.1)',
                                         },
                                     }}
-                                    aria-label={item.label}
-                                    aria-expanded={item.subItems ? isExpanded : undefined}
                                 >
                                     <ListItemIcon
                                         sx={{
                                             minWidth: 0,
                                             mr: isOpen ? 2 : 'auto',
                                             justifyContent: 'center',
-                                            color: isActive ? 'var(--primary-color)' : '#fff',
+                                            color: 'inherit',
                                         }}
                                     >
-                                        <Icon />
+                                        <item.icon sx={{ fontSize: 24 }} />
                                     </ListItemIcon>
                                     {isOpen && (
-                                        <>
-                                            <ListItemText
-                                                primary={item.label}
-                                                sx={{
-                                                    opacity: isOpen ? 1 : 0,
-                                                    '& .MuiListItemText-primary': {
-                                                        fontWeight: isActive ? 600 : 500,
-                                                        fontSize: '14px',
-                                                    },
-                                                }}
-                                            />
-                                            {item.subItems && (
-                                                <Box sx={{ ml: 'auto' }}>
-                                                    {isExpanded ? <ExpandLess /> : <ExpandMore />}
-                                                </Box>
-                                            )}
-                                        </>
+                                        <ListItemText
+                                            primary={item.label}
+                                            primaryTypographyProps={{
+                                                fontSize: '0.95rem',
+                                                fontWeight: 500,
+                                            }}
+                                        />
                                     )}
+                                    {isOpen && item.subItems && (isExpanded ? <ExpandLess /> : <ExpandMore />)}
                                 </ListItemButton>
                             </ListItem>
-
-                            {/* Sub Items */}
-                            {item.subItems && isOpen && (
+                            {item.subItems && (
                                 <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                                    <List component="div" disablePadding>
-                                        {item.subItems.map((subItem) => {
-                                            const isSubActive = isMenuItemExactActive(subItem.href);
-                                            return (
-                                                <ListItem key={subItem.id} disablePadding>
-                                                    <ListItemButton
-                                                        href={subItem.href}
-                                                        component="a"
-                                                        sx={{
-                                                            pl: 4,
-                                                            minHeight: 40,
-                                                            backgroundColor: isSubActive
-                                                                ? 'rgba(124, 179, 66, 0.15)'
-                                                                : 'transparent',
-                                                            borderLeft: isSubActive
-                                                                ? '3px solid var(--primary-color)'
-                                                                : '3px solid transparent',
-                                                            color: isSubActive ? 'var(--primary-color)' : '#fff',
-                                                            fontSize: '13px',
-                                                            transition: 'all 0.2s ease',
-                                                            '&:hover': {
-                                                                backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                                                            },
-                                                        }}
-                                                        aria-label={subItem.label}
-                                                        aria-current={isSubActive ? 'page' : undefined}
-                                                    >
-                                                        <ListItemText primary={subItem.label}></ListItemText>
-                                                    </ListItemButton>
-                                                </ListItem>
-                                            );
-                                        })}
+                                    <List component="div" disablePadding sx={{ pl: isOpen ? 4 : 0 }}>
+                                        {item.subItems.map((sub) => (
+                                            <ListItem key={sub.id} disablePadding>
+                                                <ListItemButton
+                                                    onClick={() => sub.href && router.push(sub.href)}
+                                                    selected={isMenuItemExactActive(sub.href)}
+                                                    sx={{
+                                                        pl: isOpen ? 4 : 2,
+                                                        py: 1,
+                                                        borderRadius: 2,
+                                                        color: isMenuItemExactActive(sub.href)
+                                                            ? 'var(--primary-color)'
+                                                            : '#ddd',
+                                                        '&:hover': {
+                                                            color: '#fff',
+                                                        },
+                                                    }}
+                                                >
+                                                    {isOpen && (
+                                                        <ListItemText
+                                                            primary={sub.label}
+                                                            primaryTypographyProps={{
+                                                                fontSize: '0.9rem',
+                                                            }}
+                                                        />
+                                                    )}
+                                                </ListItemButton>
+                                            </ListItem>
+                                        ))}
                                     </List>
                                 </Collapse>
                             )}
@@ -303,7 +286,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                     fullWidth
                     variant="outlined"
                     startIcon={<LogoutIcon />}
-                    onClick={onLogout}
+                    onClick={handleLogout} // Sử dụng handleLogout
                     sx={{
                         color: '#fff',
                         borderColor: 'rgba(255, 255, 255, 0.3)',
