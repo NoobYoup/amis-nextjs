@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Box,
@@ -26,171 +26,47 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
+    Alert,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Image as ImageIcon } from '@mui/icons-material';
 import { Activity } from '@/types/activity';
+import dayjs from 'dayjs';
 
-const mockActivities: Activity[] = [
-    {
-        id: 1,
-        title: 'Hội thảo Khoa học Quốc tế 2024',
-        description: 'Học sinh AMIS tham gia hội thảo khoa học quốc tế với nhiều nghiên cứu xuất sắc',
-        category: 'Học thuật',
-        date: '2024-10-15',
-        author: 'Nguyễn Văn A',
-        thumbnail: '/images/hero_backround.jpg',
-        images: ['/images/hero_backround.jpg', '/images/logo_amis.png'],
-        videos: ['https://www.youtube.com/embed/dQw4w9WgXcQ', 'https://www.youtube.com/embed/dQw4w9WgXcQ'],
-        createdAt: '2024-10-15T10:00:00Z',
-        updatedAt: '2024-10-15T10:00:00Z',
-    },
-    {
-        id: 2,
-        title: 'Giải bóng đá liên trường 2024',
-        description: 'Đội tuyển AMIS giành chức vô địch giải bóng đá liên trường khu vực',
-        category: 'Thể thao',
-        date: '2024-10-10',
-        author: 'Trần Thị B',
-        thumbnail: '/images/hero_backround.jpg',
-        images: ['/images/hero_backround.jpg'],
-        createdAt: '2024-10-10T10:00:00Z',
-        updatedAt: '2024-10-10T10:00:00Z',
-    },
-    {
-        id: 3,
-        title: 'Đêm nhạc từ thiện',
-        description: 'Chương trình văn nghệ gây quỹ ủng hộ học sinh vùng cao',
-        category: 'Văn nghệ',
-        date: '2024-10-05',
-        author: 'Lê Văn C',
-        thumbnail: '/images/hero_backround.jpg',
-        images: ['/images/hero_backround.jpg'],
-        createdAt: '2024-10-05T10:00:00Z',
-        updatedAt: '2024-10-05T10:00:00Z',
-    },
-    {
-        id: 4,
-        title: 'Trại hè sáng tạo 2024',
-        description: 'Học sinh tham gia các hoạt động ngoại khóa bổ ích trong kỳ nghỉ hè',
-        category: 'Ngoại khóa',
-        date: '2024-09-28',
-        author: 'Phạm Thị D',
-        thumbnail: '/images/hero_backround.jpg',
-        images: ['/images/hero_backround.jpg'],
-        createdAt: '2024-09-28T10:00:00Z',
-        updatedAt: '2024-09-28T10:00:00Z',
-    },
-    {
-        id: 5,
-        title: 'Cuộc thi Olympic Toán học',
-        description: 'Học sinh AMIS đạt giải nhất cuộc thi Olympic Toán học cấp quốc gia',
-        category: 'Học thuậ t',
-        date: '2024-09-20',
-        author: 'Hoàng Văn E',
-        thumbnail: '/images/hero_backround.jpg',
-        images: ['/images/hero_backround.jpg'],
-        createdAt: '2024-09-20T10:00:00Z',
-        updatedAt: '2024-09-20T10:00:00Z',
-    },
-    {
-        id: 6,
-        title: 'Giải cầu lông học sinh',
-        description: 'Đội tuyển cầu lông AMIS xuất sắc giành 3 huy chương vàng',
-        category: 'Thể thao',
-        date: '2024-09-15',
-        author: 'Đỗ Thị F',
-        thumbnail: '/images/hero_backround.jpg',
-        images: ['/images/hero_backround.jpg'],
-        createdAt: '2024-09-15T10:00:00Z',
-        updatedAt: '2024-09-15T10:00:00Z',
-    },
-    {
-        id: 7,
-        title: 'Khóa học lập trình Python',
-        description: 'Khóa học lập trình Python cho học sinh cấp 2',
-        category: 'Học thuậ t',
-        date: '2024-09-10',
-        author: 'Nguyễn Thị G',
-        thumbnail: '/images/hero_backround.jpg',
-        images: ['/images/hero_backround.jpg'],
-        createdAt: '2024-09-10T10:00:00Z',
-        updatedAt: '2024-09-10T10:00:00Z',
-    },
-    {
-        id: 8,
-        title: 'Giải bánh mỏ toàn trường',
-        description: 'Giải bánh mỏ toàn trường với sự tham gia của 500+ học sinh',
-        category: 'Thể thao',
-        date: '2024-09-05',
-        author: 'Trần Văn H',
-        thumbnail: '/images/hero_backround.jpg',
-        images: ['/images/hero_backround.jpg'],
-        createdAt: '2024-09-05T10:00:00Z',
-        updatedAt: '2024-09-05T10:00:00Z',
-    },
-    {
-        id: 9,
-        title: 'Hội họa mỏ cửa học sinh',
-        description: 'Hội họa mỏ cửa học sinh với nhiều tác phẩm đẹp mắt',
-        category: 'Văn nghệ',
-        date: '2024-08-30',
-        author: 'Lê Thị I',
-        thumbnail: '/images/hero_backround.jpg',
-        images: ['/images/hero_backround.jpg'],
-        createdAt: '2024-08-30T10:00:00Z',
-        updatedAt: '2024-08-30T10:00:00Z',
-    },
-    {
-        id: 10,
-        title: 'Chuyến tham quan bảo tàng lịch sử',
-        description: 'Chuyến tham quan bảo tàng lịch sử Việt Nam của học sinh khối 10',
-        category: 'Ngoại khóa',
-        date: '2024-08-25',
-        author: 'Phạm Văn J',
-        thumbnail: '/images/hero_backround.jpg',
-        images: ['/images/hero_backround.jpg'],
-        createdAt: '2024-08-25T10:00:00Z',
-        updatedAt: '2024-08-25T10:00:00Z',
-    },
-    {
-        id: 11,
-        title: 'Khóa học tiếng Anh quốc tế',
-        description: 'Khóa học tiếng Anh quốc tế IELTS cho học sinh',
-        category: 'Học thuậ t',
-        date: '2024-08-20',
-        author: 'Đỗ Thị K',
-        thumbnail: '/images/hero_backround.jpg',
-        images: ['/images/hero_backround.jpg'],
-        createdAt: '2024-08-20T10:00:00Z',
-        updatedAt: '2024-08-20T10:00:00Z',
-    },
-];
-
-const categories = ['Tất cả', 'Học thuậ t', 'Thể thao', 'Văn nghệ', 'Ngoại khóa'];
+const categories = ['Học thuật', 'Thể thao', 'Văn nghệ', 'Ngoại khóa'];
 
 export default function ActivitiesPage() {
     const router = useRouter();
+    const [activities, setActivities] = useState<Activity[]>([]);
+    const [total, setTotal] = useState(0);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('Tất cả');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null);
-    const [activities, setActivities] = useState<Activity[]>(mockActivities);
+    const [selectedId, setSelectedId] = useState<number | null>(null);
+    const [error, setError] = useState('');
 
-    const filteredActivities = useMemo(() => {
-        return activities.filter((activity) => {
-            const matchesSearch =
-                activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                activity.author.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesCategory = selectedCategory === 'Tất cả' || activity.category === selectedCategory;
-            return matchesSearch && matchesCategory;
-        });
-    }, [activities, searchTerm, selectedCategory]);
+    useEffect(() => {
+        loadActivities();
+    }, [page, searchQuery, selectedCategory]);
 
-    const paginatedActivities = useMemo(() => {
-        return filteredActivities.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-    }, [filteredActivities, page, rowsPerPage]);
+    const loadActivities = async () => {
+        try {
+            const params = new URLSearchParams({
+                search: searchQuery,
+                category: selectedCategory,
+                page: (page + 1).toString(),
+            });
+            const res = await fetch(`/api/admin/activities?${params}`);
+            if (!res.ok) throw new Error('Error loading activities');
+            const { data, total } = await res.json();
+
+            setActivities(data);
+            setTotal(total);
+        } catch (err) {
+            setError('Lỗi tải dữ liệu');
+        }
+    };
 
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
@@ -201,68 +77,75 @@ export default function ActivitiesPage() {
         setPage(0);
     };
 
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value);
+        setPage(0);
+    };
+
+    const handleCategoryChange = (e: any) => {
+        setSelectedCategory(e.target.value);
+        setPage(0);
+    };
+
+    const filteredActivities = useMemo(() => activities, [activities]);
+
     const handleOpenDeleteDialog = (id: number) => {
-        setSelectedActivityId(id);
+        setSelectedId(id);
         setDeleteDialogOpen(true);
     };
 
     const handleCloseDeleteDialog = () => {
         setDeleteDialogOpen(false);
-        setSelectedActivityId(null);
+        setSelectedId(null);
     };
 
-    const handleConfirmDelete = () => {
-        if (selectedActivityId !== null) {
-            setActivities((prev) => prev.filter((activity) => activity.id !== selectedActivityId));
+    const handleConfirmDelete = async () => {
+        if (!selectedId) return;
+        try {
+            const res = await fetch(`/api/admin/activities/${selectedId}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Error deleting');
+            loadActivities(); // Refresh list
             handleCloseDeleteDialog();
+        } catch (err) {
+            setError('Lỗi xóa hoạt động');
         }
     };
 
     return (
         <Box sx={{ py: 4, bgcolor: 'var(--background)', minHeight: '100vh' }}>
-            <Container maxWidth="lg">
+            {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {error}
+                </Alert>
+            )}
+
+            <Container maxWidth="xl">
                 {/* Header */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+                <Box sx={{ mb: 4 }}>
                     <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--foreground)' }}>
-                        Quản lý Hoạt động
+                        Quản Lý Hoạt Động
                     </Typography>
-                    <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={() => router.push('/admin/activities/add')}
-                        sx={{
-                            bgcolor: 'var(--primary-color)',
-                            '&:hover': { bgcolor: 'var(--accent-color)' },
-                        }}
-                    >
-                        Thêm hoạt động
-                    </Button>
+                    <Typography variant="body2" sx={{ color: '#666', mt: 1 }}>
+                        Quản lý danh sách các hoạt động của trường
+                    </Typography>
                 </Box>
 
                 {/* Filters */}
-                <Paper sx={{ p: 3, mb: 3, bgcolor: '#fff' }}>
-                    <Stack spacing={2}>
+                <Paper sx={{ p: 3, mb: 4, borderRadius: 2 }}>
+                    <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                         <TextField
                             fullWidth
-                            placeholder="Tìm kiếm theo tiêu đề hoạc tác giả..."
-                            value={searchTerm}
-                            onChange={(e) => {
-                                setSearchTerm(e.target.value);
-                                setPage(0);
+                            label="Tìm kiếm theo tiêu đề hoặc tác giả"
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                            InputProps={{
+                                startAdornment: <ImageIcon sx={{ mr: 1, color: '#666' }} />,
                             }}
-                            variant="outlined"
-                            size="small"
                         />
-                        <FormControl size="small" sx={{ minWidth: 200 }}>
-                            <InputLabel>Danh mục</InputLabel>
-                            <Select
-                                value={selectedCategory}
-                                onChange={(e) => {
-                                    setSelectedCategory(e.target.value);
-                                    setPage(0);
-                                }}
-                                label="Danh mục"
-                            >
+                        <FormControl fullWidth>
+                            <InputLabel>Phân loại</InputLabel>
+                            <Select value={selectedCategory} onChange={handleCategoryChange} label="Phân loại">
+                                <MenuItem value="">Tất cả</MenuItem>
                                 {categories.map((cat) => (
                                     <MenuItem key={cat} value={cat}>
                                         {cat}
@@ -270,65 +153,49 @@ export default function ActivitiesPage() {
                                 ))}
                             </Select>
                         </FormControl>
+                        <Button
+                            variant="contained"
+                            startIcon={<AddIcon />}
+                            onClick={() => router.push('/admin/activities/add')}
+                            sx={{ bgcolor: 'var(--primary-color)', minWidth: 180 }}
+                        >
+                            Thêm hoạt động
+                        </Button>
                     </Stack>
                 </Paper>
 
                 {/* Table */}
-                <TableContainer component={Paper}>
+                <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
                     <Table>
-                        <TableHead>
-                            <TableRow sx={{ bgcolor: 'var(--secondary-color)' }}>
-                                <TableCell sx={{ color: '#fff', fontWeight: 700 }}>ID</TableCell>
-                                <TableCell sx={{ color: '#fff', fontWeight: 700 }}>Tiêu đề</TableCell>
-                                <TableCell sx={{ color: '#fff', fontWeight: 700 }}>Mô tả</TableCell>
-                                <TableCell sx={{ color: '#fff', fontWeight: 700 }}>Danh mục</TableCell>
-                                <TableCell sx={{ color: '#fff', fontWeight: 700 }}>Ngày</TableCell>
-                                <TableCell sx={{ color: '#fff', fontWeight: 700 }}>Tác giả</TableCell>
-                                <TableCell sx={{ color: '#fff', fontWeight: 700, textAlign: 'center' }}>
-                                    Hình ảnh
-                                </TableCell>
-                                <TableCell sx={{ color: '#fff', fontWeight: 700, textAlign: 'center' }}>
+                        <TableHead sx={{ bgcolor: 'var(--primary-color)' }}>
+                            <TableRow>
+                                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Tiêu đề</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Phân loại</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Ngày</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Tác giả</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 600, textAlign: 'center' }}>
                                     Hành động
                                 </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {paginatedActivities.map((activity) => (
-                                <TableRow key={activity.id} hover>
-                                    <TableCell>{activity.id}</TableCell>
-                                    <TableCell sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                        {activity.title}
-                                    </TableCell>
-                                    <TableCell sx={{ maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                        {activity.description}
-                                    </TableCell>
+                            {filteredActivities.map((activity) => (
+                                <TableRow key={activity._id} hover>
+                                    <TableCell>{activity.title}</TableCell>
                                     <TableCell>{activity.category}</TableCell>
-                                    <TableCell>{activity.date}</TableCell>
+                                    <TableCell>{dayjs(activity.date).format('DD/MM/YYYY')}</TableCell>
                                     <TableCell>{activity.author}</TableCell>
-                                    <TableCell sx={{ textAlign: 'center' }}>
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                gap: 0.5,
-                                            }}
-                                        >
-                                            <ImageIcon sx={{ fontSize: 18, color: 'var(--primary-color)' }} />
-                                            <Typography variant="body2">{activity.images.length}</Typography>
-                                        </Box>
-                                    </TableCell>
                                     <TableCell sx={{ textAlign: 'center' }}>
                                         <IconButton
                                             size="small"
-                                            onClick={() => router.push(`/admin/activities/update/${activity.id}`)}
+                                            onClick={() => router.push(`/admin/activities/update/${activity._id}`)}
                                             sx={{ color: 'var(--primary-color)' }}
                                         >
                                             <EditIcon />
                                         </IconButton>
                                         <IconButton
                                             size="small"
-                                            onClick={() => handleOpenDeleteDialog(activity.id)}
+                                            onClick={() => handleOpenDeleteDialog(activity._id)}
                                             sx={{ color: '#d32f2f' }}
                                         >
                                             <DeleteIcon />
@@ -344,28 +211,28 @@ export default function ActivitiesPage() {
                 <TablePagination
                     rowsPerPageOptions={[10]}
                     component="div"
-                    count={filteredActivities.length}
+                    count={total}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                     sx={{ bgcolor: '#fff', mt: 2, display: 'flex', justifyContent: 'center' }}
                 />
-            </Container>
 
-            {/* Delete Confirmation Dialog */}
-            <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-                <DialogTitle>Xác nhận xóa</DialogTitle>
-                <DialogContent>
-                    <Typography>Bạn có chắc chắn muốn xóa hoạt động này không?</Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseDeleteDialog}>Hủy</Button>
-                    <Button onClick={handleConfirmDelete} variant="contained" color="error">
-                        Xóa
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                {/* Delete Dialog */}
+                <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+                    <DialogTitle>Xác nhận xóa</DialogTitle>
+                    <DialogContent>
+                        <Typography>Bạn có chắc chắn muốn xóa hoạt động này không?</Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleConfirmDelete} variant="contained" color="error">
+                            Xóa
+                        </Button>
+                        <Button onClick={handleCloseDeleteDialog}>Hủy</Button>
+                    </DialogActions>
+                </Dialog>
+            </Container>
         </Box>
     );
 }

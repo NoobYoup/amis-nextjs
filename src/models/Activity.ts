@@ -7,9 +7,9 @@ const activitySchema = new Schema(
         category: { type: String, required: true, enum: ['Học thuật', 'Thể thao', 'Văn nghệ', 'Ngoại khóa'] },
         date: { type: Date, required: true },
         author: { type: String, required: true },
-        thumbnail: { type: String },
-        images: [{ type: String }], // Cloudinary URLs
-        videos: [{ type: String }], // YouTube embeds
+        thumbnail: { type: String }, // Cloudinary URL
+        images: [{ type: String }], // Array Cloudinary URLs
+        videos: [{ type: String }], // Array YouTube embeds
     },
     { timestamps: true },
 );
