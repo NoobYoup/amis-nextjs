@@ -15,8 +15,16 @@ import {
     Breadcrumbs,
     Link,
     Alert,
+    IconButton,
+    CircularProgress,
 } from '@mui/material';
-import { ArrowBack as ArrowBackIcon, Save as SaveIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import {
+    ArrowBack as ArrowBackIcon,
+    Save as SaveIcon,
+    CloudUpload as CloudUploadIcon,
+    Close as CloseIcon,
+    Delete as DeleteIcon,
+} from '@mui/icons-material';
 
 const documentTypes = ['Thông tư', 'Quyết định', 'Quy chế', 'Kế hoạch', 'Quy định', 'Hướng dẫn'];
 const documentFields = ['Quản lý giáo dục', 'Tuyển sinh', 'Đánh giá', 'Kế hoạch', 'Học sinh', 'Chương trình'];
@@ -52,10 +60,7 @@ const mockDocuments = {
 export default function UpdateDocumentPage() {
     const router = useRouter();
     const params = useParams();
-    const id = params?.id as string;
-
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const documentId = params?.id as string;
     const [formData, setFormData] = useState({
         title: '',
         type: '',
@@ -64,62 +69,165 @@ export default function UpdateDocumentPage() {
         field: '',
         summary: '',
         fileUrl: '',
+        file: null as File | null,
         fileType: 'pdf',
         isNew: false,
     });
+    const [dragActive, setDragActive] = useState(false);
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [filePreview, setFilePreview] = useState<string | null>(null);
 
     useEffect(() => {
-        if (id) {
-            // TODO: Replace with API call
-            const doc = mockDocuments[id];
-            if (doc) {
-                setFormData(doc);
-                setLoading(false);
-            } else {
-                setError('Không tìm thấy tài liệu');
-                setLoading(false);
-            }
+        if (documentId) {
+            loadDocument();
         }
-    }, [id]);
+    }, [documentId]);
+
+    const loadDocument = async () => {
+        try {
+            const res = await fetch(`/api/admin/documents/${documentId}`);
+            if (!res.ok) throw new Error('Error loading document');
+            const data = await res.json();
+            setFormData({
+                title: data.title,
+                type: data.type,
+                number: data.number,
+                date: data.date.split('T')[0], // Format date input
+                field: data.field,
+                summary: data.summary || '',
+                fileUrl: data.fileUrl,
+                file: null,
+                fileType: data.fileType,
+                isNew: data.isNew || false,
+            });
+            setFilePreview(data.fileUrl); // Preview existing URL
+            setLoading(false);
+        } catch (err) {
+            setError('Lỗi tải dữ liệu');
+            setLoading(false);
+        }
+    };
 
     const handleChange = (field: string, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handleSave = () => {
-        // Validate required fields
-        if (!formData.title || !formData.type || !formData.number || !formData.date || !formData.field) {
-            alert('Vui lòng điền đầy đủ các trường bắt buộc');
-            return;
+    const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.type === 'dragenter' || e.type === 'dragover') {
+            setDragActive(true);
+        } else if (e.type === 'dragleave') {
+            setDragActive(false);
         }
-        // TODO: Call API to update document
-        console.log('Updating document:', formData);
-        router.push('/admin/documents');
     };
 
-    const handleDelete = () => {
-        if (confirm('Bạn có chắc chắn muốn xóa tài liệu này?')) {
-            // TODO: Call API to delete document
-            console.log('Deleting document:', id);
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragActive(false);
+
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+            handleFiles(files);
+        }
+    };
+
+    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            handleFiles(e.target.files);
+        }
+    };
+
+    const handleFiles = (files: FileList) => {
+        const fileArray = Array.from(files).filter((file) =>
+            [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            ].includes(file.type),
+        );
+
+        if (fileArray.length === 0) {
+            setError('Vui lòng chọn file PDF, DOC hoặc DOCX');
+            return;
+        }
+
+        const file = fileArray[0];
+        setFormData((prev) => ({
+            ...prev,
+            file,
+            fileType: file.name.split('.').pop() as 'pdf' | 'doc' | 'docx',
+        }));
+        setFilePreview(URL.createObjectURL(file));
+        setError('');
+    };
+
+    const handleRemoveFile = () => {
+        setFormData((prev) => ({ ...prev, file: null, fileType: 'pdf' }));
+        setFilePreview(formData.fileUrl || null); // Back to old URL
+    };
+
+    const handleSave = async () => {
+        setError('');
+        if (!formData.title || !formData.type || !formData.number || !formData.date || !formData.field) {
+            setError('Vui lòng điền đầy đủ các trường bắt buộc');
+            return;
+        }
+
+        const submitData = new FormData();
+        submitData.append('title', formData.title);
+        submitData.append('type', formData.type);
+        submitData.append('number', formData.number);
+        submitData.append('date', formData.date);
+        submitData.append('field', formData.field);
+        submitData.append('summary', formData.summary);
+        submitData.append('fileType', formData.fileType);
+        submitData.append('isNew', formData.isNew.toString());
+
+        if (formData.file) {
+            submitData.append('file', formData.file); // New file
+        }
+
+        try {
+            const res = await fetch(`/api/admin/documents/${documentId}`, {
+                method: 'PUT',
+                body: submitData,
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                setError(err.error || 'Lỗi cập nhật tài liệu');
+                return;
+            }
             router.push('/admin/documents');
+        } catch (err) {
+            setError('Có lỗi xảy ra. Vui lòng thử lại.');
         }
     };
 
     const handleCancel = () => {
-        router.back();
+        router.push('/admin/documents');
     };
 
     if (loading) {
         return (
-            <Box sx={{ py: 4, bgcolor: 'var(--background)', minHeight: '100vh' }}>
-                <Container maxWidth="lg">
-                    <Typography>Đang tải...</Typography>
-                </Container>
+            <Box
+                sx={{
+                    py: 4,
+                    bgcolor: 'var(--background)',
+                    minHeight: '100vh',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }}
+            >
+                <CircularProgress />
             </Box>
         );
     }
 
-    if (error) {
+    if (error && error === 'Không tìm thấy tài liệu') {
         return (
             <Box sx={{ py: 4, bgcolor: 'var(--background)', minHeight: '100vh' }}>
                 <Container maxWidth="lg">
@@ -161,9 +269,16 @@ export default function UpdateDocumentPage() {
                         Chỉnh Sửa Tài Liệu Văn Bản
                     </Typography>
                     <Typography variant="body2" sx={{ color: '#666', mt: 1 }}>
-                        Cập nhật thông tin tài liệu
+                        Cập nhật thông tin tài liệu trong hệ thống
                     </Typography>
                 </Box>
+
+                {/* Error Alert */}
+                {error && (
+                    <Alert severity="error" sx={{ mb: 3 }}>
+                        {error}
+                    </Alert>
+                )}
 
                 {/* Form Card */}
                 <Card sx={{ p: 4 }}>
@@ -253,30 +368,151 @@ export default function UpdateDocumentPage() {
                             />
                         </Grid>
 
-                        {/* Đường Dẫn File & Loại File */}
-                        <Grid size={{ xs: 12, md: 8 }}>
-                            <TextField
-                                fullWidth
-                                label="Đường Dẫn File"
-                                value={formData.fileUrl}
-                                onChange={(e) => handleChange('fileUrl', e.target.value)}
-                                placeholder="/files/document.pdf"
-                                helperText="Đường dẫn đến file tài liệu"
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 4 }}>
-                            <TextField
-                                fullWidth
-                                select
-                                label="Loại File"
-                                value={formData.fileType}
-                                onChange={(e) => handleChange('fileType', e.target.value)}
+                        {/* File Upload - Drag & Drop */}
+                        <Grid size={{ xs: 12 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                                Tải lên tài liệu {formData.file ? '(Tùy chọn)' : '*'}
+                            </Typography>
+                            <Box
+                                onDragEnter={handleDrag}
+                                onDragLeave={handleDrag}
+                                onDragOver={handleDrag}
+                                onDrop={handleDrop}
+                                sx={{
+                                    border: '2px dashed',
+                                    borderColor: dragActive ? 'var(--primary-color)' : '#ccc',
+                                    borderRadius: 2,
+                                    p: 3,
+                                    textAlign: 'center',
+                                    cursor: 'pointer',
+                                    bgcolor: dragActive ? 'rgba(124, 179, 66, 0.05)' : 'transparent',
+                                    transition: 'all 0.3s ease',
+                                }}
                             >
-                                <MenuItem value="pdf">PDF</MenuItem>
-                                <MenuItem value="doc">DOC</MenuItem>
-                                <MenuItem value="docx">DOCX</MenuItem>
-                            </TextField>
+                                <input
+                                    type="file"
+                                    accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                    onChange={handleFileInputChange}
+                                    style={{ display: 'none' }}
+                                    id="file-input"
+                                />
+                                <label htmlFor="file-input" style={{ cursor: 'pointer', display: 'block' }}>
+                                    <CloudUploadIcon sx={{ fontSize: 48, color: 'var(--primary-color)', mb: 1 }} />
+                                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                        Kéo thả tài liệu vào đây hoặc nhấp để chọn
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ color: '#999' }}>
+                                        Hỗ trợ các định dạng: PDF, DOC, DOCX
+                                    </Typography>
+                                </label>
+                            </Box>
                         </Grid>
+
+                        {/* File Preview - New File */}
+                        {filePreview && formData.file && (
+                            <Grid size={{ xs: 12 }}>
+                                <Card
+                                    sx={{
+                                        p: 2,
+                                        bgcolor: 'rgba(124, 179, 66, 0.05)',
+                                        border: '1px solid var(--primary-color)',
+                                    }}
+                                >
+                                    <Box
+                                        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                                    >
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                            <Box
+                                                sx={{
+                                                    width: 40,
+                                                    height: 40,
+                                                    borderRadius: 1,
+                                                    bgcolor: 'var(--primary-color)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    color: 'white',
+                                                    fontWeight: 700,
+                                                }}
+                                            >
+                                                {formData.fileType.toUpperCase().charAt(0)}
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                    {filePreview}
+                                                </Typography>
+                                                <Typography variant="caption" sx={{ color: '#999' }}>
+                                                    Loại: {formData.fileType.toUpperCase()}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                        <IconButton
+                                            size="small"
+                                            onClick={handleRemoveFile}
+                                            sx={{
+                                                bgcolor: '#d32f2f',
+                                                color: '#fff',
+                                                '&:hover': { bgcolor: '#b71c1c' },
+                                            }}
+                                        >
+                                            <CloseIcon />
+                                        </IconButton>
+                                    </Box>
+                                </Card>
+                            </Grid>
+                        )}
+
+                        {/* Existing File Display */}
+                        {!formData.file && (
+                            <Grid size={{ xs: 12 }}>
+                                <Card
+                                    sx={{
+                                        p: 2,
+                                        bgcolor: 'rgba(33, 150, 243, 0.05)',
+                                        border: '1px solid rgba(33, 150, 243, 0.3)',
+                                    }}
+                                >
+                                    <Box
+                                        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                                    >
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                            <Box
+                                                sx={{
+                                                    width: 40,
+                                                    height: 40,
+                                                    borderRadius: 1,
+                                                    bgcolor: 'rgba(33, 150, 243, 0.8)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    color: 'white',
+                                                    fontWeight: 700,
+                                                }}
+                                            >
+                                                {formData.fileType.toUpperCase().charAt(0)}
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                    {filePreview}
+                                                </Typography>
+                                                <Typography variant="caption" sx={{ color: '#999' }}>
+                                                    File hiện tại - Loại: {formData.fileType.toUpperCase()}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                        <Button
+                                            size="small"
+                                            variant="outlined"
+                                            color="error"
+                                            onClick={handleRemoveFile}
+                                            sx={{ minWidth: 'auto' }}
+                                        >
+                                            Thay thế
+                                        </Button>
+                                    </Box>
+                                </Card>
+                            </Grid>
+                        )}
 
                         {/* Divider */}
                         <Grid size={{ xs: 12 }}>
@@ -285,15 +521,7 @@ export default function UpdateDocumentPage() {
 
                         {/* Action Buttons */}
                         <Grid size={{ xs: 12 }}>
-                            <Stack direction="row" spacing={2} justifyContent="space-between">
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<DeleteIcon />}
-                                    onClick={handleDelete}
-                                    sx={{ color: '#d32f2f', borderColor: '#d32f2f' }}
-                                >
-                                    Xóa Tài Liệu
-                                </Button>
+                            <Stack direction="row" spacing={2} justifyContent="flex-end">
                                 <Stack direction="row" spacing={2}>
                                     <Button
                                         variant="outlined"
@@ -309,7 +537,7 @@ export default function UpdateDocumentPage() {
                                         onClick={handleSave}
                                         sx={{ bgcolor: 'var(--primary-color)' }}
                                     >
-                                        Cập Nhật
+                                        Cập Nhật Tài Liệu
                                     </Button>
                                 </Stack>
                             </Stack>
@@ -337,6 +565,8 @@ export default function UpdateDocumentPage() {
                         • Số văn bản phải theo định dạng chuẩn (ví dụ: 09/2024/TT-BGDĐT)
                         <br />
                         • Tóm tắt giúp người dùng nhanh chóng hiểu nội dung chính
+                        <br />
+                        • File hiện tại sẽ được giữ nguyên nếu không tải lên file mới
                         <br />• Nhấn "Xóa Tài Liệu" để xóa vĩnh viễn tài liệu này khỏi hệ thống
                     </Typography>
                 </Card>

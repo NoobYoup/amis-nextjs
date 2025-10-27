@@ -17,7 +17,12 @@ import {
     Alert,
     IconButton,
 } from '@mui/material';
-import { ArrowBack as ArrowBackIcon, Save as SaveIcon, CloudUpload as CloudUploadIcon, Close as CloseIcon } from '@mui/icons-material';
+import {
+    ArrowBack as ArrowBackIcon,
+    Save as SaveIcon,
+    CloudUpload as CloudUploadIcon,
+    Close as CloseIcon,
+} from '@mui/icons-material';
 
 const documentTypes = ['Thông tư', 'Quyết định', 'Quy chế', 'Kế hoạch', 'Quy định', 'Hướng dẫn'];
 const documentFields = ['Quản lý giáo dục', 'Tuyển sinh', 'Đánh giá', 'Kế hoạch', 'Học sinh', 'Chương trình'];
@@ -37,6 +42,7 @@ export default function AddDocumentPage() {
     });
     const [dragActive, setDragActive] = useState(false);
     const [error, setError] = useState('');
+
     const [filePreview, setFilePreview] = useState<string | null>(null);
 
     const handleChange = (field: string, value: any) => {
@@ -72,7 +78,11 @@ export default function AddDocumentPage() {
 
     const handleFiles = (files: FileList) => {
         const fileArray = Array.from(files).filter((file) =>
-            ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)
+            [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            ].includes(file.type),
         );
 
         if (fileArray.length === 0) {
@@ -84,9 +94,9 @@ export default function AddDocumentPage() {
         setFormData((prev) => ({
             ...prev,
             file,
-            fileType: file.type === 'application/pdf' ? 'pdf' : file.type.includes('word') ? 'docx' : 'doc',
+            fileType: file.name.split('.').pop() as 'pdf' | 'doc' | 'docx',
         }));
-        setFilePreview(file.name);
+        setFilePreview(URL.createObjectURL(file));
         setError('');
     };
 
@@ -95,44 +105,49 @@ export default function AddDocumentPage() {
         setFilePreview(null);
     };
 
-    const validateForm = () => {
-        if (!formData.title?.trim()) {
-            setError('Vui lòng nhập tiêu đề');
-            return false;
-        }
-        if (!formData.type) {
-            setError('Vui lòng chọn loại văn bản');
-            return false;
-        }
-        if (!formData.number?.trim()) {
-            setError('Vui lòng nhập số văn bản');
-            return false;
-        }
-        if (!formData.date) {
-            setError('Vui lòng chọn ngày ban hành');
-            return false;
-        }
-        if (!formData.field) {
-            setError('Vui lòng chọn lĩnh vực');
-            return false;
-        }
-        if (!formData.file) {
-            setError('Vui lòng tải lên file tài liệu');
-            return false;
-        }
+    const handleSave = async () => {
         setError('');
-        return true;
-    };
+        if (
+            !formData.title ||
+            !formData.type ||
+            !formData.number ||
+            !formData.date ||
+            !formData.field ||
+            !formData.file
+        ) {
+            setError('Vui lòng điền đầy đủ các trường bắt buộc');
+            return;
+        }
 
-    const handleSave = () => {
-        if (validateForm()) {
-            console.log('Saving document:', formData);
+        const submitData = new FormData();
+        submitData.append('title', formData.title);
+        submitData.append('type', formData.type);
+        submitData.append('number', formData.number);
+        submitData.append('date', formData.date);
+        submitData.append('field', formData.field);
+        submitData.append('summary', formData.summary);
+        submitData.append('fileType', formData.fileType);
+        submitData.append('isNew', formData.isNew.toString());
+        submitData.append('file', formData.file);
+
+        try {
+            const res = await fetch('/api/admin/documents', {
+                method: 'POST',
+                body: submitData,
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                setError(err.error || 'Lỗi lưu tài liệu');
+                return;
+            }
             router.push('/admin/documents');
+        } catch (err) {
+            setError('Có lỗi xảy ra. Vui lòng thử lại.');
         }
     };
 
     const handleCancel = () => {
-        router.back();
+        router.push('/admin/documents');
     };
 
     return (
@@ -301,8 +316,16 @@ export default function AddDocumentPage() {
                         {/* File Preview */}
                         {filePreview && (
                             <Grid size={{ xs: 12 }}>
-                                <Card sx={{ p: 2, bgcolor: 'rgba(124, 179, 66, 0.05)', border: '1px solid var(--primary-color)' }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Card
+                                    sx={{
+                                        p: 2,
+                                        bgcolor: 'rgba(124, 179, 66, 0.05)',
+                                        border: '1px solid var(--primary-color)',
+                                    }}
+                                >
+                                    <Box
+                                        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                                    >
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                             <Box
                                                 sx={{
@@ -321,7 +344,7 @@ export default function AddDocumentPage() {
                                             </Box>
                                             <Box>
                                                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                                    {filePreview}
+                                                    {formData.file?.name}
                                                 </Typography>
                                                 <Typography variant="caption" sx={{ color: '#999' }}>
                                                     Loại: {formData.fileType.toUpperCase()}
@@ -374,7 +397,14 @@ export default function AddDocumentPage() {
                 </Card>
 
                 {/* Info Box */}
-                <Card sx={{ p: 3, mt: 4, bgcolor: 'rgba(124, 179, 66, 0.08)', border: '1px solid rgba(124, 179, 66, 0.2)' }}>
+                <Card
+                    sx={{
+                        p: 3,
+                        mt: 4,
+                        bgcolor: 'rgba(124, 179, 66, 0.08)',
+                        border: '1px solid rgba(124, 179, 66, 0.2)',
+                    }}
+                >
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'var(--primary-color)', mb: 1 }}>
                         ℹ️ Hướng dẫn
                     </Typography>
@@ -386,8 +416,7 @@ export default function AddDocumentPage() {
                         • Số văn bản phải theo định dạng chuẩn (ví dụ: 09/2024/TT-BGDĐT)
                         <br />
                         • Tóm tắt giúp người dùng nhanh chóng hiểu nội dung chính
-                        <br />
-                        • Đường dẫn file phải trỏ đến vị trí lưu trữ file trên server
+                        <br />• Đường dẫn file phải trỏ đến vị trí lưu trữ file trên server
                     </Typography>
                 </Card>
             </Container>
