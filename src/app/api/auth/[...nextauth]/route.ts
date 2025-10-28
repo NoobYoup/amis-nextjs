@@ -29,14 +29,19 @@ const handler = NextAuth({
                     // Query with more detailed logging
                     console.log('🔍 Searching for user with query:', { email: normalizedEmail });
                     const user = await User.findOne({ email: normalizedEmail });
-                    console.log('📊 Query result:', user ? {
-                        id: user._id,
-                        email: user.email,
-                        name: user.name,
-                        role: user.role,
-                        hasPassword: !!user.password,
-                        passwordLength: user.password ? user.password.length : 0
-                    } : 'Not found');
+                    console.log(
+                        '📊 Query result:',
+                        user
+                            ? {
+                                  id: user._id,
+                                  email: user.email,
+                                  name: user.name,
+                                  role: user.role,
+                                  hasPassword: !!user.password,
+                                  passwordLength: user.password ? user.password.length : 0,
+                              }
+                            : 'Not found',
+                    );
 
                     if (!user) {
                         console.log('❌ User not found in database');
@@ -67,7 +72,10 @@ const handler = NextAuth({
         }),
     ],
     pages: { signIn: '/login' },
-    session: { strategy: 'jwt' },
+    session: {
+        strategy: 'jwt',
+        maxAge: 15 * 60, // 5 minutes inactivity
+    },
     callbacks: {
         async redirect({ url, baseUrl }) {
             // Always redirect to admin activities after login

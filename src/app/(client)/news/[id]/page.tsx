@@ -180,6 +180,8 @@ export default function NewsDetailPage() {
                             {/* Featured Image */}
                             <Box sx={{ mb: 4 }}>
                                 <Image
+                                    width={400}
+                                    height={400}
                                     src={article.thumbnail}
                                     alt={article.title}
                                     style={{ width: '100%', height: 'auto', borderRadius: '8px' }}

@@ -50,19 +50,6 @@ export default function Login() {
                 return;
             }
 
-            // TODO: Implement actual login logic with your backend
-            // const response = await fetch('/api/auth/login', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ email, password }),
-            // });
-
-            // if (!response.ok) {
-            //     const data = await response.json();
-            //     setError(data.message || 'Đăng nhập thất bại');
-            //     return;
-            // }
-
             // Gọi NextAuth signIn
             const result = await signIn('credentials', {
                 email,
@@ -174,7 +161,7 @@ export default function Login() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             margin="normal"
-                            placeholder="admin@amis.edu.vn"
+                            // placeholder="admin@amis.edu.vn"
                             disabled={loading}
                             sx={{
                                 '& .MuiOutlinedInput-root': {
@@ -189,7 +176,7 @@ export default function Login() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             margin="normal"
-                            placeholder="Amis@123"
+                            // placeholder="Amis@123"
                             disabled={loading}
                             InputProps={{
                                 endAdornment: (

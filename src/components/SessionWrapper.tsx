@@ -15,7 +15,7 @@ export default function SessionWrapper({ children }: SessionWrapperProps) {
     }
 
     if (!session || session.user.role !== 'admin') {
-        return <p>Access Denied</p>; //fix lỗi từ next-auth.d.ts
+        return <p>Phiên đăng nhập hết hạn</p>; //fix lỗi từ next-auth.d.ts
     }
 
     return <>{children}</>;

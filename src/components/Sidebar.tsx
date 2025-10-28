@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { usePathname, useRouter } from 'next/navigation'; // Thêm useRouter
+import { usePathname, useRouter } from 'next/navigation';
 import {
     Box,
     Drawer,
@@ -31,7 +31,7 @@ import {
     LastPage as LastPageIcon,
 } from '@mui/icons-material';
 import { SidebarMenuItem } from '@/types/sidebar';
-import { signOut } from 'next-auth/react'; // Thêm import signOut
+import { signOut } from 'next-auth/react';
 
 const SIDEBAR_WIDTH = 280;
 const SIDEBAR_COLLAPSED_WIDTH = 80;
@@ -41,16 +41,18 @@ const menuItems: SidebarMenuItem[] = [
         id: 'activities',
         label: 'Hoạt động',
         icon: EventNoteIcon,
-        subItems: [
-            { id: 'activities-list', label: 'Danh sách hoạt động', href: '/admin/activities' },
-            // { id: 'activities-add', label: 'Thêm hoạt động', href: '/admin/activities/add' },
-        ],
+        subItems: [{ id: 'activities-list', label: 'Danh sách hoạt động', href: '/admin/activities' }],
     },
     {
         id: 'tuition',
         label: 'Học phí',
         icon: AttachMoneyIcon,
-        subItems: [{ id: 'tuition-list', label: 'Danh sách học phí', href: '/admin/tuition' }],
+        subItems: [
+            { id: 'tuition-grade', label: 'Theo Lớp', href: '/admin/tuition/grade' },
+            { id: 'tuition-discount', label: 'Giảm Giá', href: '/admin/tuition/discount' },
+            { id: 'tuition-schedule', label: 'Lịch Nộp', href: '/admin/tuition/schedule' },
+            { id: 'tuition-fee', label: 'Khoản Phí', href: '/admin/tuition/fee' },
+        ],
     },
     {
         id: 'info',
@@ -78,7 +80,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
     const [mobileOpen, setMobileOpen] = useState(false);
     const pathname = usePathname();
-    const router = useRouter(); // Thêm router
+    const router = useRouter();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -286,7 +288,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                     fullWidth
                     variant="outlined"
                     startIcon={<LogoutIcon />}
-                    onClick={handleLogout} // Sử dụng handleLogout
+                    onClick={handleLogout}
                     sx={{
                         color: '#fff',
                         borderColor: 'rgba(255, 255, 255, 0.3)',

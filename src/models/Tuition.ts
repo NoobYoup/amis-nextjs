@@ -3,7 +3,7 @@ import mongoose, { Schema } from 'mongoose';
 const tuitionSchema = new Schema(
     {
         type: { type: String, required: true, enum: ['grade', 'discount', 'schedule', 'fee'] },
-        // Common fields
+        // Common
         description: { type: String },
         // Grade-specific
         grade: { type: String },

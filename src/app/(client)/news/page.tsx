@@ -25,7 +25,6 @@ interface NewsArticle {
     author: string;
     thumbnail: string;
     views: number;
-    featured?: boolean;
 }
 
 export default function NewsPage() {
@@ -44,7 +43,6 @@ export default function NewsPage() {
             author: 'Khối Tiểu học',
             thumbnail: '/images/hero_backround.jpg',
             views: 1250,
-            featured: true,
         },
         {
             id: 2,
@@ -55,7 +53,6 @@ export default function NewsPage() {
             author: 'Ban Giám hiệu',
             thumbnail: '/images/hero_backround.jpg',
             views: 2100,
-            featured: true,
         },
         {
             id: 3,
@@ -66,7 +63,6 @@ export default function NewsPage() {
             author: 'Khối THCS',
             thumbnail: '/images/hero_backround.jpg',
             views: 1800,
-            featured: true,
         },
         {
             id: 4,
@@ -265,20 +261,6 @@ export default function NewsPage() {
                                             fontWeight: 600,
                                         }}
                                     />
-                                    {article.featured && (
-                                        <Chip
-                                            label="Nổi bật"
-                                            size="small"
-                                            sx={{
-                                                position: 'absolute',
-                                                top: 12,
-                                                left: 12,
-                                                bgcolor: '#f44336',
-                                                color: 'white',
-                                                fontWeight: 600,
-                                            }}
-                                        />
-                                    )}
                                 </Box>
                                 <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                                     <Typography
