@@ -45,7 +45,7 @@ export default function AddDocumentPage() {
 
     const [filePreview, setFilePreview] = useState<string | null>(null);
 
-    const handleChange = (field: string, value: any) => {
+    const handleChange = (field: keyof typeof formData, value: string | File | null | boolean) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
@@ -142,7 +142,7 @@ export default function AddDocumentPage() {
             }
             router.push('/admin/documents');
         } catch (err) {
-            setError('Có lỗi xảy ra. Vui lòng thử lại.');
+            setError((err as Error).message || 'Có lỗi xảy ra. Vui lòng thử lại.');
         }
     };
 

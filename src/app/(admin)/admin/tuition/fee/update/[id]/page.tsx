@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import {
     Box,
@@ -21,13 +21,6 @@ import {
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon, Save as SaveIcon } from '@mui/icons-material';
 
-interface TuitionFee {
-    _id: string;
-    description: string;
-    name: string;
-    typeFee: 'included' | 'notIncluded';
-}
-
 export default function UpdateTuitionFeePage() {
     const router = useRouter();
     const params = useParams();
@@ -40,11 +33,7 @@ export default function UpdateTuitionFeePage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        loadTuition();
-    }, [id]);
-
-    const loadTuition = async () => {
+    const loadTuition = useCallback(async () => {
         try {
             const res = await fetch(`/api/admin/tuition/${id}`);
             if (!res.ok) throw new Error('Error loading');
@@ -55,11 +44,15 @@ export default function UpdateTuitionFeePage() {
                 typeFee: data.typeFee || 'included',
             });
         } catch (err) {
-            setError('Lỗi tải dữ liệu');
+            setError((err as Error).message || 'Lỗi tải dữ liệu');
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        loadTuition();
+    }, [loadTuition]);
 
     const handleChange = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -86,7 +79,7 @@ export default function UpdateTuitionFeePage() {
             }
             router.push('/admin/tuition/fee');
         } catch (err) {
-            setError('Có lỗi xảy ra');
+            setError((err as Error).message || 'Có lỗi xảy ra');
         }
     };
 

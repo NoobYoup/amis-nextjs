@@ -40,7 +40,7 @@ export default function AddTuitionSchedulePage() {
             }
             router.push('/admin/tuition/schedule');
         } catch (err) {
-            setError('Có lỗi xảy ra');
+            setError((err as Error).message || 'Có lỗi xảy ra');
         }
     };
 

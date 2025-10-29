@@ -31,28 +31,28 @@ export default function UpdateTuitionSchedulePage() {
     const [error, setError] = useState('');
 
     useEffect(() => {
+        const loadSchedule = async () => {
+            try {
+                const res = await fetch(`/api/admin/tuition/${id}`);
+                if (!res.ok) throw new Error('Error loading schedule');
+                const data = await res.json();
+                setFormData({
+                    description: data.description || '',
+                    period: data.period || '',
+                    date: data.date ? data.date.split('T')[0] : '',
+                    months: data.months || '',
+                });
+                setLoading(false);
+            } catch (err) {
+                setError((err as Error).message || 'Lỗi tải dữ liệu');
+                setLoading(false);
+            }
+        };
+
         if (id) {
             loadSchedule();
         }
     }, [id]);
-
-    const loadSchedule = async () => {
-        try {
-            const res = await fetch(`/api/admin/tuition/${id}`);
-            if (!res.ok) throw new Error('Error loading schedule');
-            const data = await res.json();
-            setFormData({
-                description: data.description || '',
-                period: data.period || '',
-                date: data.date ? data.date.split('T')[0] : '',
-                months: data.months || '',
-            });
-            setLoading(false);
-        } catch (err) {
-            setError('Lỗi tải dữ liệu');
-            setLoading(false);
-        }
-    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -75,7 +75,7 @@ export default function UpdateTuitionSchedulePage() {
             if (!res.ok) throw new Error('Error updating schedule');
             router.push('/admin/tuition/schedule');
         } catch (err) {
-            setError('Lỗi cập nhật lịch nộp');
+            setError((err as Error).message || 'Lỗi cập nhật lịch nộp');
         }
     };
 

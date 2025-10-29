@@ -55,7 +55,7 @@ export default function AddTuitionGradePage() {
             }
             router.push('/admin/tuition/grade');
         } catch (err) {
-            setError('Có lỗi xảy ra');
+            setError((err as Error).message || 'Có lỗi xảy ra');
         }
     };
 

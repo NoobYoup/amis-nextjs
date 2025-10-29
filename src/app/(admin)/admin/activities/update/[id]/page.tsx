@@ -47,26 +47,25 @@ export default function UpdateActivityPage() {
     const [error, setError] = useState('');
 
     useEffect(() => {
+        const loadActivity = async () => {
+            try {
+                const res = await fetch(`/api/admin/activities/${activityId}`);
+                if (!res.ok) throw new Error('Error loading activity');
+                const data = await res.json();
+                setFormData(data);
+                setImagePreviews(data.images || []);
+                setThumbnailPreview(data.thumbnail || data.images?.[0] || null);
+                setLoading(false);
+            } catch (err) {
+                setError((err as Error).message || 'Lỗi tải dữ liệu');
+                setLoading(false);
+            }
+        };
+
         if (activityId) {
             loadActivity();
         }
-    }, [activityId]);
-
-    const loadActivity = async () => {
-        try {
-            const res = await fetch(`/api/admin/activities/${activityId}`);
-            if (!res.ok) throw new Error('Error loading activity');
-            const data = await res.json();
-            console.log(data);
-            setFormData(data);
-            setImagePreviews(data.images || []);
-            setThumbnailPreview(data.thumbnail || data.images?.[0] || null);
-            setLoading(false);
-        } catch (err) {
-            setError('Lỗi tải dữ liệu');
-            setLoading(false);
-        }
-    };
+    }, [activityId]); // Now we only need activityId as a dependency
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -106,7 +105,7 @@ export default function UpdateActivityPage() {
 
     const handleFiles = (files: FileList) => {
         const fileArray = Array.from(files).filter((file) => file.type.startsWith('image/'));
-        const newPreviews = [];
+        const newPreviews: string[] = [];
         for (const file of fileArray) {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -167,7 +166,7 @@ export default function UpdateActivityPage() {
             }
             router.push('/admin/activities');
         } catch (err) {
-            setError('Lỗi không mong muốn');
+            setError((err as Error).message || 'Lỗi không mong muốn');
         }
     };
 

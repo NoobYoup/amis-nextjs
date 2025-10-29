@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Box,
@@ -15,13 +15,10 @@ import {
     Button,
     TextField,
     MenuItem,
-    Grid,
-    Card,
     IconButton,
     Stack,
     Chip,
     TablePagination,
-    InputAdornment,
     Alert,
     Paper,
     FormControl,
@@ -40,6 +37,7 @@ import {
     Download as DownloadIcon,
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
+import { SelectChangeEvent } from '@mui/material/Select';
 
 interface Document {
     id: string; // _id from Mongo
@@ -70,11 +68,7 @@ export default function DocumentsPage() {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedId, setSelectedId] = useState<number | null>(null);
 
-    useEffect(() => {
-        loadDocuments();
-    }, [page, searchQuery, selectedType, selectedField]);
-
-    const loadDocuments = async () => {
+    const loadDocuments = useCallback(async () => {
         try {
             const params = new URLSearchParams({
                 search: searchQuery,
@@ -89,9 +83,13 @@ export default function DocumentsPage() {
             setDocuments(data);
             setTotal(total);
         } catch (err) {
-            setError('Lỗi tải dữ liệu');
+            setError((err as Error).message || 'Lỗi tải dữ liệu');
         }
-    };
+    }, [page, searchQuery, selectedType, selectedField]);
+
+    useEffect(() => {
+        loadDocuments();
+    }, [loadDocuments]);
 
     const handleChangePage = (event: unknown, newPage: number) => setPage(newPage);
     const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,12 +102,12 @@ export default function DocumentsPage() {
         setPage(0);
     };
 
-    const handleTypeChange = (e: any) => {
+    const handleTypeChange = (e: SelectChangeEvent) => {
         setSelectedType(e.target.value);
         setPage(0);
     };
 
-    const handleFieldChange = (e: any) => {
+    const handleFieldChange = (e: SelectChangeEvent) => {
         setSelectedField(e.target.value);
         setPage(0);
     };
@@ -121,7 +119,7 @@ export default function DocumentsPage() {
             loadDocuments();
             handleCloseDeleteDialog();
         } catch (err) {
-            setError('Lỗi xóa tài liệu');
+            setError((err as Error).message || 'Lỗi xóa tài liệu');
         }
     };
 

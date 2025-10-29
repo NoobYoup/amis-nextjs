@@ -28,7 +28,16 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = 10;
 
-    const query: any = {};
+    interface DocumentQuery {
+        $or?: Array<{
+            title?: { $regex: string; $options: string };
+            number?: { $regex: string; $options: string };
+        }>;
+        type?: string;
+        field?: string;
+    }
+    
+    const query: DocumentQuery = {};
     if (search)
         query.$or = [{ title: { $regex: search, $options: 'i' } }, { number: { $regex: search, $options: 'i' } }];
     if (type) query.type = type;

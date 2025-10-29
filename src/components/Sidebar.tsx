@@ -71,11 +71,7 @@ const menuItems: SidebarMenuItem[] = [
     },
 ];
 
-interface SidebarProps {
-    onLogout?: () => void;
-}
-
-const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
+const Sidebar: React.FC = () => {
     const [isOpen, setIsOpen] = useState(true);
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
     const [mobileOpen, setMobileOpen] = useState(false);

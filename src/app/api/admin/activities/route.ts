@@ -24,7 +24,12 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = 10;
 
-    const query: any = {};
+    interface ActivityQuery {
+        $or?: Array<{ [key: string]: { $regex: string; $options: string } }>;
+        category?: string;
+    }
+
+    const query: ActivityQuery = {};
     if (search)
         query.$or = [{ title: { $regex: search, $options: 'i' } }, { author: { $regex: search, $options: 'i' } }];
     if (category) query.category = category;

@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongoose';
 import Tuition from '@/models/Tuition';
+// import { Error as MongooseError } from 'mongoose';
+
+interface ValidationError extends Error {
+    errors: Record<string, { message: string }>;
+    name: 'ValidationError';
+}
+
+function isValidationError(error: unknown): error is ValidationError {
+    return error instanceof Error && error.name === 'ValidationError';
+}
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     await dbConnect();
@@ -24,15 +34,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         await tuition.save();
 
         return NextResponse.json(tuition);
-    } catch (error: any) {
-        if (error.name === 'ValidationError') {
+    } catch (error: unknown) {
+        if (isValidationError(error)) {
             const errMsg = Object.values(error.errors)
-                .map((e: any) => e.message)
+                .map((e) => e.message)
                 .join(', ');
             return NextResponse.json({ error: errMsg || 'Validation failed' }, { status: 400 });
         }
         console.error('PUT tuition error:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json(
+            { error: error instanceof Error ? error.message : 'Internal server error' },
+            { status: 500 },
+        );
     }
 }
 

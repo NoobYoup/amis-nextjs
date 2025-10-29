@@ -54,7 +54,7 @@ export default function AddTuitionFeePage() {
             }
             router.push('/admin/tuition/fee');
         } catch (err) {
-            setError('Có lỗi xảy ra');
+            setError((err as Error).message || 'Có lỗi xảy ra');
         }
     };
 

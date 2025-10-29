@@ -17,12 +17,6 @@ import {
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon, Save as SaveIcon } from '@mui/icons-material';
 
-interface TuitionDiscount {
-    _id: string;
-    description: string;
-    discount: string;
-}
-
 export default function UpdateTuitionDiscountPage() {
     const router = useRouter();
     const params = useParams();
@@ -35,24 +29,24 @@ export default function UpdateTuitionDiscountPage() {
     const [error, setError] = useState('');
 
     useEffect(() => {
+        const loadTuition = async () => {
+            try {
+                const res = await fetch(`/api/admin/tuition/${id}`);
+                if (!res.ok) throw new Error('Error loading');
+                const data = await res.json();
+                setFormData({
+                    description: data.description || '',
+                    discount: data.discount || '',
+                });
+            } catch (err) {
+                setError((err as Error).message || 'Lỗi tải dữ liệu');
+            } finally {
+                setLoading(false);
+            }
+        };
+
         loadTuition();
     }, [id]);
-
-    const loadTuition = async () => {
-        try {
-            const res = await fetch(`/api/admin/tuition/${id}`);
-            if (!res.ok) throw new Error('Error loading');
-            const data = await res.json();
-            setFormData({
-                description: data.description || '',
-                discount: data.discount || '',
-            });
-        } catch (err) {
-            setError('Lỗi tải dữ liệu');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleChange = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -79,7 +73,7 @@ export default function UpdateTuitionDiscountPage() {
             }
             router.push('/admin/tuition/discount');
         } catch (err) {
-            setError('Có lỗi xảy ra');
+            setError((err as Error).message || 'Có lỗi xảy ra');
         }
     };
 

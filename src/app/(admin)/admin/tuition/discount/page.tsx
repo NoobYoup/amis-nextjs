@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Box,
@@ -39,11 +39,7 @@ export default function TuitionDiscountPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        loadTuitions();
-    }, [page, searchQuery]);
-
-    const loadTuitions = async () => {
+    const loadTuitions = useCallback(async () => {
         try {
             const params = new URLSearchParams({
                 type: 'discount',
@@ -56,9 +52,13 @@ export default function TuitionDiscountPage() {
             setTuitions(data);
             setTotal(total);
         } catch (err) {
-            setError('Lỗi tải dữ liệu');
+            setError((err as Error).message || 'Lỗi tải dữ liệu');
         }
-    };
+    }, [page, searchQuery]);
+
+    useEffect(() => {
+        loadTuitions();
+    }, [loadTuitions]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
@@ -74,7 +74,7 @@ export default function TuitionDiscountPage() {
             const res = await fetch(`/api/admin/tuition/${id}`, { method: 'DELETE' });
             if (res.ok) loadTuitions();
         } catch (err) {
-            setError('Lỗi xóa');
+            setError((err as Error).message || 'Lỗi xóa');
         }
     };
 

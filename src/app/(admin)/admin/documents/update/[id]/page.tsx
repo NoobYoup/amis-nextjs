@@ -23,39 +23,10 @@ import {
     Save as SaveIcon,
     CloudUpload as CloudUploadIcon,
     Close as CloseIcon,
-    Delete as DeleteIcon,
 } from '@mui/icons-material';
 
 const documentTypes = ['Thông tư', 'Quyết định', 'Quy chế', 'Kế hoạch', 'Quy định', 'Hướng dẫn'];
 const documentFields = ['Quản lý giáo dục', 'Tuyển sinh', 'Đánh giá', 'Kế hoạch', 'Học sinh', 'Chương trình'];
-
-// Mock data - replace with API call
-const mockDocuments = {
-    1: {
-        id: 1,
-        title: 'Thông tư 09/2024/TT-BGDĐT về công khai trong hoạt động của các cơ sở giáo dục',
-        type: 'Thông tư',
-        number: '09/2024/TT-BGDĐT',
-        date: '2024-06-15',
-        field: 'Quản lý giáo dục',
-        summary: 'Quy định về công khai thông tin đội ngũ giáo viên, chương trình đào tạo, kết quả giáo dục',
-        fileUrl: '/files/09-bgd.pdf',
-        fileType: 'pdf',
-        isNew: true,
-    },
-    2: {
-        id: 2,
-        title: 'Quyết định về việc ban hành quy chế tuyển sinh năm học 2024-2025',
-        type: 'Quyết định',
-        number: '456/QĐ-AMIS',
-        date: '2024-05-20',
-        field: 'Tuyển sinh',
-        summary: 'Quy định về điều kiện, hồ sơ, quy trình tuyển sinh các cấp học',
-        fileUrl: '/files/decision-456.pdf',
-        fileType: 'pdf',
-        isNew: true,
-    },
-};
 
 export default function UpdateDocumentPage() {
     const router = useRouter();
@@ -79,37 +50,37 @@ export default function UpdateDocumentPage() {
     const [filePreview, setFilePreview] = useState<string | null>(null);
 
     useEffect(() => {
+        const loadDocument = async () => {
+            try {
+                const res = await fetch(`/api/admin/documents/${documentId}`);
+                if (!res.ok) throw new Error('Error loading document');
+                const data = await res.json();
+                setFormData({
+                    title: data.title,
+                    type: data.type,
+                    number: data.number,
+                    date: data.date.split('T')[0], // Format date input
+                    field: data.field,
+                    summary: data.summary || '',
+                    fileUrl: data.fileUrl,
+                    file: null,
+                    fileType: data.fileType,
+                    isNew: data.isNew || false,
+                });
+                setFilePreview(data.fileUrl); // Preview existing URL
+                setLoading(false);
+            } catch (err) {
+                setError((err as Error).message || 'Lỗi tải dữ liệu');
+                setLoading(false);
+            }
+        };
+
         if (documentId) {
             loadDocument();
         }
     }, [documentId]);
 
-    const loadDocument = async () => {
-        try {
-            const res = await fetch(`/api/admin/documents/${documentId}`);
-            if (!res.ok) throw new Error('Error loading document');
-            const data = await res.json();
-            setFormData({
-                title: data.title,
-                type: data.type,
-                number: data.number,
-                date: data.date.split('T')[0], // Format date input
-                field: data.field,
-                summary: data.summary || '',
-                fileUrl: data.fileUrl,
-                file: null,
-                fileType: data.fileType,
-                isNew: data.isNew || false,
-            });
-            setFilePreview(data.fileUrl); // Preview existing URL
-            setLoading(false);
-        } catch (err) {
-            setError('Lỗi tải dữ liệu');
-            setLoading(false);
-        }
-    };
-
-    const handleChange = (field: string, value: any) => {
+    const handleChange = (field: string, value: string | File | null | boolean) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
@@ -202,7 +173,7 @@ export default function UpdateDocumentPage() {
             }
             router.push('/admin/documents');
         } catch (err) {
-            setError('Có lỗi xảy ra. Vui lòng thử lại.');
+            setError((err as Error).message || 'Có lỗi xảy ra. Vui lòng thử lại.');
         }
     };
 
@@ -567,7 +538,7 @@ export default function UpdateDocumentPage() {
                         • Tóm tắt giúp người dùng nhanh chóng hiểu nội dung chính
                         <br />
                         • File hiện tại sẽ được giữ nguyên nếu không tải lên file mới
-                        <br />• Nhấn "Xóa Tài Liệu" để xóa vĩnh viễn tài liệu này khỏi hệ thống
+                        <br />• Nhấn &ldquo;Xóa Tài Liệu&rdquo; để xóa vĩnh viễn tài liệu này khỏi hệ thống
                     </Typography>
                 </Card>
             </Container>

@@ -80,7 +80,7 @@ export default function AddActivityPage() {
 
     const handleFiles = (files: FileList) => {
         const fileArray = Array.from(files).filter((file) => file.type.startsWith('image/'));
-        const newPreviews = [];
+        const newPreviews: string[] = [];
         for (const file of fileArray) {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -138,7 +138,7 @@ export default function AddActivityPage() {
             }
             router.push('/admin/activities');
         } catch (err) {
-            setError('Lỗi không mong muốn');
+            setError((err as Error).message || 'Lỗi không mong muốn');
         }
     };
 
@@ -266,7 +266,7 @@ export default function AddActivityPage() {
                                     </Typography>
                                     <Grid container spacing={2}>
                                         {imagePreviews.map((preview, index) => (
-                                            <Grid item xs={12} sm={6} md={4} key={index}>
+                                            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
                                                 <Card sx={{ position: 'relative' }}>
                                                     <CardMedia
                                                         component="img"

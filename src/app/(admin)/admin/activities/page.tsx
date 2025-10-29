@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Box,
@@ -46,11 +46,7 @@ export default function ActivitiesPage() {
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        loadActivities();
-    }, [page, searchQuery, selectedCategory]);
-
-    const loadActivities = async () => {
+    const loadActivities = useCallback(async () => {
         try {
             const params = new URLSearchParams({
                 search: searchQuery,
@@ -64,9 +60,13 @@ export default function ActivitiesPage() {
             setActivities(data);
             setTotal(total);
         } catch (err) {
-            setError('Lỗi tải dữ liệu');
+            setError((err as Error).message || 'Lỗi tải dữ liệu');
         }
-    };
+    }, [page, searchQuery, selectedCategory]); // Add dependencies here
+
+    useEffect(() => {
+        loadActivities();
+    }, [loadActivities]); // Now this is the only dependency needed
 
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
@@ -82,7 +82,7 @@ export default function ActivitiesPage() {
         setPage(0);
     };
 
-    const handleCategoryChange = (e: any) => {
+    const handleCategoryChange = (e: { target: { value: string } }) => {
         setSelectedCategory(e.target.value);
         setPage(0);
     };
@@ -107,7 +107,7 @@ export default function ActivitiesPage() {
             loadActivities(); // Refresh list
             handleCloseDeleteDialog();
         } catch (err) {
-            setError('Lỗi xóa hoạt động');
+            setError((err as Error).message || 'Lỗi xóa hoạt động');
         }
     };
 
