@@ -19,10 +19,11 @@ async function uploadToCloudinary(file: File): Promise<string> {
     });
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+// ✅ GET: Load document by id (Next.js 15 compatible)
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
         await dbConnect();
-        const { id } = params;
+        const { id } = await context.params; // 👈 cần await khi lấy params
         const document = await Document.findById(id).lean();
 
         if (!document) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
@@ -34,13 +35,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+// ✅ PUT: Update document (Next.js 15 compatible)
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
         await dbConnect();
-        const { id } = params;
+        const { id } = await context.params; // 👈 cần await
+
         const formData = await req.formData();
 
-        // Parse fields (similar to POST)
         const title = formData.get('title') as string;
         const type = formData.get('type') as string;
         const number = formData.get('number') as string;
@@ -53,7 +55,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
         // Upload new file if provided
         const file = formData.get('file') as File;
-        let fileUrl = existingFileUrl || ''; // Keep existing file URL if no new file
+        let fileUrl = existingFileUrl || '';
 
         if (file) {
             fileUrl = await uploadToCloudinary(file);
@@ -83,10 +85,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+// ✅ DELETE: Remove document (Next.js 15 compatible)
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
         await dbConnect();
-        const { id } = params;
+        const { id } = await context.params; // 👈 cần await
 
         const document = await Document.findByIdAndDelete(id);
         if (!document) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
