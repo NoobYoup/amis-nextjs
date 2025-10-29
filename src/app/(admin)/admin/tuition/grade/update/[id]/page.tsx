@@ -21,14 +21,6 @@ import {
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon, Save as SaveIcon } from '@mui/icons-material';
 
-interface TuitionGrade {
-    _id: string;
-    description: string;
-    grade: string;
-    level: 'elementary' | 'middle';
-    tuition: string;
-}
-
 export default function UpdateTuitionGradePage() {
     const router = useRouter();
     const params = useParams();
@@ -43,26 +35,26 @@ export default function UpdateTuitionGradePage() {
     const [error, setError] = useState('');
 
     useEffect(() => {
+        const loadTuition = async () => {
+            try {
+                const res = await fetch(`/api/admin/tuition/${id}`);
+                if (!res.ok) throw new Error('Error loading');
+                const data = await res.json();
+                setFormData({
+                    description: data.description || '',
+                    grade: data.grade || '',
+                    level: data.level || 'elementary',
+                    tuition: data.tuition || '',
+                });
+            } catch (err) {
+                setError((err as Error).message || 'Lỗi tải dữ liệu');
+            } finally {
+                setLoading(false);
+            }
+        };
+
         loadTuition();
     }, [id]);
-
-    const loadTuition = async () => {
-        try {
-            const res = await fetch(`/api/admin/tuition/${id}`);
-            if (!res.ok) throw new Error('Error loading');
-            const data = await res.json();
-            setFormData({
-                description: data.description || '',
-                grade: data.grade || '',
-                level: data.level || 'elementary',
-                tuition: data.tuition || '',
-            });
-        } catch (err) {
-            setError('Lỗi tải dữ liệu');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleChange = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -89,7 +81,7 @@ export default function UpdateTuitionGradePage() {
             }
             router.push('/admin/tuition/grade');
         } catch (err) {
-            setError('Có lỗi xảy ra');
+            setError((err as Error).message || 'Có lỗi xảy ra');
         }
     };
 

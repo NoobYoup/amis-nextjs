@@ -38,7 +38,7 @@ export default function AddTuitionDiscountPage() {
             }
             router.push('/admin/tuition/discount');
         } catch (err) {
-            setError('Có lỗi xảy ra');
+            setError((err as Error).message || 'Có lỗi xảy ra');
         }
     };
 

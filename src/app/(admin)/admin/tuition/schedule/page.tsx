@@ -171,7 +171,7 @@ export default function TuitionSchedulePage() {
                         rowsPerPage={10}
                         page={page}
                         onPageChange={(e, newPage) => setPage(newPage)}
-                        onRowsPerPageChange={(e) => setPage(0)}
+                        onRowsPerPageChange={() => setPage(0)}
                         labelRowsPerPage="Hiển thị:"
                         labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
                         sx={{ mt: 2 }}
