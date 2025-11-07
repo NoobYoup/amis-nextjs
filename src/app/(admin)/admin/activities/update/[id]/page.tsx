@@ -25,7 +25,10 @@ import {
 import { Close as CloseIcon, CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 import { ActivityFormData } from '@/types/activity';
 
-const categories = ['Học thuật', 'Thể thao', 'Văn nghệ', 'Ngoại khóa'];
+interface Category {
+    _id: string;
+    name: string;
+}
 
 export default function UpdateActivityPage() {
     const router = useRouter();
@@ -45,6 +48,27 @@ export default function UpdateActivityPage() {
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
     const [dragActive, setDragActive] = useState(false);
     const [error, setError] = useState('');
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
+
+    // Fetch categories
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch('/api/admin/categories/activity');
+                if (!response.ok) throw new Error('Lỗi khi tải danh mục');
+                const data = await response.json();
+                setCategories(data);
+            } catch (err) {
+                setError('Không thể tải danh sách danh mục');
+                console.error('Error fetching categories:', err);
+            } finally {
+                setCategoriesLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     useEffect(() => {
         const loadActivity = async () => {
@@ -218,11 +242,17 @@ export default function UpdateActivityPage() {
                                     label="Phân loại"
                                     required
                                 >
-                                    {categories.map((cat) => (
-                                        <MenuItem key={cat} value={cat}>
-                                            {cat}
-                                        </MenuItem>
-                                    ))}
+                                    {categoriesLoading ? (
+                                        <MenuItem disabled>Đang tải danh mục...</MenuItem>
+                                    ) : categories.length === 0 ? (
+                                        <MenuItem disabled>Không có danh mục nào</MenuItem>
+                                    ) : (
+                                        categories.map((category) => (
+                                            <MenuItem key={category._id} value={category._id}>
+                                                {category.name}
+                                            </MenuItem>
+                                        ))
+                                    )}
                                 </Select>
                             </FormControl>
                             <TextField

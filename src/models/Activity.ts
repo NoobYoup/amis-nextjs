@@ -1,10 +1,14 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 
 const activitySchema = new Schema(
     {
         title: { type: String, required: true },
         description: { type: String, required: true },
-        category: { type: String, required: true, enum: ['Học thuật', 'Thể thao', 'Văn nghệ', 'Ngoại khóa'] },
+        category: {
+            type: Schema.Types.ObjectId,
+            ref: 'ActivityCategory',
+            required: true,
+        },
         date: { type: Date, required: true },
         author: { type: String, required: true },
         thumbnail: { type: String }, // Cloudinary URL

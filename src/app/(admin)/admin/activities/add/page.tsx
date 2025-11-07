@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Box,
@@ -24,7 +24,10 @@ import {
 import { Close as CloseIcon, CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 import { ActivityFormData } from '@/types/activity';
 
-const categories = ['Học thuật', 'Thể thao', 'Văn nghệ', 'Ngoại khóa'];
+interface Category {
+    _id: string;
+    name: string;
+}
 
 export default function AddActivityPage() {
     const router = useRouter();
@@ -41,11 +44,32 @@ export default function AddActivityPage() {
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
     const [dragActive, setDragActive] = useState(false);
     const [error, setError] = useState('');
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
+
+    // Fetch categories on component mount
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch('/api/admin/categories/activity');
+                if (!response.ok) throw new Error('Lỗi khi tải danh mục');
+                const data = await response.json();
+                setCategories(data);
+            } catch (err) {
+                setError('Không thể tải danh sách danh mục');
+                console.error('Error fetching categories:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     const handleSelectChange = (e: SelectChangeEvent) => {
         setFormData((prev) => ({ ...prev, category: e.target.value }));
@@ -183,18 +207,26 @@ export default function AddActivityPage() {
                                 required
                             />
                             <FormControl fullWidth>
-                                <InputLabel>Phân loại</InputLabel>
+                                <InputLabel>Danh mục *</InputLabel>
                                 <Select
-                                    value={formData.category}
+                                    name="category"
+                                    value={formData.category || ''}
+                                    label="Danh mục *"
                                     onChange={handleSelectChange}
-                                    label="Phân loại"
                                     required
+                                    disabled={loading}
                                 >
-                                    {categories.map((cat) => (
-                                        <MenuItem key={cat} value={cat}>
-                                            {cat}
-                                        </MenuItem>
-                                    ))}
+                                    {loading ? (
+                                        <MenuItem disabled>Đang tải danh mục...</MenuItem>
+                                    ) : categories.length === 0 ? (
+                                        <MenuItem disabled>Không có danh mục nào</MenuItem>
+                                    ) : (
+                                        categories.map((category) => (
+                                            <MenuItem key={category._id} value={category._id}>
+                                                {category.name}
+                                            </MenuItem>
+                                        ))
+                                    )}
                                 </Select>
                             </FormControl>
                             <TextField
