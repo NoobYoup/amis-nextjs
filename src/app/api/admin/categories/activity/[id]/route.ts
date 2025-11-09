@@ -4,11 +4,12 @@ import prisma from '@/lib/prisma';
 // Get single category
 export async function GET(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await context.params;
         const category = await prisma.activityCategory.findUnique({
-            where: { id: params.id },
+            where: { id },
         });
         
         if (!category || category.deletedAt) {
@@ -31,9 +32,10 @@ export async function GET(
 // Update category
 export async function PUT(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await context.params;
         const { name } = await req.json();
 
         // Validate input
@@ -46,7 +48,7 @@ export async function PUT(
 
         // Check if category exists
         const existingCategory = await prisma.activityCategory.findUnique({
-            where: { id: params.id },
+            where: { id },
         });
         
         if (!existingCategory || existingCategory.deletedAt) {
@@ -57,13 +59,11 @@ export async function PUT(
         }
 
         // Check if new name is already taken
+        // Note: MySQL is case-insensitive by default
         const duplicateCategory = await prisma.activityCategory.findFirst({
             where: {
-                id: { not: params.id },
-                name: {
-                    equals: name.trim(),
-                    mode: 'insensitive',
-                },
+                id: { not: id },
+                name: name.trim(),
                 deletedAt: null,
             },
         });
@@ -76,7 +76,7 @@ export async function PUT(
         }
 
         const updatedCategory = await prisma.activityCategory.update({
-            where: { id: params.id },
+            where: { id },
             data: { name: name.trim() },
         });
 
@@ -93,12 +93,14 @@ export async function PUT(
 // Delete category (soft delete)
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await context.params;
+        
         // Check if category is being used by any activity
         const activityCount = await prisma.activity.count({ 
-            where: { categoryId: params.id },
+            where: { categoryId: id },
         });
 
         if (activityCount > 0) {
@@ -113,7 +115,7 @@ export async function DELETE(
 
         // Check if category exists
         const category = await prisma.activityCategory.findUnique({
-            where: { id: params.id },
+            where: { id },
         });
         
         if (!category || category.deletedAt) {
@@ -125,7 +127,7 @@ export async function DELETE(
 
         // Perform soft delete
         await prisma.activityCategory.update({
-            where: { id: params.id },
+            where: { id },
             data: { 
                 deletedAt: new Date(),
             },

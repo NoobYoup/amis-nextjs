@@ -32,7 +32,8 @@ export default function AddCategoryPage() {
 
             if (!res.ok) {
                 const err = await res.json();
-                setError(err.error || 'Lỗi thêm danh mục');
+
+                setError(err.error || err.details || 'Lỗi thêm danh mục');
                 return;
             }
 
