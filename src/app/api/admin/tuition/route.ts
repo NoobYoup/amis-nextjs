@@ -11,9 +11,11 @@ export async function GET(req: NextRequest) {
     const where: any = {};
     if (type) where.type = type;
     if (search) {
+        // MySQL is case-insensitive by default
         where.OR = [
-            { description: { contains: search, mode: 'insensitive' } },
-            { name: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search } },
+            { name: { contains: search } },
+            { grade: { contains: search } },
         ];
     }
 
@@ -34,21 +36,40 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
 
-        if (!body.type || !body.name)
-            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        console.log('POST /api/admin/tuition - Received:', body);
 
-        if (body.type === 'grade' && (!body.grade || !body.tuition))
-            return NextResponse.json({ error: 'Missing grade/tuition' }, { status: 400 });
-        if (body.type === 'fee' && (!body.name || !body.typeFee))
-            return NextResponse.json({ error: 'Missing name/typeFee' }, { status: 400 });
+        // Validate based on type
+        if (!body.type) {
+            return NextResponse.json({ error: 'Thiếu trường type' }, { status: 400 });
+        }
+
+        if (body.type === 'grade') {
+            if (!body.grade || !body.tuition) {
+                return NextResponse.json({ error: 'Thiếu trường grade hoặc tuition' }, { status: 400 });
+            }
+            // Set name for grade type
+            body.name = body.grade;
+        } else if (body.type === 'fee') {
+            if (!body.name || !body.typeFee) {
+                return NextResponse.json({ error: 'Thiếu trường name hoặc typeFee' }, { status: 400 });
+            }
+        } else if (body.type === 'discount' || body.type === 'schedule') {
+            if (!body.name) {
+                return NextResponse.json({ error: 'Thiếu trường name' }, { status: 400 });
+            }
+        }
 
         const tuition = await prisma.tuition.create({
             data: body,
         });
 
+        console.log('Tuition created:', tuition);
         return NextResponse.json(tuition, { status: 201 });
-    } catch (error) {
+    } catch (error: any) {
         console.error('POST tuition error:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ 
+            error: 'Lỗi khi tạo học phí',
+            details: error.message 
+        }, { status: 500 });
     }
 }

@@ -50,7 +50,7 @@ export default function AddTuitionGradePage() {
             });
             if (!res.ok) {
                 const err = await res.json();
-                setError(err.error || 'Lỗi lưu');
+                setError(err.error || err.details || 'Lỗi lưu');
                 return;
             }
             router.push('/admin/tuition/grade');

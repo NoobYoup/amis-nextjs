@@ -76,7 +76,7 @@ export default function UpdateTuitionGradePage() {
             });
             if (!res.ok) {
                 const err = await res.json();
-                setError(err.error || 'Lỗi cập nhật');
+                setError(err.error || err.details || 'Lỗi cập nhật');
                 return;
             }
             router.push('/admin/tuition/grade');

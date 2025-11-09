@@ -79,7 +79,7 @@ export default function DocumentsPage() {
             const res = await fetch(`/api/admin/documents?${params}`);
             if (!res.ok) throw new Error('Error loading documents');
             const { data, total } = await res.json();
-
+            console.log(data);
             setDocuments(data);
             setTotal(total);
         } catch (err) {
@@ -222,7 +222,7 @@ export default function DocumentsPage() {
                                     <TableCell sx={{ textAlign: 'center' }}>
                                         <IconButton
                                             size="small"
-                                            href={`/admin/documents/update/${doc._id}`}
+                                            href={`/admin/documents/update/${doc.id}`}
                                             component="a"
                                             sx={{ color: 'var(--primary-color)' }}
                                         >
@@ -233,7 +233,7 @@ export default function DocumentsPage() {
                                         </IconButton>
                                         <IconButton
                                             size="small"
-                                            onClick={() => handleOpenDeleteDialog(doc._id)}
+                                            onClick={() => handleOpenDeleteDialog(doc.id)}
                                             sx={{ color: '#d32f2f' }}
                                         >
                                             <DeleteIcon />

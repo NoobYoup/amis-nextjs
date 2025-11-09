@@ -14,18 +14,21 @@ import {
     TableRow,
     Paper,
     TablePagination,
-    TextField,
     Button,
     Stack,
     IconButton,
     Alert,
-    InputAdornment,
     Chip,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Search as SearchIcon } from '@mui/icons-material';
 
 interface TuitionGrade {
-    _id: string;
+    id: string;
     description: string;
     grade: string;
     level: 'elementary' | 'middle';
@@ -40,6 +43,7 @@ export default function TuitionGradePage() {
     const [page, setPage] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
     const [error, setError] = useState('');
+    const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
 
     const loadTuitions = useCallback(async () => {
         try {
@@ -62,22 +66,33 @@ export default function TuitionGradePage() {
         loadTuitions();
     }, [loadTuitions]);
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-        setPage(0);
-    };
-
     const handleAdd = () => router.push('/admin/tuition/grade/add');
 
     const handleEdit = (id: string) => router.push(`/admin/tuition/grade/update/${id}`);
 
-    const handleDelete = async (id: string) => {
+    const handleDeleteClick = (id: string) => {
+        setDeleteDialog({ open: true, id });
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!deleteDialog.id) return;
+        
         try {
-            const res = await fetch(`/api/admin/tuition/${id}`, { method: 'DELETE' });
-            if (res.ok) loadTuitions();
+            const res = await fetch(`/api/admin/tuition/${deleteDialog.id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                const err = await res.json();
+                setError(err.error || err.details || 'Lỗi xóa');
+                return;
+            }
+            loadTuitions();
+            setDeleteDialog({ open: false, id: null });
         } catch (err) {
             setError((err as Error).message || 'Lỗi xóa');
         }
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteDialog({ open: false, id: null });
     };
 
     return (
@@ -93,96 +108,95 @@ export default function TuitionGradePage() {
                     <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--foreground)' }}>
                         Học Phí Theo Lớp
                     </Typography>
-                    <Button variant="contained" startIcon={<AddIcon />} onClick={handleAdd}>
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={handleAdd}
+                        sx={{ bgcolor: 'var(--primary-color)' }}
+                    >
                         Thêm Lớp
                     </Button>
                 </Stack>
 
-                <Paper sx={{ p: 3, borderRadius: 2 }}>
-                    <Stack direction="row" spacing={2} sx={{ mb: 3, alignItems: 'center' }}>
-                        <TextField
-                            variant="outlined"
-                            placeholder="Tìm kiếm theo mô tả hoặc lớp..."
-                            value={searchQuery}
-                            onChange={handleSearchChange}
-                            sx={{ flex: 1 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Stack>
-
-                    <TableContainer>
-                        <Table>
-                            <TableHead sx={{ bgcolor: 'var(--primary-color)' }}>
-                                <TableRow>
-                                    <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Mô Tả</TableCell>
-                                    <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Lớp</TableCell>
-                                    <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Cấp Học</TableCell>
-                                    <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Học Phí/Tháng</TableCell>
-                                    <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Ngày Tạo</TableCell>
-                                    <TableCell sx={{ color: '#fff', fontWeight: 600, textAlign: 'center' }}>
-                                        Hành Động
+                <TableContainer>
+                    <Table>
+                        <TableHead sx={{ bgcolor: 'var(--primary-color)' }}>
+                            <TableRow>
+                                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Mô Tả</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Lớp</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Cấp Học</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Học Phí/Tháng</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Ngày Tạo</TableCell>
+                                <TableCell sx={{ color: '#fff', fontWeight: 600, textAlign: 'center' }}>
+                                    Hành Động
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {tuitions.map((tuition) => (
+                                <TableRow key={tuition.id} hover>
+                                    <TableCell>{tuition.description}</TableCell>
+                                    <TableCell sx={{ fontWeight: 600 }}>{tuition.grade}</TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            label={tuition.level === 'elementary' ? 'Tiểu học' : 'Trung học'}
+                                            size="small"
+                                        />
+                                    </TableCell>
+                                    <TableCell sx={{ fontWeight: 600 }}>{tuition.tuition} VND</TableCell>
+                                    <TableCell>{new Date(tuition.createdAt).toLocaleDateString('vi-VN')}</TableCell>
+                                    <TableCell sx={{ textAlign: 'center' }}>
+                                        <IconButton
+                                            onClick={() => handleEdit(tuition.id)}
+                                            sx={{ color: 'var(--primary-color)' }}
+                                        >
+                                            <EditIcon />
+                                        </IconButton>
+                                        <IconButton onClick={() => handleDeleteClick(tuition.id)} sx={{ color: '#d32f2f' }}>
+                                            <DeleteIcon />
+                                        </IconButton>
                                     </TableCell>
                                 </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {tuitions.map((tuition) => (
-                                    <TableRow key={tuition.id} hover>
-                                        <TableCell>{tuition.description}</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>{tuition.grade}</TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={tuition.level === 'elementary' ? 'Tiểu học' : 'Trung học'}
-                                                size="small"
-                                            />
-                                        </TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>{tuition.tuition} VND</TableCell>
-                                        <TableCell>{new Date(tuition.createdAt).toLocaleDateString('vi-VN')}</TableCell>
-                                        <TableCell sx={{ textAlign: 'center' }}>
-                                            <IconButton
-                                                onClick={() => handleEdit(tuition.id)}
-                                                sx={{ color: 'var(--primary-color)' }}
-                                            >
-                                                <EditIcon />
-                                            </IconButton>
-                                            <IconButton
-                                                onClick={() => handleDelete(tuition.id)}
-                                                sx={{ color: '#d32f2f' }}
-                                            >
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                                {tuitions.length === 0 && (
-                                    <TableRow>
-                                        <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4, color: '#666' }}>
-                                            Không có dữ liệu
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                            ))}
+                            {tuitions.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4, color: '#666' }}>
+                                        Không có dữ liệu
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
 
-                    <TablePagination
-                        rowsPerPageOptions={[5, 10, 25]}
-                        component="div"
-                        count={total}
-                        rowsPerPage={10}
-                        page={page}
-                        onPageChange={(e, newPage) => setPage(newPage)}
-                        onRowsPerPageChange={() => setPage(0)}
-                        labelRowsPerPage="Hiển thị:"
-                        labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
-                        sx={{ mt: 2 }}
-                    />
-                </Paper>
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={total}
+                    rowsPerPage={10}
+                    page={page}
+                    onPageChange={(e, newPage) => setPage(newPage)}
+                    onRowsPerPageChange={() => setPage(0)}
+                    labelRowsPerPage="Hiển thị:"
+                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
+                    sx={{ mt: 2 }}
+                />
+
+                {/* Delete Confirmation Dialog */}
+                <Dialog open={deleteDialog.open} onClose={handleDeleteCancel}>
+                    <DialogTitle>Xác nhận xóa</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Bạn có chắc chắn muốn xóa học phí này không? Hành động này không thể hoàn tác.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleDeleteCancel}>Hủy</Button>
+                        <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+                            Xóa
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Container>
         </Box>
     );

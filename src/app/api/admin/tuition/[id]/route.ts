@@ -24,9 +24,16 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
         const { id } = await context.params;
         const body = await req.json();
 
+        console.log('PUT /api/admin/tuition/[id] - ID:', id, 'Body:', body);
+
         const tuition = await prisma.tuition.findUnique({ where: { id } });
         if (!tuition) {
-            return NextResponse.json({ error: 'Tuition not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Không tìm thấy học phí' }, { status: 404 });
+        }
+
+        // Set name for grade type
+        if (body.type === 'grade' && body.grade) {
+            body.name = body.grade;
         }
 
         // Update tuition
@@ -35,11 +42,15 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
             data: body,
         });
 
+        console.log('Tuition updated:', updatedTuition);
         return NextResponse.json(updatedTuition);
-    } catch (error: unknown) {
+    } catch (error: any) {
         console.error('PUT tuition error:', error);
         return NextResponse.json(
-            { error: error instanceof Error ? error.message : 'Internal server error' },
+            { 
+                error: 'Lỗi khi cập nhật học phí',
+                details: error.message 
+            },
             { status: 500 },
         );
     }
@@ -50,16 +61,22 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ id: 
     try {
         const { id } = await context.params;
 
+        console.log('DELETE /api/admin/tuition/[id] - ID:', id);
+
         const tuition = await prisma.tuition.findUnique({ where: { id } });
         if (!tuition) {
-            return NextResponse.json({ error: 'Tuition not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Không tìm thấy học phí' }, { status: 404 });
         }
 
         await prisma.tuition.delete({ where: { id } });
 
-        return NextResponse.json({ message: 'Tuition deleted' });
-    } catch (error) {
+        console.log('Tuition deleted:', id);
+        return NextResponse.json({ message: 'Xóa học phí thành công' });
+    } catch (error: any) {
         console.error('Error deleting tuition:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ 
+            error: 'Lỗi khi xóa học phí',
+            details: error.message 
+        }, { status: 500 });
     }
 }
