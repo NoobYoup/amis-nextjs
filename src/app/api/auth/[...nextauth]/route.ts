@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import dbConnect from '@/lib/mongoose';
-import User from '@/models/User';
+import prisma from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
 
 const handler = NextAuth({
     providers: [
@@ -19,21 +19,20 @@ const handler = NextAuth({
                 }
 
                 try {
-                    await dbConnect();
-                    console.log('✅ Database connected');
-
                     // Normalize email
                     const normalizedEmail = credentials.email.toLowerCase().trim();
                     console.log('📧 Normalized email:', normalizedEmail);
 
-                    // Query with more detailed logging
+                    // Query with Prisma
                     console.log('🔍 Searching for user with query:', { email: normalizedEmail });
-                    const user = await User.findOne({ email: normalizedEmail });
+                    const user = await prisma.user.findUnique({
+                        where: { email: normalizedEmail },
+                    });
                     console.log(
                         '📊 Query result:',
                         user
                             ? {
-                                  id: user._id,
+                                  id: user.id,
                                   email: user.email,
                                   name: user.name,
                                   role: user.role,
@@ -49,7 +48,7 @@ const handler = NextAuth({
                     }
 
                     console.log('🔐 Comparing passwords...');
-                    const isValid = await user.comparePassword(credentials.password);
+                    const isValid = await bcrypt.compare(credentials.password, user.password);
                     console.log('✅ Password comparison result:', isValid);
 
                     if (!isValid) {
@@ -63,7 +62,7 @@ const handler = NextAuth({
                     }
 
                     console.log('✅ Auth success for user:', user.email);
-                    return { id: user._id, email: user.email, name: user.name, role: user.role };
+                    return { id: user.id, email: user.email, name: user.name, role: user.role };
                 } catch (error) {
                     console.error('❌ Error in authorize:', error);
                     return null;

@@ -1,8 +1,12 @@
 export interface Activity {
-    _id: number;
+    id: string;
     title: string;
     description: string;
-    category: string;
+    categoryId: string;
+    category: {
+        id: string;
+        name: string;
+    };
     date: string;
     author: string;
     thumbnail: string;

@@ -1,24 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongoose';
-import Tuition from '@/models/Tuition';
-
-// Kiểu lỗi validate từ Mongoose
-interface ValidationError extends Error {
-    errors: Record<string, { message: string }>;
-    name: 'ValidationError';
-}
-
-function isValidationError(error: unknown): error is ValidationError {
-    return error instanceof Error && error.name === 'ValidationError';
-}
+import prisma from '@/lib/prisma';
 
 // ===== GET: Lấy thông tin học phí theo id =====
 export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
-        await dbConnect();
-        const { id } = await context.params; // ✅ phải await trong Next.js 15+
+        const { id } = await context.params;
 
-        const tuition = await Tuition.findById(id).lean();
+        const tuition = await prisma.tuition.findUnique({ where: { id } });
         if (!tuition) {
             return NextResponse.json({ error: 'Tuition not found' }, { status: 404 });
         }
@@ -33,28 +21,22 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
 // ===== PUT: Cập nhật thông tin học phí =====
 export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
-        await dbConnect();
-        const { id } = await context.params; // ✅ phải await
+        const { id } = await context.params;
         const body = await req.json();
 
-        const tuition = await Tuition.findById(id);
+        const tuition = await prisma.tuition.findUnique({ where: { id } });
         if (!tuition) {
             return NextResponse.json({ error: 'Tuition not found' }, { status: 404 });
         }
 
-        // Cập nhật dữ liệu (merge)
-        Object.assign(tuition, body);
-        await tuition.save();
+        // Update tuition
+        const updatedTuition = await prisma.tuition.update({
+            where: { id },
+            data: body,
+        });
 
-        return NextResponse.json(tuition);
+        return NextResponse.json(updatedTuition);
     } catch (error: unknown) {
-        if (isValidationError(error)) {
-            const errMsg = Object.values(error.errors)
-                .map((e) => e.message)
-                .join(', ');
-            return NextResponse.json({ error: errMsg || 'Validation failed' }, { status: 400 });
-        }
-
         console.error('PUT tuition error:', error);
         return NextResponse.json(
             { error: error instanceof Error ? error.message : 'Internal server error' },
@@ -66,13 +48,14 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
 // ===== DELETE: Xóa thông tin học phí =====
 export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
-        await dbConnect();
-        const { id } = await context.params; // ✅ phải await
+        const { id } = await context.params;
 
-        const tuition = await Tuition.findByIdAndDelete(id);
+        const tuition = await prisma.tuition.findUnique({ where: { id } });
         if (!tuition) {
             return NextResponse.json({ error: 'Tuition not found' }, { status: 404 });
         }
+
+        await prisma.tuition.delete({ where: { id } });
 
         return NextResponse.json({ message: 'Tuition deleted' });
     } catch (error) {

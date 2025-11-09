@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongoose';
-import Document from '@/models/Document';
+import prisma from '@/lib/prisma';
 import cloudinary from '@/lib/cloudinary';
 
 // Helper: Upload file to Cloudinary (raw for PDF/DOC)
@@ -20,7 +19,6 @@ async function uploadToCloudinary(file: File): Promise<string> {
 }
 
 export async function GET(req: NextRequest) {
-    await dbConnect();
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search') || '';
     const type = searchParams.get('type') || '';
@@ -28,33 +26,31 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = 10;
 
-    interface DocumentQuery {
-        $or?: Array<{
-            title?: { $regex: string; $options: string };
-            number?: { $regex: string; $options: string };
-        }>;
-        type?: string;
-        field?: string;
-    }
+    const where: any = {};
     
-    const query: DocumentQuery = {};
-    if (search)
-        query.$or = [{ title: { $regex: search, $options: 'i' } }, { number: { $regex: search, $options: 'i' } }];
-    if (type) query.type = type;
-    if (field) query.field = field;
+    if (search) {
+        where.OR = [
+            { title: { contains: search, mode: 'insensitive' } },
+            { number: { contains: search, mode: 'insensitive' } },
+        ];
+    }
+    if (type) where.type = type;
+    if (field) where.field = field;
 
-    const documents = await Document.find(query)
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit);
-
-    const total = await Document.countDocuments(query);
+    const [documents, total] = await Promise.all([
+        prisma.document.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            skip: (page - 1) * limit,
+            take: limit,
+        }),
+        prisma.document.count({ where }),
+    ]);
 
     return NextResponse.json({ data: documents, total, page, pages: Math.ceil(total / limit) });
 }
 
 export async function POST(req: NextRequest) {
-    await dbConnect();
     const formData = await req.formData();
 
     const title = formData.get('title') as string;
@@ -76,27 +72,31 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const document = new Document({ title, type, number, date, field, summary, fileUrl, fileType, isNew });
-    await document.save();
+    const document = await prisma.document.create({
+        data: { title, type, number, date, field, summary, fileUrl, fileType, isNew },
+    });
 
     return NextResponse.json(document, { status: 201 });
 }
 
 export async function DELETE(req: NextRequest) {
-    await dbConnect();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
 
     if (!id) return NextResponse.json({ error: 'Missing document ID' }, { status: 400 });
 
-    const document = await Document.findByIdAndDelete(id);
+    const document = await prisma.document.findUnique({ where: { id } });
     if (!document) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
 
-    // Optional: Delete file from Cloudinary
+    // Delete file from Cloudinary
     if (document.fileUrl) {
         const publicId = document.fileUrl.split('/').pop()?.split('.')[0];
-        await cloudinary.uploader.destroy(publicId);
+        if (publicId) {
+            await cloudinary.uploader.destroy(publicId);
+        }
     }
+
+    await prisma.document.delete({ where: { id } });
 
     return NextResponse.json({ message: 'Document deleted' });
 }

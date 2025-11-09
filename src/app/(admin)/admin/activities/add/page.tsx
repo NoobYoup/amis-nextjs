@@ -25,7 +25,7 @@ import { Close as CloseIcon, CloudUpload as CloudUploadIcon } from '@mui/icons-m
 import { ActivityFormData } from '@/types/activity';
 
 interface Category {
-    _id: string;
+    id: string;
     name: string;
 }
 
@@ -46,6 +46,7 @@ export default function AddActivityPage() {
     const [error, setError] = useState('');
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
+    const [submitLoading, setSubmitLoading] = useState(false);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -158,11 +159,13 @@ export default function AddActivityPage() {
             if (!res.ok) {
                 const err = await res.json();
                 setError(err.error || 'Lỗi thêm hoạt động');
+                setSubmitLoading(false);
                 return;
             }
             router.push('/admin/activities');
         } catch (err) {
             setError((err as Error).message || 'Lỗi không mong muốn');
+            setSubmitLoading(false);
         }
     };
 
@@ -222,7 +225,7 @@ export default function AddActivityPage() {
                                         <MenuItem disabled>Không có danh mục nào</MenuItem>
                                     ) : (
                                         categories.map((category) => (
-                                            <MenuItem key={category._id} value={category._id}>
+                                            <MenuItem key={category.id} value={category.id}>
                                                 {category.name}
                                             </MenuItem>
                                         ))
@@ -319,7 +322,7 @@ export default function AddActivityPage() {
                                                             justifyContent: 'space-between',
                                                         }}
                                                     >
-                                                        <Button
+                                                        {/* <Button
                                                             size="small"
                                                             variant="contained"
                                                             onClick={() => handleSetThumbnail(index)}
@@ -332,7 +335,7 @@ export default function AddActivityPage() {
                                                             }}
                                                         >
                                                             {thumbnailPreview === preview ? 'Đã chọn' : 'Chọn'}
-                                                        </Button>
+                                                        </Button> */}
                                                         <IconButton
                                                             size="small"
                                                             onClick={() => handleRemoveImage(index)}
@@ -363,8 +366,9 @@ export default function AddActivityPage() {
                                         '&:hover': { bgcolor: 'var(--accent-color)' },
                                     }}
                                     onClick={handleSubmit}
+                                    disabled={submitLoading}
                                 >
-                                    Thêm hoạt động
+                                    {submitLoading ? 'Đang thêm...' : 'Thêm hoạt động'}
                                 </Button>
                                 <Button variant="outlined" onClick={() => router.push('/admin/activities')}>
                                     Hủy

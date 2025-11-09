@@ -131,7 +131,7 @@ export default function TuitionSchedulePage() {
                             </TableHead>
                             <TableBody>
                                 {tuitions.map((tuition) => (
-                                    <TableRow key={tuition._id} hover>
+                                    <TableRow key={tuition.id} hover>
                                         <TableCell>{tuition.description}</TableCell>
                                         <TableCell sx={{ fontWeight: 600 }}>{tuition.period}</TableCell>
                                         <TableCell>{tuition.date}</TableCell>
@@ -139,13 +139,13 @@ export default function TuitionSchedulePage() {
                                         <TableCell>{new Date(tuition.createdAt).toLocaleDateString('vi-VN')}</TableCell>
                                         <TableCell sx={{ textAlign: 'center' }}>
                                             <IconButton
-                                                onClick={() => handleEdit(tuition._id)}
+                                                onClick={() => handleEdit(tuition.id)}
                                                 sx={{ color: 'var(--primary-color)' }}
                                             >
                                                 <EditIcon />
                                             </IconButton>
                                             <IconButton
-                                                onClick={() => handleDelete(tuition._id)}
+                                                onClick={() => handleDelete(tuition.id)}
                                                 sx={{ color: '#d32f2f' }}
                                             >
                                                 <DeleteIcon />

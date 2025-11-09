@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongoose';
-import ActivityCategory from '@/models/ActivityCategory';
-import Activity from '@/models/Activity';
-import { Types } from 'mongoose';
+import prisma from '@/lib/prisma';
 
 // Get single category
 export async function GET(
@@ -10,18 +7,11 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
     try {
-        await dbConnect();
+        const category = await prisma.activityCategory.findUnique({
+            where: { id: params.id },
+        });
         
-        if (!Types.ObjectId.isValid(params.id)) {
-            return NextResponse.json(
-                { error: 'ID danh mục không hợp lệ' },
-                { status: 400 }
-            );
-        }
-
-        const category = await ActivityCategory.findById(params.id);
-        
-        if (!category) {
+        if (!category || category.deletedAt) {
             return NextResponse.json(
                 { error: 'Không tìm thấy danh mục' },
                 { status: 404 }
@@ -44,15 +34,6 @@ export async function PUT(
     { params }: { params: { id: string } }
 ) {
     try {
-        await dbConnect();
-        
-        if (!Types.ObjectId.isValid(params.id)) {
-            return NextResponse.json(
-                { error: 'ID danh mục không hợp lệ' },
-                { status: 400 }
-            );
-        }
-
         const { name } = await req.json();
 
         // Validate input
@@ -64,8 +45,11 @@ export async function PUT(
         }
 
         // Check if category exists
-        const existingCategory = await ActivityCategory.findById(params.id);
-        if (!existingCategory) {
+        const existingCategory = await prisma.activityCategory.findUnique({
+            where: { id: params.id },
+        });
+        
+        if (!existingCategory || existingCategory.deletedAt) {
             return NextResponse.json(
                 { error: 'Không tìm thấy danh mục' },
                 { status: 404 }
@@ -73,9 +57,15 @@ export async function PUT(
         }
 
         // Check if new name is already taken
-        const duplicateCategory = await ActivityCategory.findOne({
-            _id: { $ne: params.id },
-            name: { $regex: new RegExp(`^${name}$`, 'i') }
+        const duplicateCategory = await prisma.activityCategory.findFirst({
+            where: {
+                id: { not: params.id },
+                name: {
+                    equals: name.trim(),
+                    mode: 'insensitive',
+                },
+                deletedAt: null,
+            },
         });
 
         if (duplicateCategory) {
@@ -85,11 +75,10 @@ export async function PUT(
             );
         }
 
-        const updatedCategory = await ActivityCategory.findByIdAndUpdate(
-            params.id,
-            { name: name.trim() },
-            { new: true, runValidators: true }
-        );
+        const updatedCategory = await prisma.activityCategory.update({
+            where: { id: params.id },
+            data: { name: name.trim() },
+        });
 
         return NextResponse.json(updatedCategory);
     } catch (error) {
@@ -107,19 +96,9 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
-        await dbConnect();
-        
-        if (!Types.ObjectId.isValid(params.id)) {
-            return NextResponse.json(
-                { error: 'ID danh mục không hợp lệ' },
-                { status: 400 }
-            );
-        }
-
         // Check if category is being used by any activity
-        const activityCount = await Activity.countDocuments({ 
-            category: params.id,
-            deleted: { $ne: true }
+        const activityCount = await prisma.activity.count({ 
+            where: { categoryId: params.id },
         });
 
         if (activityCount > 0) {
@@ -132,17 +111,25 @@ export async function DELETE(
             );
         }
 
-        // Perform soft delete
-        const category = await ActivityCategory.findById(params.id);
+        // Check if category exists
+        const category = await prisma.activityCategory.findUnique({
+            where: { id: params.id },
+        });
         
-        if (!category) {
+        if (!category || category.deletedAt) {
             return NextResponse.json(
                 { error: 'Không tìm thấy danh mục' },
                 { status: 404 }
             );
         }
 
-        await category.delete();
+        // Perform soft delete
+        await prisma.activityCategory.update({
+            where: { id: params.id },
+            data: { 
+                deletedAt: new Date(),
+            },
+        });
 
         return NextResponse.json({ 
             success: true, 

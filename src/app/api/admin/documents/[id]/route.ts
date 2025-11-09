@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongoose';
-import Document from '@/models/Document';
+import prisma from '@/lib/prisma';
 import cloudinary from '@/lib/cloudinary';
 
 // Helper: Upload file to Cloudinary (raw for PDF/DOC)
@@ -22,9 +21,8 @@ async function uploadToCloudinary(file: File): Promise<string> {
 // ✅ GET: Load document by id (Next.js 15 compatible)
 export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
-        await dbConnect();
-        const { id } = await context.params; // 👈 cần await khi lấy params
-        const document = await Document.findById(id).lean();
+        const { id } = await context.params;
+        const document = await prisma.document.findUnique({ where: { id } });
 
         if (!document) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
 
@@ -38,8 +36,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
 // ✅ PUT: Update document (Next.js 15 compatible)
 export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
-        await dbConnect();
-        const { id } = await context.params; // 👈 cần await
+        const { id } = await context.params;
 
         const formData = await req.formData();
 
@@ -61,24 +58,26 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
             fileUrl = await uploadToCloudinary(file);
         }
 
-        const document = await Document.findById(id);
+        const document = await prisma.document.findUnique({ where: { id } });
         if (!document) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
 
-        // Update fields
-        document.title = title || document.title;
-        document.type = type || document.type;
-        document.number = number || document.number;
-        document.date = date || document.date;
-        document.field = field || document.field;
-        document.summary = summary || document.summary;
-        document.fileType = fileType || document.fileType;
-        document.isNew = isNew !== undefined ? isNew : document.isNew;
+        // Update document
+        const updatedDocument = await prisma.document.update({
+            where: { id },
+            data: {
+                title: title || document.title,
+                type: type || document.type,
+                number: number || document.number,
+                date: date || document.date,
+                field: field || document.field,
+                summary: summary || document.summary,
+                fileType: fileType || document.fileType,
+                isNew: isNew !== undefined ? isNew : document.isNew,
+                fileUrl: fileUrl || document.fileUrl,
+            },
+        });
 
-        if (fileUrl) document.fileUrl = fileUrl;
-
-        await document.save();
-
-        return NextResponse.json(document);
+        return NextResponse.json(updatedDocument);
     } catch (error) {
         console.error('Error updating document:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -88,17 +87,20 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
 // ✅ DELETE: Remove document (Next.js 15 compatible)
 export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
-        await dbConnect();
-        const { id } = await context.params; // 👈 cần await
+        const { id } = await context.params;
 
-        const document = await Document.findByIdAndDelete(id);
+        const document = await prisma.document.findUnique({ where: { id } });
         if (!document) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
 
-        // Optional: Delete file from Cloudinary
+        // Delete file from Cloudinary
         if (document.fileUrl) {
             const publicId = document.fileUrl.split('/').pop()?.split('.')[0];
-            await cloudinary.uploader.destroy(publicId);
+            if (publicId) {
+                await cloudinary.uploader.destroy(publicId);
+            }
         }
+
+        await prisma.document.delete({ where: { id } });
 
         return NextResponse.json({ message: 'Document deleted' });
     } catch (error) {

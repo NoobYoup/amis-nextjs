@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongoose';
-import Activity from '@/models/Activity';
+import prisma from '@/lib/prisma';
 import cloudinary from '@/lib/cloudinary';
 
 // Upload helper
@@ -22,9 +21,11 @@ export async function GET(
     context: { params: Promise<{ id: string }> }, // 👈 nhận Promise thay vì object trực tiếp
 ) {
     try {
-        await dbConnect();
-        const { id } = await context.params; // 👈 cần await ở đây
-        const activity = await Activity.findById(id).lean();
+        const { id } = await context.params;
+        const activity = await prisma.activity.findUnique({
+            where: { id },
+            include: { category: true },
+        });
 
         if (!activity) {
             return NextResponse.json({ error: 'Activity not found' }, { status: 404 });
@@ -41,13 +42,12 @@ export async function PUT(
     req: NextRequest,
     context: { params: Promise<{ id: string }> }, // 👈 thêm Promise ở đây
 ) {
-    await dbConnect();
-    const { id } = await context.params; // 👈 cần await
+    const { id } = await context.params;
 
     const formData = await req.formData();
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
-    const category = formData.get('category') as string;
+    const categoryId = formData.get('category') as string;
     const date = new Date(formData.get('date') as string);
     const author = formData.get('author') as string;
     const videosStr = (formData.get('videos') as string) || '';
@@ -63,42 +63,50 @@ export async function PUT(
         }
     }
 
-    const activity = await Activity.findById(id);
+    const activity = await prisma.activity.findUnique({ where: { id } });
     if (!activity) return NextResponse.json({ error: 'Activity not found' }, { status: 404 });
 
-    activity.title = title || activity.title;
-    activity.description = description || activity.description;
-    activity.category = category || activity.category;
-    activity.date = date || activity.date;
-    activity.author = author || activity.author;
-    activity.videos = videos.length ? videos : activity.videos;
+    const existingImages = (activity.images as string[]) || [];
+    const updatedImages = newImageUrls.length ? [...existingImages, ...newImageUrls] : existingImages;
+    const updatedThumbnail = newImageUrls[0] || activity.thumbnail;
 
-    if (newImageUrls.length) {
-        activity.images = [...activity.images, ...newImageUrls];
-        activity.thumbnail = newImageUrls[0] || activity.thumbnail;
-    }
+    const updatedActivity = await prisma.activity.update({
+        where: { id },
+        data: {
+            title: title || activity.title,
+            description: description || activity.description,
+            categoryId: categoryId || activity.categoryId,
+            date: date || activity.date,
+            author: author || activity.author,
+            videos: videos.length ? videos : activity.videos,
+            images: updatedImages,
+            thumbnail: updatedThumbnail,
+        },
+        include: { category: true },
+    });
 
-    await activity.save();
-
-    return NextResponse.json(activity);
+    return NextResponse.json(updatedActivity);
 }
 
 export async function DELETE(
     req: NextRequest,
     context: { params: Promise<{ id: string }> }, // 👈 tương tự
 ) {
-    await dbConnect();
     const { id } = await context.params;
 
-    const activity = await Activity.findByIdAndDelete(id);
+    const activity = await prisma.activity.findUnique({ where: { id } });
     if (!activity) return NextResponse.json({ error: 'Activity not found' }, { status: 404 });
 
-    for (const url of [...activity.images, activity.thumbnail]) {
-        if (url) {
-            const publicId = url.split('/').pop()?.split('.')[0];
+    // Delete from Cloudinary
+    const images = (activity.images as string[]) || [];
+    for (const url of [...images, activity.thumbnail].filter(Boolean)) {
+        const publicId = url.split('/').pop()?.split('.')[0];
+        if (publicId) {
             await cloudinary.uploader.destroy(publicId);
         }
     }
+
+    await prisma.activity.delete({ where: { id } });
 
     return NextResponse.json({ message: 'Activity deleted' });
 }

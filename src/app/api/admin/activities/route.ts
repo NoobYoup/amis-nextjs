@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongoose';
-import Activity from '@/models/Activity';
+import prisma from '@/lib/prisma';
 import cloudinary from '@/lib/cloudinary';
 
 // Helper: Upload files to Cloudinary
@@ -17,45 +16,50 @@ async function uploadToCloudinary(file: File, resourceType: 'image' | 'video' = 
 }
 
 export async function GET(req: NextRequest) {
-    await dbConnect();
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category') || '';
     const page = parseInt(searchParams.get('page') || '1');
     const limit = 10;
 
-    interface ActivityQuery {
-        $or?: Array<{ [key: string]: { $regex: string; $options: string } }>;
-        category?: string;
+    const where: any = {};
+    
+    if (search) {
+        where.OR = [
+            { title: { contains: search, mode: 'insensitive' } },
+            { author: { contains: search, mode: 'insensitive' } },
+        ];
+    }
+    
+    if (category) {
+        where.categoryId = category;
     }
 
-    const query: ActivityQuery = {};
-    if (search)
-        query.$or = [{ title: { $regex: search, $options: 'i' } }, { author: { $regex: search, $options: 'i' } }];
-    if (category) query.category = category;
-
-    const activities = await Activity.find(query)
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit);
-
-    const total = await Activity.countDocuments(query);
+    const [activities, total] = await Promise.all([
+        prisma.activity.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            skip: (page - 1) * limit,
+            take: limit,
+            include: { category: true },
+        }),
+        prisma.activity.count({ where }),
+    ]);
 
     return NextResponse.json({ data: activities, total, page, pages: Math.ceil(total / limit) });
 }
 
 export async function POST(req: NextRequest) {
-    await dbConnect();
     const formData = await req.formData();
 
     // Parse fields
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
-    const category = formData.get('category') as string;
+    const categoryId = formData.get('category') as string;
     const date = new Date(formData.get('date') as string);
     const author = formData.get('author') as string;
-    const videosStr = (formData.get('videos') as string) || ''; // Multiline string
-    const videos = videosStr.split('\n').filter(Boolean); // Array embeds
+    const videosStr = (formData.get('videos') as string) || '';
+    const videos = videosStr.split('\n').filter(Boolean);
 
     // Upload images
     const imagesFiles = formData.getAll('images') as File[];
@@ -66,15 +70,26 @@ export async function POST(req: NextRequest) {
             imageUrls.push(url);
         }
     }
-    const thumbnail = imageUrls[0] || ''; // First image as thumbnail
+    const thumbnail = imageUrls[0] || '';
 
-    // Validation cơ bản (bạn có thể add Zod sau)
-    if (!title || !description || !category || !date || !author) {
+    // Validation
+    if (!title || !description || !categoryId || !date || !author) {
         return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const activity = new Activity({ title, description, category, date, author, thumbnail, images: imageUrls, videos });
-    await activity.save();
+    const activity = await prisma.activity.create({
+        data: {
+            title,
+            description,
+            categoryId,
+            date,
+            author,
+            thumbnail,
+            images: imageUrls,
+            videos,
+        },
+        include: { category: true },
+    });
 
     return NextResponse.json(activity, { status: 201 });
 }

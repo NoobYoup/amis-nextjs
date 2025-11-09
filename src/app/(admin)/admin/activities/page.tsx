@@ -15,7 +15,6 @@ import {
     TableRow,
     Paper,
     TablePagination,
-    TextField,
     Select,
     MenuItem,
     FormControl,
@@ -28,28 +27,46 @@ import {
     DialogActions,
     Alert,
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Image as ImageIcon } from '@mui/icons-material';
+import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import { Activity } from '@/types/activity';
 import dayjs from 'dayjs';
 
-const categories = ['Học thuật', 'Thể thao', 'Văn nghệ', 'Ngoại khóa'];
+interface Category {
+    id: string;
+    name: string;
+}
 
 export default function ActivitiesPage() {
     const router = useRouter();
     const [activities, setActivities] = useState<Activity[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [selectedId, setSelectedId] = useState<number | null>(null);
+    const [selectedId, setSelectedId] = useState<string | null>(null);
     const [error, setError] = useState('');
+
+    // Fetch categories on mount
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await fetch('/api/admin/categories/activity');
+                if (!res.ok) throw new Error('Error loading categories');
+                const data = await res.json();
+                setCategories(data);
+            } catch (err) {
+                console.error('Error fetching categories:', err);
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     const loadActivities = useCallback(async () => {
         try {
             const params = new URLSearchParams({
-                search: searchQuery,
                 category: selectedCategory,
                 page: (page + 1).toString(),
             });
@@ -62,7 +79,7 @@ export default function ActivitiesPage() {
         } catch (err) {
             setError((err as Error).message || 'Lỗi tải dữ liệu');
         }
-    }, [page, searchQuery, selectedCategory]); // Add dependencies here
+    }, [page, selectedCategory]); // Add dependencies here
 
     useEffect(() => {
         loadActivities();
@@ -77,11 +94,6 @@ export default function ActivitiesPage() {
         setPage(0);
     };
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-        setPage(0);
-    };
-
     const handleCategoryChange = (e: { target: { value: string } }) => {
         setSelectedCategory(e.target.value);
         setPage(0);
@@ -89,7 +101,7 @@ export default function ActivitiesPage() {
 
     const filteredActivities = useMemo(() => activities, [activities]);
 
-    const handleOpenDeleteDialog = (id: number) => {
+    const handleOpenDeleteDialog = (id: string) => {
         setSelectedId(id);
         setDeleteDialogOpen(true);
     };
@@ -133,22 +145,13 @@ export default function ActivitiesPage() {
                 {/* Filters */}
                 <Paper sx={{ p: 3, mb: 4, borderRadius: 2 }}>
                     <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-                        <TextField
-                            fullWidth
-                            label="Tìm kiếm theo tiêu đề hoặc tác giả"
-                            value={searchQuery}
-                            onChange={handleSearchChange}
-                            InputProps={{
-                                startAdornment: <ImageIcon sx={{ mr: 1, color: '#666' }} />,
-                            }}
-                        />
                         <FormControl fullWidth>
                             <InputLabel>Phân loại</InputLabel>
                             <Select value={selectedCategory} onChange={handleCategoryChange} label="Phân loại">
                                 <MenuItem value="">Tất cả</MenuItem>
                                 {categories.map((cat) => (
-                                    <MenuItem key={cat} value={cat}>
-                                        {cat}
+                                    <MenuItem key={cat.id} value={cat.id}>
+                                        {cat.name}
                                     </MenuItem>
                                 ))}
                             </Select>
@@ -180,22 +183,22 @@ export default function ActivitiesPage() {
                         </TableHead>
                         <TableBody>
                             {filteredActivities.map((activity) => (
-                                <TableRow key={activity._id} hover>
+                                <TableRow key={activity.id} hover>
                                     <TableCell>{activity.title}</TableCell>
-                                    <TableCell>{activity.category}</TableCell>
+                                    <TableCell>{activity.category.name}</TableCell>
                                     <TableCell>{dayjs(activity.date).format('DD/MM/YYYY')}</TableCell>
                                     <TableCell>{activity.author}</TableCell>
                                     <TableCell sx={{ textAlign: 'center' }}>
                                         <IconButton
                                             size="small"
-                                            onClick={() => router.push(`/admin/activities/update/${activity._id}`)}
+                                            onClick={() => router.push(`/admin/activities/update/${activity.id}`)}
                                             sx={{ color: 'var(--primary-color)' }}
                                         >
                                             <EditIcon />
                                         </IconButton>
                                         <IconButton
                                             size="small"
-                                            onClick={() => handleOpenDeleteDialog(activity._id)}
+                                            onClick={() => handleOpenDeleteDialog(activity.id)}
                                             sx={{ color: '#d32f2f' }}
                                         >
                                             <DeleteIcon />

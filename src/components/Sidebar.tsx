@@ -41,7 +41,10 @@ const menuItems: SidebarMenuItem[] = [
         id: 'activities',
         label: 'Hoạt động',
         icon: EventNoteIcon,
-        subItems: [{ id: 'activities-list', label: 'Danh sách hoạt động', href: '/admin/activities' }],
+        subItems: [
+            { id: 'activities-list', label: 'Danh sách hoạt động', href: '/admin/activities' },
+            { id: 'activities-category', label: 'Danh mục hoạt động', href: '/admin/categories/activity' },
+        ],
     },
     {
         id: 'tuition',

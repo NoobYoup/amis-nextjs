@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongoose';
-import ActivityCategory from '@/models/ActivityCategory';
-import { Types } from 'mongoose';
+import prisma from '@/lib/prisma';
 
 export async function GET() {
     try {
-        await dbConnect();
-        const categories = await ActivityCategory.find({}).sort({ name: 1 });
+        const categories = await prisma.activityCategory.findMany({
+            where: { deletedAt: null },
+            orderBy: { name: 'asc' },
+        });
         return NextResponse.json(categories);
     } catch (error) {
         return NextResponse.json(
@@ -18,7 +18,6 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
     try {
-        await dbConnect();
         const { name } = await req.json();
 
         // Validate input
@@ -30,8 +29,14 @@ export async function POST(req: NextRequest) {
         }
 
         // Check if category already exists (case insensitive)
-        const existingCategory = await ActivityCategory.findOne({
-            name: { $regex: new RegExp(`^${name}$`, 'i') }
+        const existingCategory = await prisma.activityCategory.findFirst({
+            where: {
+                name: {
+                    equals: name.trim(),
+                    mode: 'insensitive',
+                },
+                deletedAt: null,
+            },
         });
 
         if (existingCategory) {
@@ -41,8 +46,9 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const category = new ActivityCategory({ name: name.trim() });
-        await category.save();
+        const category = await prisma.activityCategory.create({
+            data: { name: name.trim() },
+        });
 
         return NextResponse.json(category, { status: 201 });
     } catch (error) {
