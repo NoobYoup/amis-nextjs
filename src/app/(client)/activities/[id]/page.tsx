@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
@@ -21,148 +21,82 @@ import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 interface Activity {
-    id: number;
+    id: string;
     title: string;
     description: string;
-    content: string;
-    category: string;
+    categoryId: string;
+    category: {
+        id: string;
+        name: string;
+    };
     date: string;
     author: string;
-    thumbnail: string;
+    thumbnail: string | null;
     images: string[];
-    videos?: string[];
+    videos: string[];
+    createdAt: string;
 }
 
 export default function ActivityDetailPage() {
     const params = useParams();
     const router = useRouter();
+    const [activity, setActivity] = useState<Activity | null>(null);
+    const [relatedActivities, setRelatedActivities] = useState<Activity[]>([]);
     const [openGallery, setOpenGallery] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    // Dữ liệu mẫu - sau này sẽ lấy từ API theo ID
-    const activities: Activity[] = [
-        {
-            id: 1,
-            title: 'Hội thảo Khoa học Quốc tế 2024',
-            description: 'Học sinh AMIS tham gia hội thảo khoa học quốc tế với nhiều nghiên cứu xuất sắc',
-            content: `
-                <p>Ngày 15/10/2024, trường AMIS đã vinh dự được tổ chức Hội thảo Khoa học Quốc tế với sự tham gia của hơn 200 học sinh và giáo viên từ nhiều quốc gia.</p>
-                
-                <h3>Các hoạt động chính</h3>
-                <p>Hội thảo bao gồm nhiều hoạt động phong phú:</p>
-                <ul>
-                    <li>Trình bày các nghiên cứu khoa học của học sinh</li>
-                    <li>Thảo luận nhóm về các chủ đề khoa học đương đại</li>
-                    <li>Workshop về phương pháp nghiên cứu khoa học</li>
-                    <li>Giao lưu với các nhà khoa học quốc tế</li>
-                </ul>
-                
-                <h3>Thành tựu đạt được</h3>
-                <p>Học sinh AMIS đã có 5 nghiên cứu được đánh giá xuất sắc và nhận giải thưởng. Đặc biệt, đề tài "Ứng dụng AI trong giáo dục" của nhóm học sinh lớp 11 đã nhận được sự quan tâm đặc biệt từ ban giám khảo.</p>
-                
-                <p>Sự kiện này không chỉ là cơ hội để học sinh thể hiện năng lực mà còn là dịp để các em học hỏi kinh nghiệm từ bạn bè quốc tế, mở rộng tầm nhìn và phát triển kỹ năng nghiên cứu khoa học.</p>
-            `,
-            category: 'Học thuật',
-            date: '2024-10-15',
-            author: 'Nguyễn Văn A',
-            thumbnail: '/images/hero_backround.jpg',
-            images: [
-                '/images/hero_backround.jpg',
-                '/images/logo_amis.png',
-                '/images/logo_cambridge.png',
-                '/images/logo_michigan.png',
-            ],
-            videos: [
-                'https://www.youtube.com/embed/dwKBtDgvRC8?si=gqrkjRhtwdNmwhv-',
-                'https://www.youtube.com/embed/OyTRHb6qLC8?si=4KApfMU6upnhOiBw',
-            ],
-        },
-        {
-            id: 2,
-            title: 'Giải bóng đá liên trường 2024',
-            description: 'Đội tuyển AMIS giành chức vô địch giải bóng đá liên trường khu vực',
-            content: `
-                <p>Sau 2 tuần tranh tài căng thẳng, đội tuyển bóng đá AMIS đã xuất sắc giành chức vô địch Giải bóng đá liên trường khu vực năm 2024.</p>
-                
-                <h3>Hành trình chiến thắng</h3>
-                <p>Đội tuyển đã vượt qua 8 đội bóng mạnh khác với thành tích ấn tượng:</p>
-                <ul>
-                    <li>Vòng bảng: 3 trận thắng, ghi 12 bàn, thủng lưới 2 bàn</li>
-                    <li>Tứ kết: Thắng 3-1</li>
-                    <li>Bán kết: Thắng 2-0</li>
-                    <li>Chung kết: Thắng 4-2</li>
-                </ul>
-                
-                <h3>Cầu thủ xuất sắc</h3>
-                <p>Nguyễn Văn B (lớp 10A1) được bình chọn là cầu thủ xuất sắc nhất giải với 8 bàn thắng. Thủ môn Trần Văn C cũng có màn trình diễn ấn tượng với nhiều pha cứu thua xuất sắc.</p>
-            `,
-            category: 'Thể thao',
-            date: '2024-10-10',
-            author: 'Trần Thị B',
-            thumbnail: '/images/hero_backround.jpg',
-            images: ['/images/hero_backround.jpg', '/images/logo_amis.png'],
-        },
-        {
-            id: 3,
-            title: 'Đêm nhạc từ thiện',
-            description: 'Chương trình văn nghệ gây quỹ ủng hộ học sinh vùng cao',
-            content: `
-                <p>Đêm nhạc từ thiện "Chia sẻ yêu thương" do học sinh AMIS tổ chức đã thu về hơn 500 triệu đồng để hỗ trợ học sinh vùng cao.</p>
-            `,
-            category: 'Văn nghệ',
-            date: '2024-10-05',
-            author: 'Lê Văn C',
-            thumbnail: '/images/hero_backround.jpg',
-            images: ['/images/hero_backround.jpg'],
-        },
-        {
-            id: 4,
-            title: 'Trại hè sáng tạo 2024',
-            description: 'Học sinh tham gia các hoạt động ngoại khóa bổ ích trong kỳ nghỉ hè',
-            content: `
-                <p>Trại hè sáng tạo 2024 đã diễn ra thành công với sự tham gia của 150 học sinh.</p>
-            `,
-            category: 'Ngoại khóa',
-            date: '2024-09-28',
-            author: 'Phạm Thị D',
-            thumbnail: '/images/hero_backround.jpg',
-            images: ['/images/hero_backround.jpg'],
-        },
-        {
-            id: 5,
-            title: 'Cuộc thi Olympic Toán học',
-            description: 'Học sinh AMIS đạt giải nhất cuộc thi Olympic Toán học cấp quốc gia',
-            content: `
-                <p>Học sinh AMIS đã xuất sắc giành giải nhất Olympic Toán học cấp quốc gia.</p>
-            `,
-            category: 'Học thuật',
-            date: '2024-09-20',
-            author: 'Hoàng Văn E',
-            thumbnail: '/images/hero_backround.jpg',
-            images: ['/images/hero_backround.jpg'],
-        },
-        {
-            id: 6,
-            title: 'Giải cầu lông học sinh',
-            description: 'Đội tuyển cầu lông AMIS xuất sắc giành 3 huy chương vàng',
-            content: `
-                <p>Đội tuyển cầu lông AMIS đã có màn trình diễn xuất sắc tại giải đấu.</p>
-            `,
-            category: 'Thể thao',
-            date: '2024-09-15',
-            author: 'Đỗ Thị F',
-            thumbnail: '/images/hero_backround.jpg',
-            images: ['/images/hero_backround.jpg'],
-        },
-    ];
+    // Load activity detail
+    useEffect(() => {
+        const loadActivity = async () => {
+            setLoading(true);
+            try {
+                const res = await fetch(`/api/activities/${params.id}`);
+                if (!res.ok) {
+                    if (res.status === 404) {
+                        setError('Không tìm thấy hoạt động');
+                    } else {
+                        setError('Lỗi khi tải dữ liệu');
+                    }
+                    return;
+                }
+                const data = await res.json();
+                console.log(data);
+                setActivity(data);
 
-    const activity = activities.find((a) => a.id === Number(params.id));
+                // Load related activities
+                const relatedRes = await fetch(`/api/activities?categoryId=${data.categoryId}&limit=3`);
+                if (relatedRes.ok) {
+                    const { data: related } = await relatedRes.json();
+                    setRelatedActivities(related.filter((a: Activity) => a.id !== data.id).slice(0, 3));
+                }
+            } catch (err) {
+                console.error('Error loading activity:', err);
+                setError('Lỗi khi tải dữ liệu');
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    if (!activity) {
+        if (params.id) {
+            loadActivity();
+        }
+    }, [params.id]);
+
+    if (loading) {
+        return (
+            <Container maxWidth="lg" sx={{ py: 8, textAlign: 'center' }}>
+                <Typography variant="h5">Đang tải...</Typography>
+            </Container>
+        );
+    }
+
+    if (error || !activity) {
         return (
             <Container maxWidth="lg" sx={{ py: 8, textAlign: 'center' }}>
                 <Typography variant="h4" sx={{ mb: 2 }}>
-                    Không tìm thấy hoạt động
+                    {error || 'Không tìm thấy hoạt động'}
                 </Typography>
                 <Button variant="contained" onClick={() => router.push('/activities')}>
                     Quay lại danh sách
@@ -188,6 +122,25 @@ export default function ActivityDetailPage() {
         setSelectedImageIndex((prev) => (prev === activity.images.length - 1 ? 0 : prev + 1));
     };
 
+    // Hàm chuyển đổi URL YouTube sang embed URL
+    const convertToEmbedUrl = (url: string): string => {
+        // Xử lý URL YouTube dạng https://youtu.be/VIDEO_ID
+        if (url.includes('youtu.be/')) {
+            const videoId = url.split('youtu.be/')[1].split('?')[0];
+            return `https://www.youtube.com/embed/${videoId}`;
+        }
+
+        // Xử lý URL YouTube dạng https://www.youtube.com/watch?v=VIDEO_ID
+        if (url.includes('youtube.com/watch')) {
+            const urlObj = new URL(url);
+            const videoId = urlObj.searchParams.get('v');
+            return `https://www.youtube.com/embed/${videoId}`;
+        }
+
+        // Nếu đã là embed URL hoặc không phải YouTube, trả về nguyên bản
+        return url;
+    };
+
     return (
         <Box sx={{ bgcolor: 'var(--background)', minHeight: '100vh', py: 4 }}>
             <Container maxWidth="lg">
@@ -204,7 +157,7 @@ export default function ActivityDetailPage() {
                 <Box sx={{ mb: 4 }}>
                     <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap', alignItems: 'center' }}>
                         <Chip
-                            label={activity.category}
+                            label={activity.category.name}
                             sx={{
                                 bgcolor: 'var(--primary-color)',
                                 color: 'white',
@@ -213,7 +166,9 @@ export default function ActivityDetailPage() {
                         />
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <CalendarTodayIcon sx={{ fontSize: 18, color: 'var(--primary-color)' }} />
-                            <Typography variant="body2">{activity.date}</Typography>
+                            <Typography variant="body2">
+                                {new Date(activity.date).toLocaleDateString('vi-VN')}
+                            </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <PersonIcon sx={{ fontSize: 18, color: 'var(--primary-color)' }} />
@@ -243,7 +198,7 @@ export default function ActivityDetailPage() {
                                             }}
                                         >
                                             <iframe
-                                                src={video}
+                                                src={convertToEmbedUrl(video)}
                                                 title={activity.title}
                                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                                 allowFullScreen
@@ -267,75 +222,57 @@ export default function ActivityDetailPage() {
                 <Box
                     sx={{
                         mb: 4,
-                        '& h3': {
-                            color: 'var(--primary-color)',
-                            fontWeight: 700,
-                            fontSize: '1.5rem',
-                            mt: 3,
-                            mb: 2,
-                        },
-                        '& p': {
-                            fontSize: '1.1rem',
-                            lineHeight: 1.8,
-                            mb: 2,
-                            color: '#333',
-                        },
-                        '& ul': {
-                            pl: 3,
-                            mb: 2,
-                        },
-                        '& li': {
-                            fontSize: '1.1rem',
-                            lineHeight: 1.8,
-                            mb: 1,
-                            color: '#333',
-                        },
+                        fontSize: '1.1rem',
+                        lineHeight: 1.8,
+                        color: '#333',
+                        whiteSpace: 'pre-wrap',
                     }}
-                    dangerouslySetInnerHTML={{ __html: activity.content }}
-                />
-
-                {/* Image Gallery */}
-                <Box sx={{ mb: 4 }}>
-                    <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: 'var(--primary-color)' }}>
-                        Thư viện ảnh ({activity.images.length})
-                    </Typography>
-                    <Grid container spacing={2}>
-                        {activity.images.map((image, index) => (
-                            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
-                                <Card
-                                    sx={{
-                                        cursor: 'pointer',
-                                        transition: 'transform 0.3s, box-shadow 0.3s',
-                                        '&:hover': {
-                                            transform: 'scale(1.05)',
-                                            boxShadow: 6,
-                                        },
-                                    }}
-                                    onClick={() => handleOpenGallery(index)}
-                                >
-                                    <CardMedia
-                                        component="img"
-                                        height="250"
-                                        image={image}
-                                        alt={`${activity.title} - Ảnh ${index + 1}`}
-                                        sx={{ objectFit: 'cover' }}
-                                    />
-                                </Card>
-                            </Grid>
-                        ))}
-                    </Grid>
+                >
+                    {activity.description}
                 </Box>
 
+                {/* Image Gallery */}
+                {activity.images && activity.images.length > 0 && (
+                    <Box sx={{ mb: 4 }}>
+                        <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: 'var(--primary-color)' }}>
+                            Thư viện ảnh ({activity.images.length})
+                        </Typography>
+                        <Grid container spacing={2}>
+                            {activity.images.map((image, index) => (
+                                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
+                                    <Card
+                                        sx={{
+                                            cursor: 'pointer',
+                                            transition: 'transform 0.3s, box-shadow 0.3s',
+                                            '&:hover': {
+                                                transform: 'scale(1.05)',
+                                                boxShadow: 6,
+                                            },
+                                        }}
+                                        onClick={() => handleOpenGallery(index)}
+                                    >
+                                        <CardMedia
+                                            component="img"
+                                            height="250"
+                                            image={image}
+                                            alt={`${activity.title} - Ảnh ${index + 1}`}
+                                            sx={{ objectFit: 'cover' }}
+                                        />
+                                    </Card>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Box>
+                )}
+
                 {/* Related Activities */}
-                <Box>
-                    <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: 'var(--primary-color)' }}>
-                        Hoạt động liên quan
-                    </Typography>
-                    <Grid container spacing={3}>
-                        {activities
-                            .filter((a) => a.id !== activity.id && a.category === activity.category)
-                            .slice(0, 3)
-                            .map((relatedActivity) => (
+                {relatedActivities.length > 0 && (
+                    <Box>
+                        <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: 'var(--primary-color)' }}>
+                            Hoạt động liên quan
+                        </Typography>
+                        <Grid container spacing={3}>
+                            {relatedActivities.map((relatedActivity) => (
                                 <Grid size={{ xs: 12, sm: 6, md: 4 }} key={relatedActivity.id}>
                                     <Card
                                         sx={{
@@ -352,13 +289,13 @@ export default function ActivityDetailPage() {
                                         <CardMedia
                                             component="img"
                                             height="200"
-                                            image={relatedActivity.thumbnail}
+                                            image={relatedActivity.thumbnail || '/images/hero_backround.jpg'}
                                             alt={relatedActivity.title}
                                             sx={{ objectFit: 'cover' }}
                                         />
                                         <Box sx={{ p: 2 }}>
                                             <Chip
-                                                label={relatedActivity.category}
+                                                label={relatedActivity.category.name}
                                                 size="small"
                                                 sx={{
                                                     bgcolor: 'var(--primary-color)',
@@ -384,8 +321,9 @@ export default function ActivityDetailPage() {
                                     </Card>
                                 </Grid>
                             ))}
-                    </Grid>
-                </Box>
+                        </Grid>
+                    </Box>
+                )}
             </Container>
 
             {/* Gallery Dialog */}

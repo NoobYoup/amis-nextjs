@@ -25,9 +25,11 @@ export async function GET(req: NextRequest) {
     const where: any = {};
     
     if (search) {
+        // MySQL is case-insensitive by default
         where.OR = [
-            { title: { contains: search, mode: 'insensitive' } },
-            { author: { contains: search, mode: 'insensitive' } },
+            { title: { contains: search } },
+            { author: { contains: search } },
+            { description: { contains: search } },
         ];
     }
     
