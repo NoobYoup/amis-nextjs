@@ -1,0 +1,39 @@
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+
+export async function GET() {
+    try {
+        // Get unique years from documents
+        const documents = await prisma.document.findMany({
+            select: {
+                date: true,
+                type: true,
+                field: true,
+            },
+        });
+
+        // Extract unique years
+        const years = [...new Set(documents.map(doc => new Date(doc.date).getFullYear()))].sort((a, b) => b - a);
+        
+        // Extract unique types
+        const types = [...new Set(documents.map(doc => doc.type))].sort();
+        
+        // Extract unique fields
+        const fields = [...new Set(documents.map(doc => doc.field))].sort();
+
+        return NextResponse.json({
+            years,
+            types,
+            fields,
+        });
+    } catch (error: any) {
+        console.error('GET /api/documents/filters error:', error);
+        return NextResponse.json(
+            {
+                error: 'Lỗi khi lấy danh sách filters',
+                details: error.message,
+            },
+            { status: 500 }
+        );
+    }
+}

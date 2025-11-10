@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -15,16 +15,18 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import SearchIcon from '@mui/icons-material/Search';
 
 interface Document {
-    id: number;
+    id: string;
     title: string;
     type: string;
     number: string;
     date: string;
     field: string;
-    summary: string;
+    summary: string | null;
     fileUrl: string;
-    fileType: 'pdf' | 'doc' | 'docx';
-    isNew?: boolean;
+    fileType: string;
+    isNew: boolean;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export default function DocumentsPage() {
@@ -32,88 +34,92 @@ export default function DocumentsPage() {
     const [selectedYear, setSelectedYear] = useState('all');
     const [selectedType, setSelectedType] = useState('all');
     const [selectedField, setSelectedField] = useState('all');
+    const [documents, setDocuments] = useState<Document[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [years, setYears] = useState<number[]>([]);
+    const [types, setTypes] = useState<string[]>([]);
+    const [fields, setFields] = useState<string[]>([]);
+    const [downloading, setDownloading] = useState<string | null>(null);
 
-    const documents: Document[] = [
-        {
-            id: 1,
-            title: 'Thông tư 09/2024/TT-BGDĐT về công khai trong hoạt động của các cơ sở giáo dục',
-            type: 'Thông tư',
-            number: '09/2024/TT-BGDĐT',
-            date: '2024-06-15',
-            field: 'Quản lý giáo dục',
-            summary: 'Quy định về công khai thông tin đội ngũ giáo viên, chương trình đào tạo, kết quả giáo dục',
-            fileUrl: '/files/09-bgd.pdf',
-            fileType: 'pdf',
-            isNew: true,
-        },
-        {
-            id: 2,
-            title: 'Quyết định về việc ban hành quy chế tuyển sinh năm học 2024-2025',
-            type: 'Quyết định',
-            number: '456/QĐ-AMIS',
-            date: '2024-05-20',
-            field: 'Tuyển sinh',
-            summary: 'Quy định về điều kiện, hồ sơ, quy trình tuyển sinh các cấp học',
-            fileUrl: '/files/decision-456.pdf',
-            fileType: 'pdf',
-            isNew: true,
-        },
-        {
-            id: 3,
-            title: 'Quy chế đánh giá học sinh theo Thông tư 22/2021/TT-BGDĐT',
-            type: 'Quy chế',
-            number: '22/2021/TT-BGDĐT',
-            date: '2024-03-10',
-            field: 'Đánh giá',
-            summary: 'Hướng dẫn đánh giá học sinh tiểu học, trung học cơ sở và trung học phổ thông',
-            fileUrl: '/files/regulation-22.pdf',
-            fileType: 'pdf',
-        },
-        {
-            id: 4,
-            title: 'Kế hoạch năm học 2024-2025',
-            type: 'Kế hoạch',
-            number: '789/KH-AMIS',
-            date: '2024-08-01',
-            field: 'Kế hoạch',
-            summary: 'Kế hoạch tổ chức các hoạt động giáo dục trong năm học 2024-2025',
-            fileUrl: '/files/plan-789.pdf',
-            fileType: 'pdf',
-            isNew: true,
-        },
-        {
-            id: 5,
-            title: 'Quy định về trang phục học sinh',
-            type: 'Quy định',
-            number: '101/QĐ-AMIS',
-            date: '2024-02-15',
-            field: 'Học sinh',
-            summary: 'Quy định về trang phục, đồng phục học sinh các cấp học',
-            fileUrl: '/files/uniform.pdf',
-            fileType: 'pdf',
-        },
-        {
-            id: 6,
-            title: 'Hướng dẫn thực hiện chương trình giáo dục phổ thông 2018',
-            type: 'Hướng dẫn',
-            number: '32/2018/TT-BGDĐT',
-            date: '2023-12-20',
-            field: 'Chương trình',
-            summary: 'Hướng dẫn thực hiện chương trình giáo dục phổ thông ban hành kèm theo Thông tư 32',
-            fileUrl: '/files/guide-32.pdf',
-            fileType: 'pdf',
-        },
-    ];
+    const handleDownload = async (doc: Document) => {
+        setDownloading(doc.id);
+        try {
+            const response = await fetch(`/api/download?url=${encodeURIComponent(doc.fileUrl)}`);
 
-    const filteredDocuments = documents.filter((doc) => {
-        const matchSearch =
-            doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            doc.number.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchYear = selectedYear === 'all' || doc.date.startsWith(selectedYear);
-        const matchType = selectedType === 'all' || doc.type === selectedType;
-        const matchField = selectedField === 'all' || doc.field === selectedField;
-        return matchSearch && matchYear && matchType && matchField;
-    });
+            if (!response.ok) {
+                throw new Error('Download failed');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${doc.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${doc.fileType}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Download error:', error);
+            alert('Lỗi khi tải file. Vui lòng thử lại.');
+        } finally {
+            setDownloading(null);
+        }
+    };
+
+    // Load filters
+    useEffect(() => {
+        const loadFilters = async () => {
+            try {
+                const res = await fetch('/api/documents/filters');
+                if (res.ok) {
+                    const data = await res.json();
+                    setYears(data.years);
+                    setTypes(data.types);
+                    setFields(data.fields);
+                }
+            } catch (err) {
+                console.error('Error loading filters:', err);
+            }
+        };
+        loadFilters();
+    }, []);
+
+    // Load documents
+    useEffect(() => {
+        const loadDocuments = async () => {
+            setLoading(true);
+            try {
+                const params = new URLSearchParams();
+
+                if (searchTerm) {
+                    params.append('search', searchTerm);
+                }
+                if (selectedYear !== 'all') {
+                    params.append('year', selectedYear);
+                }
+                if (selectedType !== 'all') {
+                    params.append('type', selectedType);
+                }
+                if (selectedField !== 'all') {
+                    params.append('field', selectedField);
+                }
+
+                const res = await fetch(`/api/documents?${params.toString()}`);
+                if (res.ok) {
+                    const { data } = await res.json();
+                    console.log(data);
+                    setDocuments(data);
+                }
+            } catch (err) {
+                console.error('Error loading documents:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadDocuments();
+    }, [searchTerm, selectedYear, selectedType, selectedField]);
 
     return (
         <Box sx={{ bgcolor: 'var(--background)', minHeight: '100vh' }}>
@@ -158,8 +164,11 @@ export default function DocumentsPage() {
                                 onChange={(e) => setSelectedYear(e.target.value)}
                             >
                                 <MenuItem value="all">Tất cả</MenuItem>
-                                <MenuItem value="2024">2024</MenuItem>
-                                <MenuItem value="2023">2023</MenuItem>
+                                {years.map((year) => (
+                                    <MenuItem key={year} value={year.toString()}>
+                                        {year}
+                                    </MenuItem>
+                                ))}
                             </TextField>
                         </Grid>
                         <Grid size={{ xs: 12, sm: 4, md: 3 }}>
@@ -171,12 +180,11 @@ export default function DocumentsPage() {
                                 onChange={(e) => setSelectedType(e.target.value)}
                             >
                                 <MenuItem value="all">Tất cả</MenuItem>
-                                <MenuItem value="Thông tư">Thông tư</MenuItem>
-                                <MenuItem value="Quyết định">Quyết định</MenuItem>
-                                <MenuItem value="Quy chế">Quy chế</MenuItem>
-                                <MenuItem value="Kế hoạch">Kế hoạch</MenuItem>
-                                <MenuItem value="Quy định">Quy định</MenuItem>
-                                <MenuItem value="Hướng dẫn">Hướng dẫn</MenuItem>
+                                {types.map((type) => (
+                                    <MenuItem key={type} value={type}>
+                                        {type}
+                                    </MenuItem>
+                                ))}
                             </TextField>
                         </Grid>
                         <Grid size={{ xs: 12, sm: 4, md: 3 }}>
@@ -188,71 +196,88 @@ export default function DocumentsPage() {
                                 onChange={(e) => setSelectedField(e.target.value)}
                             >
                                 <MenuItem value="all">Tất cả</MenuItem>
-                                <MenuItem value="Quản lý giáo dục">Quản lý giáo dục</MenuItem>
-                                <MenuItem value="Tuyển sinh">Tuyển sinh</MenuItem>
-                                <MenuItem value="Đánh giá">Đánh giá</MenuItem>
-                                <MenuItem value="Kế hoạch">Kế hoạch</MenuItem>
-                                <MenuItem value="Học sinh">Học sinh</MenuItem>
-                                <MenuItem value="Chương trình">Chương trình</MenuItem>
+                                {fields.map((field) => (
+                                    <MenuItem key={field} value={field}>
+                                        {field}
+                                    </MenuItem>
+                                ))}
                             </TextField>
                         </Grid>
                     </Grid>
                 </Card>
 
                 <Typography variant="body2" sx={{ mb: 2, color: '#666' }}>
-                    Tìm thấy {filteredDocuments.length} văn bản
+                    {loading ? 'Đang tải...' : `Tìm thấy ${documents.length} văn bản`}
                 </Typography>
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {filteredDocuments.map((doc) => (
-                        <Card key={doc.id} sx={{ p: 3, '&:hover': { boxShadow: 4 } }}>
-                            <Grid container spacing={2} alignItems="center">
-                                <Grid size={{ xs: 12, md: 8 }}>
-                                    <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
-                                        <Chip
-                                            label={doc.type}
-                                            size="small"
-                                            sx={{ bgcolor: 'var(--primary-color)', color: 'white', fontWeight: 600 }}
-                                        />
-                                        <Chip label={doc.number} size="small" variant="outlined" />
-                                        <Chip label={doc.field} size="small" color="default" />
-                                        {doc.isNew && (
+                {loading ? (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                        <Typography variant="h6">Đang tải dữ liệu...</Typography>
+                    </Box>
+                ) : documents.length === 0 ? (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                        <Typography variant="h6">Không tìm thấy văn bản nào</Typography>
+                    </Box>
+                ) : (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {documents.map((doc) => (
+                            <Card key={doc.id} sx={{ p: 3, '&:hover': { boxShadow: 4 } }}>
+                                <Grid container spacing={2} alignItems="center">
+                                    <Grid size={{ xs: 12, md: 8 }}>
+                                        <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
                                             <Chip
-                                                label="Mới"
+                                                label={doc.type}
                                                 size="small"
-                                                sx={{ bgcolor: '#f44336', color: 'white' }}
+                                                sx={{
+                                                    bgcolor: 'var(--primary-color)',
+                                                    color: 'white',
+                                                    fontWeight: 600,
+                                                }}
                                             />
-                                        )}
-                                    </Box>
-                                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                                        {doc.title}
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
-                                        {doc.summary}
-                                    </Typography>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <CalendarTodayIcon sx={{ fontSize: 16, color: '#999' }} />
-                                        <Typography variant="caption" sx={{ color: '#999' }}>
-                                            Ngày ban hành: {doc.date}
+                                            <Chip label={doc.number} size="small" variant="outlined" />
+                                            <Chip label={doc.field} size="small" color="default" />
+                                            {doc.isNew && (
+                                                <Chip
+                                                    label="Mới"
+                                                    size="small"
+                                                    sx={{ bgcolor: '#f44336', color: 'white' }}
+                                                />
+                                            )}
+                                        </Box>
+                                        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+                                            {doc.title}
                                         </Typography>
-                                    </Box>
+                                        <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
+                                            {doc.summary}
+                                        </Typography>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <CalendarTodayIcon sx={{ fontSize: 16, color: '#999' }} />
+                                            <Typography variant="caption" sx={{ color: '#999' }}>
+                                                Ngày ban hành: {new Date(doc.date).toLocaleDateString('vi-VN')}
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+                                    <Grid size={{ xs: 12, md: 4 }} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
+                                        <Button
+                                            variant="contained"
+                                            startIcon={<DownloadIcon />}
+                                            onClick={() => handleDownload(doc)}
+                                            disabled={downloading === doc.id}
+                                            sx={{
+                                                bgcolor: 'var(--primary-color)',
+                                                '&:hover': { bgcolor: 'var(--accent-color)' },
+                                            }}
+                                        >
+                                            {downloading === doc.id
+                                                ? 'Đang tải...'
+                                                : `Tải xuống ${doc.fileType.toUpperCase()}`}
+                                        </Button>
+                                    </Grid>
                                 </Grid>
-                                <Grid size={{ xs: 12, md: 4 }} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
-                                    <Button
-                                        variant="contained"
-                                        startIcon={<DownloadIcon />}
-                                        sx={{
-                                            bgcolor: 'var(--primary-color)',
-                                            '&:hover': { bgcolor: 'var(--accent-color)' },
-                                        }}
-                                    >
-                                        Tải xuống {doc.fileType.toUpperCase()}
-                                    </Button>
-                                </Grid>
-                            </Grid>
-                        </Card>
-                    ))}
-                </Box>
+                            </Card>
+                        ))}
+                    </Box>
+                )}
             </Container>
         </Box>
     );
