@@ -16,6 +16,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import SendIcon from '@mui/icons-material/Send';
 import SchoolIcon from '@mui/icons-material/School';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { toast } from 'react-toastify';
 
 export default function ContactPage() {
     const [formData, setFormData] = useState({
@@ -125,21 +126,23 @@ export default function ContactPage() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (validateForm()) {
-            console.log('Form submitted:', formData);
-            setSubmitted(true);
+        toast.info('Chức năng này đang phát triển');
 
-            setTimeout(() => {
-                setFormData({
-                    name: '',
-                    email: '',
-                    phone: '',
-                    subject: '',
-                    message: '',
-                });
-                setSubmitted(false);
-            }, 3000);
-        }
+        // if (validateForm()) {
+        //     console.log('Form submitted:', formData);
+        //     setSubmitted(true);
+
+        //     setTimeout(() => {
+        //         setFormData({
+        //             name: '',
+        //             email: '',
+        //             phone: '',
+        //             subject: '',
+        //             message: '',
+        //         });
+        //         setSubmitted(false);
+        //     }, 3000);
+        // }
     };
 
     return (
@@ -312,6 +315,7 @@ export default function ContactPage() {
                                                     bgcolor: 'var(--accent-color)',
                                                 },
                                             }}
+                                            onClick={handleSubmit}
                                         >
                                             Gửi tin nhắn
                                         </Button>

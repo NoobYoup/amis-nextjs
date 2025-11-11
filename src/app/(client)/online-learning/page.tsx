@@ -191,12 +191,14 @@ export default function OnlineLearningPage() {
                 {/* Tab 0: Kế hoạch dạy học */}
                 {selectedTab === 0 && (
                     <Box>
-                        <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: 'var(--primary-color)' }}>
+                        {/* <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: 'var(--primary-color)' }}>
                             Kế hoạch dạy học trực tuyến
+                        </Typography> */}
+                        <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--primary-color)', mb: 2 }}>
+                            Chức năng này đang phát triển
                         </Typography>
 
-                        {/* Grade Filter */}
-                        <Box sx={{ mb: 3 }}>
+                        {/* <Box sx={{ mb: 3 }}>
                             <Tabs
                                 value={selectedGrade}
                                 onChange={handleGradeChange}
@@ -269,7 +271,7 @@ export default function OnlineLearningPage() {
                                     ))}
                                 </TableBody>
                             </Table>
-                        </TableContainer>
+                        </TableContainer> */}
                     </Box>
                 )}
 

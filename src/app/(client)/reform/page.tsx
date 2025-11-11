@@ -17,6 +17,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import { toast } from 'react-toastify';
 
 interface DisclosureItem {
     id: number;
@@ -86,6 +87,10 @@ export default function Reform() {
             downloadUrl: '/files/ket-qua-giao-duc.pdf',
         },
     ];
+
+    const handleDownload = () => {
+        toast.info('Chức năng này đang phát triển');
+    };
 
     return (
         <Box sx={{ bgcolor: 'var(--background)', minHeight: '100vh' }}>
@@ -233,13 +238,14 @@ export default function Reform() {
                                             fullWidth
                                             variant="contained"
                                             startIcon={<DownloadIcon />}
-                                            href={item.downloadUrl}
+                                            // href={item.downloadUrl}
                                             sx={{
                                                 bgcolor: 'var(--primary-color)',
                                                 '&:hover': {
                                                     bgcolor: 'var(--accent-color)',
                                                 },
                                             }}
+                                            onClick={handleDownload}
                                         >
                                             Tải Về PDF
                                         </Button>

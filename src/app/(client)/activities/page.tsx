@@ -15,7 +15,6 @@ import Tab from '@mui/material/Tab';
 import Pagination from '@mui/material/Pagination';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ImageIcon from '@mui/icons-material/Image';
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 
 interface Activity {
     id: string;
@@ -169,7 +168,8 @@ export default function ActivitiesPage() {
                             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={activity.id}>
                                 <Card
                                     sx={{
-                                        // height: '100%',
+                                        height: '100%',
+                                        width: '100%',
                                         display: 'flex',
                                         flexDirection: 'column',
                                         cursor: 'pointer',
@@ -188,7 +188,7 @@ export default function ActivitiesPage() {
                                             width={400}
                                             image={activity.thumbnail || '/images/hero_backround.jpg'}
                                             alt={activity.title}
-                                            sx={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                                            // sx={{ objectFit: 'cover', width: '100%', height: '100%' }}
                                         />
 
                                         <Chip

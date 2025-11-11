@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     const limit = 10;
 
     const where: any = {};
-    
+
     if (search) {
         // MySQL is case-insensitive by default
         where.OR = [
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
             { description: { contains: search } },
         ];
     }
-    
+
     if (category) {
         where.categoryId = category;
     }
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 
     // Validation
     if (!title || !description || !categoryId || !date || !author) {
-        return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        return NextResponse.json({ error: 'Vui lòng nhập đầy đủ thông tin' }, { status: 400 });
     }
 
     const activity = await prisma.activity.create({

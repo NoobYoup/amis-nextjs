@@ -13,6 +13,7 @@ import Alert from '@mui/material/Alert';
 import FeedbackIcon from '@mui/icons-material/Feedback';
 import SendIcon from '@mui/icons-material/Send';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { toast } from 'react-toastify';
 
 export default function FeedbackPage() {
     const [formData, setFormData] = useState({
@@ -41,15 +42,33 @@ export default function FeedbackPage() {
     ];
 
     const classes = [
-        'Lớp 1A', 'Lớp 1B', 'Lớp 1C',
-        'Lớp 2A', 'Lớp 2B', 'Lớp 2C',
-        'Lớp 3A', 'Lớp 3B', 'Lớp 3C',
-        'Lớp 4A', 'Lớp 4B', 'Lớp 4C',
-        'Lớp 5A', 'Lớp 5B', 'Lớp 5C',
-        'Lớp 6A', 'Lớp 6B', 'Lớp 6C',
-        'Lớp 7A', 'Lớp 7B', 'Lớp 7C',
-        'Lớp 8A', 'Lớp 8B', 'Lớp 8C',
-        'Lớp 9A', 'Lớp 9B', 'Lớp 9C',
+        'Lớp 1A',
+        'Lớp 1B',
+        'Lớp 1C',
+        'Lớp 2A',
+        'Lớp 2B',
+        'Lớp 2C',
+        'Lớp 3A',
+        'Lớp 3B',
+        'Lớp 3C',
+        'Lớp 4A',
+        'Lớp 4B',
+        'Lớp 4C',
+        'Lớp 5A',
+        'Lớp 5B',
+        'Lớp 5C',
+        'Lớp 6A',
+        'Lớp 6B',
+        'Lớp 6C',
+        'Lớp 7A',
+        'Lớp 7B',
+        'Lớp 7C',
+        'Lớp 8A',
+        'Lớp 8B',
+        'Lớp 8C',
+        'Lớp 9A',
+        'Lớp 9B',
+        'Lớp 9C',
     ];
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -107,27 +126,29 @@ export default function FeedbackPage() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
-        if (validateForm()) {
-            // Simulate form submission
-            console.log('Form submitted:', formData);
-            setSubmitted(true);
-            
-            // Reset form after 3 seconds
-            setTimeout(() => {
-                setFormData({
-                    parentName: '',
-                    studentName: '',
-                    studentClass: '',
-                    email: '',
-                    phone: '',
-                    feedbackType: '',
-                    subject: '',
-                    content: '',
-                });
-                setSubmitted(false);
-            }, 3000);
-        }
+
+        toast.info('Chức năng này đang phát triển');
+
+        // if (validateForm()) {
+        //     // Simulate form submission
+        //     console.log('Form submitted:', formData);
+        //     setSubmitted(true);
+
+        //     // Reset form after 3 seconds
+        //     setTimeout(() => {
+        //         setFormData({
+        //             parentName: '',
+        //             studentName: '',
+        //             studentClass: '',
+        //             email: '',
+        //             phone: '',
+        //             feedbackType: '',
+        //             subject: '',
+        //             content: '',
+        //         });
+        //         setSubmitted(false);
+        //     }, 3000);
+        // }
     };
 
     return (
@@ -149,7 +170,8 @@ export default function FeedbackPage() {
                         </Typography>
                     </Box>
                     <Typography variant="h6" sx={{ textAlign: 'center', opacity: 0.9 }}>
-                        Ý kiến đóng góp của quý phụ huynh là nguồn động viên quý báu giúp nhà trường ngày càng hoàn thiện hơn
+                        Ý kiến đóng góp của quý phụ huynh là nguồn động viên quý báu giúp nhà trường ngày càng hoàn
+                        thiện hơn
                     </Typography>
                 </Container>
             </Box>
@@ -161,21 +183,18 @@ export default function FeedbackPage() {
                         Kính gửi Quý Phụ huynh,
                     </Typography>
                     <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8 }}>
-                        Nhà trường luôn mong muốn lắng nghe ý kiến đóng góp của Quý phụ huynh về mọi mặt hoạt động của nhà trường. 
-                        Mọi ý kiến của Quý phụ huynh đều được ghi nhận và xem xét một cách nghiêm túc.
+                        Nhà trường luôn mong muốn lắng nghe ý kiến đóng góp của Quý phụ huynh về mọi mặt hoạt động của
+                        nhà trường. Mọi ý kiến của Quý phụ huynh đều được ghi nhận và xem xét một cách nghiêm túc.
                     </Typography>
                     <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
-                        Xin vui lòng điền đầy đủ thông tin vào form dưới đây. Nhà trường cam kết sẽ phản hồi trong vòng 3-5 ngày làm việc.
+                        Xin vui lòng điền đầy đủ thông tin vào form dưới đây. Nhà trường cam kết sẽ phản hồi trong vòng
+                        3-5 ngày làm việc.
                     </Typography>
                 </Card>
 
                 {/* Success Alert */}
                 {submitted && (
-                    <Alert 
-                        icon={<CheckCircleIcon fontSize="inherit" />} 
-                        severity="success" 
-                        sx={{ mb: 4 }}
-                    >
+                    <Alert icon={<CheckCircleIcon fontSize="inherit" />} severity="success" sx={{ mb: 4 }}>
                         Cảm ơn Quý phụ huynh đã gửi góp ý! Nhà trường sẽ phản hồi sớm nhất có thể.
                     </Alert>
                 )}
@@ -340,6 +359,7 @@ export default function FeedbackPage() {
                                             bgcolor: 'var(--accent-color)',
                                         },
                                     }}
+                                    onClick={handleSubmit}
                                 >
                                     Gửi góp ý
                                 </Button>

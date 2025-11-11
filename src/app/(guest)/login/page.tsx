@@ -16,6 +16,7 @@ import {
 import { Visibility, VisibilityOff, School } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
+import { toast } from 'react-toastify';
 
 export default function Login() {
     const router = useRouter();
@@ -23,8 +24,6 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
 
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
@@ -32,20 +31,18 @@ export default function Login() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
-        setSuccess('');
         setLoading(true);
 
         try {
             // Validation
             if (!email || !password) {
-                setError('Vui lòng nhập email và mật khẩu');
+                toast.error('Vui lòng nhập email và mật khẩu');
                 setLoading(false);
                 return;
             }
 
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                setError('Email không hợp lệ');
+                toast.error('Email không hợp lệ');
                 setLoading(false);
                 return;
             }
@@ -58,18 +55,16 @@ export default function Login() {
             });
 
             if (!result?.ok) {
-                setError(result?.error || 'Đăng nhập thất bại. Vui lòng kiểm tra email/mật khẩu.');
+                toast.error('Đăng nhập thất bại. Vui lòng kiểm tra lại email hoặc mật khẩu.');
                 return;
             }
 
             // Demo success
-            setSuccess('Đăng nhập thành công!');
-            setTimeout(() => {
-                router.push('/admin/activities');
-                router.refresh();
-            }, 1500);
+            toast.success('Đăng nhập thành công!');
+            router.push('/admin/activities');
+            router.refresh();
         } catch (err) {
-            setError('Có lỗi xảy ra. Vui lòng thử lại.');
+            toast.error('Có lỗi xảy ra. Vui lòng thử lại.');
             console.error(err);
         } finally {
             setLoading(false);
@@ -139,18 +134,6 @@ export default function Login() {
                             Hệ thống quản lý trường học AMIS
                         </Typography>
                     </Box>
-
-                    {/* Alerts */}
-                    {error && (
-                        <Alert severity="error" sx={{ mb: 2 }}>
-                            {error}
-                        </Alert>
-                    )}
-                    {success && (
-                        <Alert severity="success" sx={{ mb: 2 }}>
-                            {success}
-                        </Alert>
-                    )}
 
                     {/* Form */}
                     <Box component="form" onSubmit={handleSubmit} noValidate>

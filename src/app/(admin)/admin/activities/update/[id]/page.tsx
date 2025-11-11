@@ -20,8 +20,9 @@ import {
     Alert,
     CircularProgress,
     SelectChangeEvent,
+    IconButton,
 } from '@mui/material';
-import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
+import { CloudUpload as CloudUploadIcon, Close as CloseIcon } from '@mui/icons-material';
 import { ActivityFormData } from '@/types/activity';
 
 interface Category {
@@ -43,13 +44,13 @@ export default function UpdateActivityPage() {
         images: [],
         videos: [],
     });
-    const [categoryName, setCategoryName] = useState(''); // For display only
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
     const [dragActive, setDragActive] = useState(false);
     const [error, setError] = useState('');
     const [categories, setCategories] = useState<Category[]>([]);
     const [categoriesLoading, setCategoriesLoading] = useState(true);
+    const [submitLoading, setSubmitLoading] = useState(false);
 
     // Fetch categories
     useEffect(() => {
@@ -80,7 +81,6 @@ export default function UpdateActivityPage() {
 
                 // Extract categoryId from category object
                 const categoryId = data.categoryId || data.category?.id || '';
-                const categoryNameValue = data.category?.name || '';
 
                 setFormData({
                     title: data.title,
@@ -91,7 +91,6 @@ export default function UpdateActivityPage() {
                     images: data.images || [],
                     videos: data.videos || [],
                 });
-                setCategoryName(categoryNameValue);
                 setImagePreviews(data.images || []);
                 setThumbnailPreview(data.thumbnail || data.images?.[0] || null);
                 setLoading(false);
@@ -163,9 +162,19 @@ export default function UpdateActivityPage() {
         }
     };
 
+    const handleRemoveImage = (index: number) => {
+        setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+        setFormData((prev) => ({
+            ...prev,
+            images: (prev.images || []).filter((_, i) => i !== index),
+        }));
+        if (thumbnailPreview === imagePreviews[index]) setThumbnailPreview(null);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setSubmitLoading(true);
 
         const submitData = new FormData();
         submitData.append('title', formData.title || '');
@@ -190,9 +199,11 @@ export default function UpdateActivityPage() {
                 setError(err.error || 'Lỗi cập nhật');
                 return;
             }
+            setSubmitLoading(false);
             router.push('/admin/activities');
         } catch (err) {
             setError((err as Error).message || 'Lỗi không mong muốn');
+            setSubmitLoading(false);
         }
     };
 
@@ -334,6 +345,32 @@ export default function UpdateActivityPage() {
                                                         image={preview}
                                                         alt={`Preview ${index + 1}`}
                                                     />
+                                                    <Box
+                                                        sx={{
+                                                            position: 'absolute',
+                                                            bottom: 0,
+                                                            left: 0,
+                                                            right: 0,
+                                                            bgcolor: 'rgba(0,0,0,0.6)',
+                                                            color: '#fff',
+                                                            p: 1,
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
+                                                        }}
+                                                    >
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleRemoveImage(index)}
+                                                            sx={{
+                                                                bgcolor: '#d32f2f',
+                                                                color: '#fff',
+                                                                m: 1,
+                                                                '&:hover': { bgcolor: '#b71c1c' },
+                                                            }}
+                                                        >
+                                                            <CloseIcon />
+                                                        </IconButton>
+                                                    </Box>
                                                 </Card>
                                             </Grid>
                                         ))}
@@ -350,8 +387,10 @@ export default function UpdateActivityPage() {
                                         bgcolor: 'var(--primary-color)',
                                         '&:hover': { bgcolor: 'var(--accent-color)' },
                                     }}
+                                    onClick={handleSubmit}
+                                    disabled={submitLoading}
                                 >
-                                    Cập nhật hoạt động
+                                    {submitLoading ? <CircularProgress size={20} /> : 'Cập nhật hoạt động'}
                                 </Button>
                                 <Button variant="outlined" onClick={() => router.push('/admin/activities')}>
                                     Hủy

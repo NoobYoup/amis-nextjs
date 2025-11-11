@@ -22,6 +22,7 @@ import GavelIcon from '@mui/icons-material/Gavel';
 import SecurityIcon from '@mui/icons-material/Security';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { toast } from 'react-toastify';
 
 interface Regulation {
     id: number;
@@ -233,6 +234,10 @@ export default function ProceduresPage() {
         setSelectedCategory(newValue);
     };
 
+    const handleDownload = () => {
+        toast.info('Chức năng này đang phát triển');
+    };
+
     const categories = ['all', ...Array.from(new Set(regulations.map((r) => r.category)))];
 
     const filteredRegulations = regulations.filter(
@@ -425,13 +430,14 @@ export default function ProceduresPage() {
                                             fullWidth
                                             variant="contained"
                                             startIcon={<DownloadIcon />}
-                                            href={regulation.downloadUrl}
+                                            // href={regulation.downloadUrl}
                                             sx={{
                                                 bgcolor: 'var(--primary-color)',
                                                 '&:hover': {
                                                     bgcolor: 'var(--accent-color)',
                                                 },
                                             }}
+                                            onClick={handleDownload}
                                         >
                                             Tải Về PDF
                                         </Button>

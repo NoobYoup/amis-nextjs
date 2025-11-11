@@ -18,11 +18,12 @@ import {
     Card,
     CardMedia,
     IconButton,
-    Alert,
     SelectChangeEvent,
+    CircularProgress,
 } from '@mui/material';
 import { Close as CloseIcon, CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 import { ActivityFormData } from '@/types/activity';
+import { toast } from 'react-toastify';
 
 interface Category {
     id: string;
@@ -43,7 +44,6 @@ export default function AddActivityPage() {
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
     const [dragActive, setDragActive] = useState(false);
-    const [error, setError] = useState('');
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     const [submitLoading, setSubmitLoading] = useState(false);
@@ -62,7 +62,6 @@ export default function AddActivityPage() {
                 const data = await response.json();
                 setCategories(data);
             } catch (err) {
-                setError('Không thể tải danh sách danh mục');
                 console.error('Error fetching categories:', err);
             } finally {
                 setLoading(false);
@@ -133,13 +132,9 @@ export default function AddActivityPage() {
         if (thumbnailPreview === imagePreviews[index]) setThumbnailPreview(null);
     };
 
-    const handleSetThumbnail = (index: number) => {
-        setThumbnailPreview(imagePreviews[index]);
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
+        setSubmitLoading(true);
 
         const submitData = new FormData();
         submitData.append('title', formData.title || '');
@@ -158,13 +153,13 @@ export default function AddActivityPage() {
             });
             if (!res.ok) {
                 const err = await res.json();
-                setError(err.error || 'Lỗi thêm hoạt động');
+                toast.error(err.error);
                 setSubmitLoading(false);
                 return;
             }
             router.push('/admin/activities');
         } catch (err) {
-            setError((err as Error).message || 'Lỗi không mong muốn');
+            toast.error((err as Error).message || 'Lỗi không mong muốn');
             setSubmitLoading(false);
         }
     };
@@ -183,11 +178,11 @@ export default function AddActivityPage() {
                 </Box>
 
                 <Paper sx={{ p: 4, borderRadius: 2 }}>
-                    {error && (
+                    {/* {error && (
                         <Alert severity="error" sx={{ mb: 2 }}>
                             {error}
                         </Alert>
-                    )}
+                    )} */}
 
                     <form onSubmit={handleSubmit}>
                         <Stack spacing={3}>
@@ -322,20 +317,6 @@ export default function AddActivityPage() {
                                                             justifyContent: 'space-between',
                                                         }}
                                                     >
-                                                        {/* <Button
-                                                            size="small"
-                                                            variant="contained"
-                                                            onClick={() => handleSetThumbnail(index)}
-                                                            sx={{
-                                                                bgcolor:
-                                                                    thumbnailPreview === preview
-                                                                        ? 'var(--primary-color)'
-                                                                        : '#666',
-                                                                m: 1,
-                                                            }}
-                                                        >
-                                                            {thumbnailPreview === preview ? 'Đã chọn' : 'Chọn'}
-                                                        </Button> */}
                                                         <IconButton
                                                             size="small"
                                                             onClick={() => handleRemoveImage(index)}
@@ -368,7 +349,7 @@ export default function AddActivityPage() {
                                     onClick={handleSubmit}
                                     disabled={submitLoading}
                                 >
-                                    {submitLoading ? 'Đang thêm...' : 'Thêm hoạt động'}
+                                    {submitLoading ? <CircularProgress size={20} /> : 'Thêm hoạt động'}
                                 </Button>
                                 <Button variant="outlined" onClick={() => router.push('/admin/activities')}>
                                     Hủy
