@@ -9,10 +9,8 @@ import Card from '@mui/material/Card';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
-import Alert from '@mui/material/Alert';
 import FeedbackIcon from '@mui/icons-material/Feedback';
 import SendIcon from '@mui/icons-material/Send';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { toast } from 'react-toastify';
 
 export default function FeedbackPage() {
@@ -27,7 +25,6 @@ export default function FeedbackPage() {
         content: '',
     });
 
-    const [submitted, setSubmitted] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
     const feedbackTypes = [
@@ -84,44 +81,6 @@ export default function FeedbackPage() {
                 [name]: '',
             }));
         }
-    };
-
-    const validateForm = () => {
-        const newErrors: { [key: string]: string } = {};
-
-        if (!formData.parentName.trim()) {
-            newErrors.parentName = 'Vui lòng nhập họ tên phụ huynh';
-        }
-        if (!formData.studentName.trim()) {
-            newErrors.studentName = 'Vui lòng nhập họ tên học sinh';
-        }
-        if (!formData.studentClass) {
-            newErrors.studentClass = 'Vui lòng chọn lớp';
-        }
-        if (!formData.email.trim()) {
-            newErrors.email = 'Vui lòng nhập email';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = 'Email không hợp lệ';
-        }
-        if (!formData.phone.trim()) {
-            newErrors.phone = 'Vui lòng nhập số điện thoại';
-        } else if (!/^[0-9]{10}$/.test(formData.phone.replace(/\s/g, ''))) {
-            newErrors.phone = 'Số điện thoại không hợp lệ (10 chữ số)';
-        }
-        if (!formData.feedbackType) {
-            newErrors.feedbackType = 'Vui lòng chọn loại góp ý';
-        }
-        if (!formData.subject.trim()) {
-            newErrors.subject = 'Vui lòng nhập tiêu đề';
-        }
-        if (!formData.content.trim()) {
-            newErrors.content = 'Vui lòng nhập nội dung góp ý';
-        } else if (formData.content.trim().length < 20) {
-            newErrors.content = 'Nội dung góp ý phải có ít nhất 20 ký tự';
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -193,11 +152,11 @@ export default function FeedbackPage() {
                 </Card>
 
                 {/* Success Alert */}
-                {submitted && (
+                {/* {submitted && (
                     <Alert icon={<CheckCircleIcon fontSize="inherit" />} severity="success" sx={{ mb: 4 }}>
                         Cảm ơn Quý phụ huynh đã gửi góp ý! Nhà trường sẽ phản hồi sớm nhất có thể.
                     </Alert>
-                )}
+                )} */}
 
                 {/* Feedback Form */}
                 <Card sx={{ p: 4 }}>

@@ -33,10 +33,11 @@ export async function GET(request: NextRequest) {
                 'Content-Length': fileBuffer.byteLength.toString(),
             },
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Download error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json(
-            { error: 'Error downloading file', details: error.message },
+            { error: 'Error downloading file', details: errorMessage },
             { status: 500 }
         );
     }

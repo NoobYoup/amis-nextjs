@@ -223,7 +223,7 @@ const Sidebar: React.FC = () => {
                                             color: 'inherit',
                                         }}
                                     >
-                                        <item.icon sx={{ fontSize: 24 }} />
+                                        <item.icon />
                                     </ListItemIcon>
                                     {isOpen && (
                                         <ListItemText

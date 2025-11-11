@@ -12,7 +12,6 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Paper,
     TablePagination,
     Button,
     Stack,
@@ -25,7 +24,7 @@ import {
     DialogContentText,
     DialogActions,
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Search as SearchIcon } from '@mui/icons-material';
+import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 
 interface TuitionGrade {
     id: string;
@@ -41,7 +40,6 @@ export default function TuitionGradePage() {
     const [tuitions, setTuitions] = useState<TuitionGrade[]>([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(0);
-    const [searchQuery, setSearchQuery] = useState('');
     const [error, setError] = useState('');
     const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
 
@@ -49,7 +47,6 @@ export default function TuitionGradePage() {
         try {
             const params = new URLSearchParams({
                 type: 'grade',
-                search: searchQuery,
                 page: (page + 1).toString(),
             });
             const res = await fetch(`/api/admin/tuition?${params}`);
@@ -60,7 +57,7 @@ export default function TuitionGradePage() {
         } catch (err) {
             setError((err as Error).message || 'Lỗi tải dữ liệu');
         }
-    }, [page, searchQuery]);
+    }, [page]);
 
     useEffect(() => {
         loadTuitions();

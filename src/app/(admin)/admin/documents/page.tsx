@@ -40,7 +40,7 @@ import dayjs from 'dayjs';
 import { SelectChangeEvent } from '@mui/material/Select';
 
 interface Document {
-    id: string; // _id from Mongo
+    id: number; // _id from Mongo
     title: string;
     type: string;
     number: string;
@@ -50,6 +50,8 @@ interface Document {
     fileUrl: string;
     fileType: 'pdf' | 'doc' | 'docx';
     isNew?: boolean;
+    updatedAt: string;
+    createdAt: string;
 }
 
 const documentTypes = ['Thông tư', 'Quyết định', 'Quy chế', 'Kế hoạch', 'Quy định', 'Hướng dẫn'];

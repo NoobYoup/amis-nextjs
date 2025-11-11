@@ -25,12 +25,13 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
         }
 
         return NextResponse.json(activity);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('GET /api/activities/[id] error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json(
             {
                 error: 'Lỗi khi lấy thông tin hoạt động',
-                details: error.message,
+                details: errorMessage,
             },
             { status: 500 }
         );

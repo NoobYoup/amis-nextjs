@@ -7,9 +7,8 @@ async function uploadToCloudinary(file: File): Promise<string> {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
-    // Lấy extension từ tên file
-    const fileExtension = file.name.split('.').pop() || 'pdf';
-    const fileName = file.name.replace(/\.[^/.]+$/, ''); // Tên file không có extension
+    // Lấy tên file không có extension
+    const fileName = file.name.replace(/\.[^/.]+$/, '');
     
     return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(

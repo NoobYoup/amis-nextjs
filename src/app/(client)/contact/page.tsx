@@ -8,14 +8,12 @@ import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import Alert from '@mui/material/Alert';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import SendIcon from '@mui/icons-material/Send';
 import SchoolIcon from '@mui/icons-material/School';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { toast } from 'react-toastify';
 
 export default function ContactPage() {
@@ -27,7 +25,6 @@ export default function ContactPage() {
         message: '',
     });
 
-    const [submitted, setSubmitted] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
     const contactInfo = [
@@ -92,35 +89,6 @@ export default function ContactPage() {
                 [name]: '',
             }));
         }
-    };
-
-    const validateForm = () => {
-        const newErrors: { [key: string]: string } = {};
-
-        if (!formData.name.trim()) {
-            newErrors.name = 'Vui lòng nhập họ tên';
-        }
-        if (!formData.email.trim()) {
-            newErrors.email = 'Vui lòng nhập email';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = 'Email không hợp lệ';
-        }
-        if (!formData.phone.trim()) {
-            newErrors.phone = 'Vui lòng nhập số điện thoại';
-        } else if (!/^[0-9]{10}$/.test(formData.phone.replace(/\s/g, ''))) {
-            newErrors.phone = 'Số điện thoại không hợp lệ (10 chữ số)';
-        }
-        if (!formData.subject.trim()) {
-            newErrors.subject = 'Vui lòng nhập tiêu đề';
-        }
-        if (!formData.message.trim()) {
-            newErrors.message = 'Vui lòng nhập nội dung';
-        } else if (formData.message.trim().length < 10) {
-            newErrors.message = 'Nội dung phải có ít nhất 10 ký tự';
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -223,11 +191,11 @@ export default function ContactPage() {
                                 Điền thông tin vào form dưới đây, chúng tôi sẽ phản hồi sớm nhất có thể
                             </Typography>
 
-                            {submitted && (
+                            {/* {submitted && (
                                 <Alert icon={<CheckCircleIcon fontSize="inherit" />} severity="success" sx={{ mb: 3 }}>
                                     Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất.
                                 </Alert>
-                            )}
+                            )} */}
 
                             <Box component="form" onSubmit={handleSubmit}>
                                 <Grid container spacing={2}>

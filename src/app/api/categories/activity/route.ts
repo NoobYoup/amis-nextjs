@@ -13,12 +13,13 @@ export async function GET() {
         });
 
         return NextResponse.json(categories);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('GET /api/categories/activity error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json(
             {
                 error: 'Lỗi khi lấy danh sách danh mục',
-                details: error.message,
+                details: errorMessage,
             },
             { status: 500 }
         );

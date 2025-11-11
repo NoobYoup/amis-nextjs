@@ -8,7 +8,7 @@ export async function GET() {
             orderBy: { name: 'asc' },
         });
         return NextResponse.json(categories);
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Lỗi khi lấy danh sách danh mục' }, { status: 500 });
     }
 }
@@ -46,22 +46,24 @@ export async function POST(req: NextRequest) {
 
         console.log('Category created successfully:', category);
         return NextResponse.json(category, { status: 201 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error creating category:', error);
+        const errorWithCode = error as Record<string, unknown>;
         console.error('Error details:', {
-            message: error.message,
-            code: error.code,
-            meta: error.meta,
+            message: errorWithCode.message,
+            code: errorWithCode.code,
+            meta: errorWithCode.meta,
         });
         
         // Handle Prisma unique constraint error
-        if (error.code === 'P2002') {
+        if (errorWithCode.code === 'P2002') {
             return NextResponse.json({ error: 'Danh mục đã tồn tại (unique constraint)' }, { status: 400 });
         }
         
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json({ 
             error: 'Lỗi khi tạo danh mục', 
-            details: error.message 
+            details: errorMessage 
         }, { status: 500 });
     }
 }

@@ -44,12 +44,13 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
 
         console.log('Tuition updated:', updatedTuition);
         return NextResponse.json(updatedTuition);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('PUT tuition error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json(
             { 
                 error: 'Lỗi khi cập nhật học phí',
-                details: error.message 
+                details: errorMessage 
             },
             { status: 500 },
         );
@@ -72,11 +73,12 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ id: 
 
         console.log('Tuition deleted:', id);
         return NextResponse.json({ message: 'Xóa học phí thành công' });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error deleting tuition:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json({ 
             error: 'Lỗi khi xóa học phí',
-            details: error.message 
+            details: errorMessage 
         }, { status: 500 });
     }
 }

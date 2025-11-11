@@ -26,12 +26,13 @@ export async function GET() {
             types,
             fields,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('GET /api/documents/filters error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json(
             {
                 error: 'Lỗi khi lấy danh sách filters',
-                details: error.message,
+                details: errorMessage,
             },
             { status: 500 }
         );

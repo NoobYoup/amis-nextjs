@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '100');
 
-        const where: any = {};
+        const where: Record<string, unknown> = {};
 
         // Search by title or number
         if (search) {
@@ -63,12 +63,13 @@ export async function GET(req: NextRequest) {
             limit,
             totalPages: Math.ceil(total / limit),
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('GET /api/documents error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json(
             {
                 error: 'Lỗi khi lấy danh sách văn bản',
-                details: error.message,
+                details: errorMessage,
             },
             { status: 500 }
         );

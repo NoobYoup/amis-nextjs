@@ -24,7 +24,7 @@ import {
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Search as SearchIcon } from '@mui/icons-material';
 
 interface TuitionSchedule {
-    _id: string;
+    id: string;
     description: string;
     period: string;
     date: string;

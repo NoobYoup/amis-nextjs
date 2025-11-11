@@ -4,142 +4,98 @@ import { useState } from 'react';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
 import Button from '@mui/material/Button';
-import Chip from '@mui/material/Chip';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import LiveTvIcon from '@mui/icons-material/LiveTv';
 
-interface OnlineClass {
-    id: number;
-    subject: string;
-    teacher: string;
-    grade: string;
-    time: string;
-    day: string;
-    platform: string;
-    link: string;
-    status: 'live' | 'upcoming' | 'recorded';
-}
+// interface OnlineClass {
+//     id: number;
+//     subject: string;
+//     teacher: string;
+//     grade: string;
+//     time: string;
+//     day: string;
+//     platform: string;
+//     link: string;
+//     status: 'live' | 'upcoming' | 'recorded';
+// }
 
 export default function OnlineLearningPage() {
     const [selectedTab, setSelectedTab] = useState(0);
-    const [selectedGrade, setSelectedGrade] = useState('all');
 
-    const onlineClasses: OnlineClass[] = [
-        {
-            id: 1,
-            subject: 'Toán học',
-            teacher: 'Cô Nguyễn Thị Lan',
-            grade: 'Lớp 5',
-            time: '08:00 - 09:00',
-            day: 'Thứ 2, Thứ 4',
-            platform: 'Google Meet',
-            link: 'https://meet.google.com/abc-defg-hij',
-            status: 'upcoming',
-        },
-        {
-            id: 2,
-            subject: 'Tiếng Việt',
-            teacher: 'Cô Trần Thị Mai',
-            grade: 'Lớp 4',
-            time: '09:15 - 10:15',
-            day: 'Thứ 3, Thứ 5',
-            platform: 'Zoom',
-            link: 'https://zoom.us/j/123456789',
-            status: 'live',
-        },
-        {
-            id: 3,
-            subject: 'Tiếng Anh',
-            teacher: 'Cô Lê Thị Hoa',
-            grade: 'Lớp 3',
-            time: '10:30 - 11:30',
-            day: 'Thứ 2, Thứ 4, Thứ 6',
-            platform: 'Microsoft Teams',
-            link: 'https://teams.microsoft.com/l/meetup',
-            status: 'upcoming',
-        },
-        {
-            id: 4,
-            subject: 'Khoa học',
-            teacher: 'Thầy Phạm Văn Nam',
-            grade: 'Lớp 5',
-            time: '14:00 - 15:00',
-            day: 'Thứ 3, Thứ 5',
-            platform: 'Google Meet',
-            link: 'https://meet.google.com/xyz-abcd-efg',
-            status: 'recorded',
-        },
-        {
-            id: 5,
-            subject: 'Toán học',
-            teacher: 'Cô Hoàng Thị Linh',
-            grade: 'Lớp 6',
-            time: '08:00 - 09:00',
-            day: 'Thứ 2, Thứ 4, Thứ 6',
-            platform: 'Zoom',
-            link: 'https://zoom.us/j/987654321',
-            status: 'upcoming',
-        },
-        {
-            id: 6,
-            subject: 'Văn học',
-            teacher: 'Cô Đỗ Thị Hương',
-            grade: 'Lớp 7',
-            time: '09:15 - 10:15',
-            day: 'Thứ 3, Thứ 5',
-            platform: 'Google Meet',
-            link: 'https://meet.google.com/klm-nopq-rst',
-            status: 'upcoming',
-        },
-    ];
+    // const onlineClasses: OnlineClass[] = [
+    //     {
+    //         id: 1,
+    //         subject: 'Toán học',
+    //         teacher: 'Cô Nguyễn Thị Lan',
+    //         grade: 'Lớp 5',
+    //         time: '08:00 - 09:00',
+    //         day: 'Thứ 2, Thứ 4',
+    //         platform: 'Google Meet',
+    //         link: 'https://meet.google.com/abc-defg-hij',
+    //         status: 'upcoming',
+    //     },
+    //     {
+    //         id: 2,
+    //         subject: 'Tiếng Việt',
+    //         teacher: 'Cô Trần Thị Mai',
+    //         grade: 'Lớp 4',
+    //         time: '09:15 - 10:15',
+    //         day: 'Thứ 3, Thứ 5',
+    //         platform: 'Zoom',
+    //         link: 'https://zoom.us/j/123456789',
+    //         status: 'live',
+    //     },
+    //     {
+    //         id: 3,
+    //         subject: 'Tiếng Anh',
+    //         teacher: 'Cô Lê Thị Hoa',
+    //         grade: 'Lớp 3',
+    //         time: '10:30 - 11:30',
+    //         day: 'Thứ 2, Thứ 4, Thứ 6',
+    //         platform: 'Microsoft Teams',
+    //         link: 'https://teams.microsoft.com/l/meetup',
+    //         status: 'upcoming',
+    //     },
+    //     {
+    //         id: 4,
+    //         subject: 'Khoa học',
+    //         teacher: 'Thầy Phạm Văn Nam',
+    //         grade: 'Lớp 5',
+    //         time: '14:00 - 15:00',
+    //         day: 'Thứ 3, Thứ 5',
+    //         platform: 'Google Meet',
+    //         link: 'https://meet.google.com/xyz-abcd-efg',
+    //         status: 'recorded',
+    //     },
+    //     {
+    //         id: 5,
+    //         subject: 'Toán học',
+    //         teacher: 'Cô Hoàng Thị Linh',
+    //         grade: 'Lớp 6',
+    //         time: '08:00 - 09:00',
+    //         day: 'Thứ 2, Thứ 4, Thứ 6',
+    //         platform: 'Zoom',
+    //         link: 'https://zoom.us/j/987654321',
+    //         status: 'upcoming',
+    //     },
+    //     {
+    //         id: 6,
+    //         subject: 'Văn học',
+    //         teacher: 'Cô Đỗ Thị Hương',
+    //         grade: 'Lớp 7',
+    //         time: '09:15 - 10:15',
+    //         day: 'Thứ 3, Thứ 5',
+    //         platform: 'Google Meet',
+    //         link: 'https://meet.google.com/klm-nopq-rst',
+    //         status: 'upcoming',
+    //     },
+    // ];
 
-    const grades = ['all', 'Lớp 3', 'Lớp 4', 'Lớp 5', 'Lớp 6', 'Lớp 7', 'Lớp 8', 'Lớp 9'];
-
-    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         setSelectedTab(newValue);
-    };
-
-    const handleGradeChange = (event: React.SyntheticEvent, newValue: string) => {
-        setSelectedGrade(newValue);
-    };
-
-    const filteredClasses = onlineClasses.filter((cls) => selectedGrade === 'all' || cls.grade === selectedGrade);
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'live':
-                return '#f44336';
-            case 'upcoming':
-                return '#4caf50';
-            case 'recorded':
-                return '#9e9e9e';
-            default:
-                return '#666';
-        }
-    };
-
-    const getStatusLabel = (status: string) => {
-        switch (status) {
-            case 'live':
-                return 'Đang diễn ra';
-            case 'upcoming':
-                return 'Sắp diễn ra';
-            case 'recorded':
-                return 'Đã ghi hình';
-            default:
-                return status;
-        }
     };
 
     return (

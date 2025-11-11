@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = 10;
 
-    const where: any = {};
+    const where: Record<string, unknown> = {};
     if (type) where.type = type;
     if (search) {
         // MySQL is case-insensitive by default
@@ -65,11 +65,12 @@ export async function POST(req: NextRequest) {
 
         console.log('Tuition created:', tuition);
         return NextResponse.json(tuition, { status: 201 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('POST tuition error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json({ 
             error: 'Lỗi khi tạo học phí',
-            details: error.message 
+            details: errorMessage 
         }, { status: 500 });
     }
 }

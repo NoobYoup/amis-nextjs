@@ -25,7 +25,7 @@ import {
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Search as SearchIcon } from '@mui/icons-material';
 
 interface TuitionFee {
-    _id: string;
+    id: string;
     description: string;
     name: string;
     typeFee: 'included' | 'notIncluded';

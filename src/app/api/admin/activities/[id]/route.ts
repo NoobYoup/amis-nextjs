@@ -78,7 +78,7 @@ export async function PUT(
             categoryId: categoryId || activity.categoryId,
             date: date || activity.date,
             author: author || activity.author,
-            videos: videos.length ? videos : activity.videos,
+            videos: videos.length ? videos : (activity.videos as string[]) || [],
             images: updatedImages,
             thumbnail: updatedThumbnail,
         },
@@ -99,7 +99,7 @@ export async function DELETE(
 
     // Delete from Cloudinary
     const images = (activity.images as string[]) || [];
-    for (const url of [...images, activity.thumbnail].filter(Boolean)) {
+    for (const url of [...images, activity.thumbnail].filter(Boolean) as string[]) {
         const publicId = url.split('/').pop()?.split('.')[0];
         if (publicId) {
             await cloudinary.uploader.destroy(publicId);

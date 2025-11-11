@@ -14,7 +14,7 @@ export default function SessionWrapper({ children }: SessionWrapperProps) {
         return <p>Loading...</p>;
     }
 
-    if (!session || session.user.role !== 'admin') {
+    if (!session?.user || (session.user as { role: string }).role !== 'admin') {
         return <p>Phiên đăng nhập hết hạn</p>; //fix lỗi từ next-auth.d.ts
     }
 

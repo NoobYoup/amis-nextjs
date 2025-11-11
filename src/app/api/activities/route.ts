@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '9');
 
-        const where: any = {};
+        const where: Record<string, unknown> = {};
 
         if (search) {
             // MySQL is case-insensitive by default
@@ -48,12 +48,13 @@ export async function GET(req: NextRequest) {
             page,
             pages: Math.ceil(total / limit),
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('GET /api/activities error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json(
             {
                 error: 'Lỗi khi lấy danh sách hoạt động',
-                details: error.message,
+                details: errorMessage,
             },
             { status: 500 }
         );
