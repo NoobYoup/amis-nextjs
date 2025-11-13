@@ -70,16 +70,34 @@ model Document {
   date      DateTime
   field     String   // Quản lý giáo dục, Tuyển sinh, Đánh giá, Kế hoạch, Học sinh, Chương trình
   summary   String?  @db.Text
-  fileUrl   String   @db.Text
-  fileType  String   @default("pdf")
   isNew     Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Relations
+  files DocumentFile[]
 
   @@index([type])
   @@index([field])
   @@index([date])
   @@map("documents")
+}
+
+// DocumentFile model - for storing multiple files per document
+model DocumentFile {
+  id        String   @id @default(uuid())
+  documentId String
+  fileUrl   String   @db.Text
+  fileType  String   @default("pdf") // pdf, doc, docx, image
+  order     Int      @default(0)     // for sorting multiple files
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@map("document_files")
 }
 
 // Tuition model

@@ -46,6 +46,7 @@ export async function GET(req: NextRequest) {
         const [documents, total] = await Promise.all([
             prisma.document.findMany({
                 where,
+                include: { files: { orderBy: { order: 'asc' } } },
                 orderBy: [
                     { isNew: 'desc' },
                     { date: 'desc' },

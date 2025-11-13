@@ -13,13 +13,13 @@ export async function GET() {
         });
 
         // Extract unique years
-        const years = [...new Set(documents.map(doc => new Date(doc.date).getFullYear()))].sort((a, b) => b - a);
+        const years = [...new Set(documents.map((doc: typeof documents[0]) => new Date(doc.date).getFullYear()))].sort((a, b) => b - a);
         
         // Extract unique types
-        const types = [...new Set(documents.map(doc => doc.type))].sort();
+        const types = [...new Set(documents.map((doc: typeof documents[0]) => doc.type))].sort();
         
         // Extract unique fields
-        const fields = [...new Set(documents.map(doc => doc.field))].sort();
+        const fields = [...new Set(documents.map((doc: typeof documents[0]) => doc.field))].sort();
 
         return NextResponse.json({
             years,

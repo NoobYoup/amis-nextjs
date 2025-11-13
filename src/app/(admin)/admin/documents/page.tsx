@@ -35,23 +35,33 @@ import {
     Add as AddIcon,
     Search as SearchIcon,
     Download as DownloadIcon,
+    Image as ImageIcon,
+    Close as CloseIcon,
+    NavigateBefore as NavigateBeforeIcon,
+    NavigateNext as NavigateNextIcon,
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import { SelectChangeEvent } from '@mui/material/Select';
 
+interface DocumentFile {
+    id: string;
+    fileUrl: string;
+    fileType: string;
+    order: number;
+}
+
 interface Document {
-    id: number; // _id from Mongo
+    id: string;
     title: string;
     type: string;
     number: string;
     date: string;
     field: string;
     summary: string;
-    fileUrl: string;
-    fileType: 'pdf' | 'doc' | 'docx';
     isNew?: boolean;
     updatedAt: string;
     createdAt: string;
+    files: DocumentFile[];
 }
 
 const documentTypes = ['Thông tư', 'Quyết định', 'Quy chế', 'Kế hoạch', 'Quy định', 'Hướng dẫn'];
@@ -68,7 +78,10 @@ export default function DocumentsPage() {
     const [selectedField, setSelectedField] = useState('');
     const [error, setError] = useState('');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [selectedId, setSelectedId] = useState<number | null>(null);
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [openImageGallery, setOpenImageGallery] = useState(false);
+    const [selectedImageUrls, setSelectedImageUrls] = useState<string[]>([]);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
     const loadDocuments = useCallback(async () => {
         try {
@@ -81,7 +94,7 @@ export default function DocumentsPage() {
             const res = await fetch(`/api/admin/documents?${params}`);
             if (!res.ok) throw new Error('Error loading documents');
             const { data, total } = await res.json();
-            console.log(data);
+
             setDocuments(data);
             setTotal(total);
         } catch (err) {
@@ -125,7 +138,7 @@ export default function DocumentsPage() {
         }
     };
 
-    const handleOpenDeleteDialog = (id: number) => {
+    const handleOpenDeleteDialog = (id: string) => {
         setSelectedId(id);
         setDeleteDialogOpen(true);
     };
@@ -134,6 +147,31 @@ export default function DocumentsPage() {
         setDeleteDialogOpen(false);
         setSelectedId(null);
     };
+
+    const handleOpenImageGallery = (imageUrls: string[]) => {
+        setSelectedImageUrls(imageUrls);
+        setSelectedImageIndex(0);
+        setOpenImageGallery(true);
+    };
+
+    const handleCloseImageGallery = () => {
+        setOpenImageGallery(false);
+        setSelectedImageUrls([]);
+        setSelectedImageIndex(0);
+    };
+
+    const handlePrevImage = () => {
+        setSelectedImageIndex((prev) =>
+            prev === 0 ? selectedImageUrls.length - 1 : prev - 1
+        );
+    };
+
+    const handleNextImage = () => {
+        setSelectedImageIndex((prev) =>
+            prev === selectedImageUrls.length - 1 ? 0 : prev + 1
+        );
+    };
+
 
     return (
         <Box sx={{ py: 4, bgcolor: 'var(--background)', minHeight: '100vh' }}>
@@ -230,9 +268,31 @@ export default function DocumentsPage() {
                                         >
                                             <EditIcon />
                                         </IconButton>
-                                        <IconButton size="small" href={doc.fileUrl} target="_blank" title="Tải xuống">
-                                            <DownloadIcon />
-                                        </IconButton>
+                                        {doc.files && doc.files.length > 0 && (
+                                            <>
+                                                {doc.files.some(f => f.fileType === 'image') ? (
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() => handleOpenImageGallery(
+                                                            doc.files.filter(f => f.fileType === 'image').map(f => f.fileUrl)
+                                                        )}
+                                                        title="Xem ảnh"
+                                                        sx={{ color: 'var(--primary-color)' }}
+                                                    >
+                                                        <ImageIcon />
+                                                    </IconButton>
+                                                ) : (
+                                                    <IconButton 
+                                                        size="small" 
+                                                        href={doc.files[0].fileUrl} 
+                                                        target="_blank" 
+                                                        title="Tải xuống"
+                                                    >
+                                                        <DownloadIcon />
+                                                    </IconButton>
+                                                )}
+                                            </>
+                                        )}
                                         <IconButton
                                             size="small"
                                             onClick={() => handleOpenDeleteDialog(doc.id)}
@@ -269,6 +329,104 @@ export default function DocumentsPage() {
                         </Button>
                         <Button onClick={handleCloseDeleteDialog}>Hủy</Button>
                     </DialogActions>
+                </Dialog>
+
+                {/* Image Gallery Modal */}
+                <Dialog
+                    open={openImageGallery}
+                    onClose={handleCloseImageGallery}
+                    maxWidth="lg"
+                    fullWidth
+                    PaperProps={{
+                        sx: {
+                            bgcolor: 'rgba(0, 0, 0, 0.95)',
+                            boxShadow: 'none',
+                        },
+                    }}
+                >
+                    <DialogContent sx={{ position: 'relative', p: 0, overflow: 'hidden' }}>
+                        <IconButton
+                            onClick={handleCloseImageGallery}
+                            sx={{
+                                position: 'absolute',
+                                top: 16,
+                                right: 16,
+                                color: 'white',
+                                bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                zIndex: 1,
+                                '&:hover': {
+                                    bgcolor: 'rgba(0, 0, 0, 0.7)',
+                                },
+                            }}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+
+                        <Box
+                            sx={{
+                                position: 'relative',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                minHeight: '80vh',
+                            }}
+                        >
+                            {selectedImageUrls.length > 0 && (
+                                <>
+                                    <IconButton
+                                        onClick={handlePrevImage}
+                                        sx={{
+                                            position: 'absolute',
+                                            left: 16,
+                                            color: 'white',
+                                            bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                            '&:hover': {
+                                                bgcolor: 'rgba(0, 0, 0, 0.7)',
+                                            },
+                                        }}
+                                    >
+                                        <NavigateBeforeIcon sx={{ fontSize: 40 }} />
+                                    </IconButton>
+
+                                    <Box
+                                        component="img"
+                                        src={selectedImageUrls[selectedImageIndex]}
+                                        alt={`Image ${selectedImageIndex + 1}`}
+                                        sx={{
+                                            maxWidth: '100%',
+                                            maxHeight: '80vh',
+                                            objectFit: 'contain',
+                                        }}
+                                    />
+
+                                    <IconButton
+                                        onClick={handleNextImage}
+                                        sx={{
+                                            position: 'absolute',
+                                            right: 16,
+                                            color: 'white',
+                                            bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                            '&:hover': {
+                                                bgcolor: 'rgba(0, 0, 0, 0.7)',
+                                            },
+                                        }}
+                                    >
+                                        <NavigateNextIcon sx={{ fontSize: 40 }} />
+                                    </IconButton>
+                                </>
+                            )}
+                        </Box>
+
+                        <Typography
+                            sx={{
+                                textAlign: 'center',
+                                color: 'white',
+                                py: 2,
+                            }}
+                        >
+                            {selectedImageIndex + 1} / {selectedImageUrls.length}
+                        </Typography>
+                    </DialogContent>
                 </Dialog>
             </Container>
         </Box>

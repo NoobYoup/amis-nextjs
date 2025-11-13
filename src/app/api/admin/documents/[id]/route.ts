@@ -2,18 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import cloudinary from '@/lib/cloudinary';
 
-// Helper: Upload file to Cloudinary (raw for PDF/DOC)
-async function uploadToCloudinary(file: File): Promise<string> {
+// Helper: Upload file to Cloudinary (auto-detect resource type)
+async function uploadToCloudinary(file: File, fileType: string): Promise<string> {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
     // Lấy tên file không có extension
     const fileName = file.name.replace(/\.[^/.]+$/, '');
     
+    // Determine resource type based on file type
+    const resourceType = fileType === 'image' ? 'image' : 'raw';
+    
     return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
             { 
-                resource_type: 'raw',
+                resource_type: resourceType,
                 public_id: `documents/${fileName}`, // Đặt tên file
                 use_filename: true,
                 unique_filename: true,
@@ -38,7 +41,10 @@ async function uploadToCloudinary(file: File): Promise<string> {
 export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await context.params;
-        const document = await prisma.document.findUnique({ where: { id } });
+        const document = await prisma.document.findUnique({ 
+            where: { id },
+            include: { files: { orderBy: { order: 'asc' } } }
+        });
 
         if (!document) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
 
@@ -62,40 +68,65 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
         const date = new Date(formData.get('date') as string);
         const field = formData.get('field') as string;
         const summary = formData.get('summary') as string;
-        const fileType = (formData.get('fileType') as string) || 'pdf';
         const isNew = formData.get('isNew') === 'true';
-        const existingFileUrl = formData.get('existingFileUrl') as string;
 
-        const document = await prisma.document.findUnique({ where: { id } });
+        const document = await prisma.document.findUnique({ 
+            where: { id },
+            include: { files: true }
+        });
         if (!document) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
 
-        // Upload new file if provided
-        const file = formData.get('file') as File;
-        let fileUrl = existingFileUrl || document.fileUrl;
+        // Get all new files from formData
+        const files: File[] = [];
+        const fileTypes: string[] = [];
+        
+        for (const [key, value] of formData.entries()) {
+            if (key === 'file' && value instanceof File) {
+                files.push(value);
+                const ft = formData.get(`fileType_${files.length - 1}`) as string || 'pdf';
+                fileTypes.push(ft);
+            }
+        }
 
-        if (file) {
-            // Upload new file
-            fileUrl = await uploadToCloudinary(file);
-            
-            // Delete old file from Cloudinary if exists and is different
-            if (document.fileUrl && document.fileUrl !== fileUrl) {
+        // If there are new files, delete old files and add new ones
+        if (files.length > 0) {
+            // Delete old files from Cloudinary
+            for (const oldFile of document.files) {
                 try {
-                    const urlParts = document.fileUrl.split('/upload/');
+                    const urlParts = oldFile.fileUrl.split('/upload/');
                     if (urlParts.length > 1) {
                         const pathWithVersion = urlParts[1];
                         const publicIdWithExt = pathWithVersion.split('/').slice(1).join('/');
                         const publicId = publicIdWithExt.replace(/\.[^/.]+$/, '');
                         
-                        await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
+                        const resourceType = oldFile.fileType === 'image' ? 'image' : 'raw';
+                        await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
                         console.log('Deleted old file from Cloudinary:', publicId);
                     }
                 } catch (error) {
                     console.error('Error deleting old file from Cloudinary:', error);
                 }
             }
+
+            // Delete old DocumentFile records
+            await prisma.documentFile.deleteMany({ where: { documentId: id } });
+
+            // Upload new files and create DocumentFile records
+            for (let i = 0; i < files.length; i++) {
+                const fileUrl = await uploadToCloudinary(files[i], fileTypes[i]);
+                
+                await prisma.documentFile.create({
+                    data: {
+                        documentId: id,
+                        fileUrl,
+                        fileType: fileTypes[i],
+                        order: i,
+                    },
+                });
+            }
         }
 
-        // Update document
+        // Update document metadata
         const updatedDocument = await prisma.document.update({
             where: { id },
             data: {
@@ -105,10 +136,9 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
                 date: date || document.date,
                 field: field || document.field,
                 summary: summary || document.summary,
-                fileType: fileType || document.fileType,
                 isNew: isNew !== undefined ? isNew : document.isNew,
-                fileUrl: fileUrl || document.fileUrl,
             },
+            include: { files: { orderBy: { order: 'asc' } } }
         });
 
         return NextResponse.json(updatedDocument);
@@ -123,21 +153,25 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ id: 
     try {
         const { id } = await context.params;
 
-        const document = await prisma.document.findUnique({ where: { id } });
+        const document = await prisma.document.findUnique({ 
+            where: { id },
+            include: { files: true }
+        });
         if (!document) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
 
-        // Delete file from Cloudinary
-        if (document.fileUrl) {
+        // Delete all files from Cloudinary
+        for (const file of document.files) {
             try {
                 // Extract public_id from URL
                 // URL format: https://res.cloudinary.com/.../raw/upload/v123/documents/filename.pdf
-                const urlParts = document.fileUrl.split('/upload/');
+                const urlParts = file.fileUrl.split('/upload/');
                 if (urlParts.length > 1) {
                     const pathWithVersion = urlParts[1]; // v123/documents/filename.pdf
                     const publicIdWithExt = pathWithVersion.split('/').slice(1).join('/'); // documents/filename.pdf
                     const publicId = publicIdWithExt.replace(/\.[^/.]+$/, ''); // documents/filename
                     
-                    await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
+                    const resourceType = file.fileType === 'image' ? 'image' : 'raw';
+                    await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
                     console.log('Deleted file from Cloudinary:', publicId);
                 }
             } catch (error) {

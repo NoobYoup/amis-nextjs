@@ -13,6 +13,20 @@ import Chip from '@mui/material/Chip';
 import DownloadIcon from '@mui/icons-material/Download';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import SearchIcon from '@mui/icons-material/Search';
+import ImageIcon from '@mui/icons-material/Image';
+import CloseIcon from '@mui/icons-material/Close';
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import IconButton from '@mui/material/IconButton';
+
+interface DocumentFile {
+    id: string;
+    fileUrl: string;
+    fileType: string;
+    order: number;
+}
 
 interface Document {
     id: string;
@@ -22,11 +36,10 @@ interface Document {
     date: string;
     field: string;
     summary: string | null;
-    fileUrl: string;
-    fileType: string;
     isNew: boolean;
     createdAt: string;
     updatedAt: string;
+    files: DocumentFile[];
 }
 
 export default function DocumentsPage() {
@@ -40,11 +53,15 @@ export default function DocumentsPage() {
     const [types, setTypes] = useState<string[]>([]);
     const [fields, setFields] = useState<string[]>([]);
     const [downloading, setDownloading] = useState<string | null>(null);
+    const [openImageGallery, setOpenImageGallery] = useState(false);
+    const [selectedImageUrls, setSelectedImageUrls] = useState<string[]>([]);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-    const handleDownload = async (doc: Document) => {
+    const handleDownload = async (doc: Document, fileType: string) => {
         setDownloading(doc.id);
         try {
-            const response = await fetch(`/api/download?url=${encodeURIComponent(doc.fileUrl)}`);
+            const firstFile = doc.files[0];
+            const response = await fetch(`/api/download?url=${encodeURIComponent(firstFile.fileUrl)}`);
 
             if (!response.ok) {
                 throw new Error('Download failed');
@@ -54,7 +71,7 @@ export default function DocumentsPage() {
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `${doc.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${doc.fileType}`;
+            link.download = `${doc.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${fileType}`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -65,6 +82,30 @@ export default function DocumentsPage() {
         } finally {
             setDownloading(null);
         }
+    };
+
+    const handleOpenImageGallery = (imageUrls: string[]) => {
+        setSelectedImageUrls(imageUrls);
+        setSelectedImageIndex(0);
+        setOpenImageGallery(true);
+    };
+
+    const handleCloseImageGallery = () => {
+        setOpenImageGallery(false);
+        setSelectedImageUrls([]);
+        setSelectedImageIndex(0);
+    };
+
+    const handlePrevImage = () => {
+        setSelectedImageIndex((prev) =>
+            prev === 0 ? selectedImageUrls.length - 1 : prev - 1
+        );
+    };
+
+    const handleNextImage = () => {
+        setSelectedImageIndex((prev) =>
+            prev === selectedImageUrls.length - 1 ? 0 : prev + 1
+        );
     };
 
     // Load filters
@@ -258,26 +299,144 @@ export default function DocumentsPage() {
                                         </Box>
                                     </Grid>
                                     <Grid size={{ xs: 12, md: 4 }} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
-                                        <Button
-                                            variant="contained"
-                                            startIcon={<DownloadIcon />}
-                                            onClick={() => handleDownload(doc)}
-                                            disabled={downloading === doc.id}
-                                            sx={{
-                                                bgcolor: 'var(--primary-color)',
-                                                '&:hover': { bgcolor: 'var(--accent-color)' },
-                                            }}
-                                        >
-                                            {downloading === doc.id
-                                                ? 'Đang tải...'
-                                                : `Tải xuống ${doc.fileType.toUpperCase()}`}
-                                        </Button>
+                                        {doc.files && doc.files.length > 0 && (
+                                            <>
+                                                {doc.files.some(f => f.fileType === 'image') ? (
+                                                    <Button
+                                                        variant="contained"
+                                                        startIcon={<ImageIcon />}
+                                                        onClick={() => handleOpenImageGallery(
+                                                            doc.files.filter(f => f.fileType === 'image').map(f => f.fileUrl)
+                                                        )}
+                                                        sx={{
+                                                            bgcolor: 'var(--primary-color)',
+                                                            '&:hover': { bgcolor: 'var(--accent-color)' },
+                                                        }}
+                                                    >
+                                                        Xem ảnh
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        variant="contained"
+                                                        startIcon={<DownloadIcon />}
+                                                        onClick={() => handleDownload(doc, doc.files[0].fileType)}
+                                                        disabled={downloading === doc.id}
+                                                        sx={{
+                                                            bgcolor: 'var(--primary-color)',
+                                                            '&:hover': { bgcolor: 'var(--accent-color)' },
+                                                        }}
+                                                    >
+                                                        {downloading === doc.id
+                                                            ? 'Đang tải...'
+                                                            : `Tải xuống ${doc.files[0].fileType.toUpperCase()}`}
+                                                    </Button>
+                                                )}
+                                            </>
+                                        )}
                                     </Grid>
                                 </Grid>
                             </Card>
                         ))}
                     </Box>
                 )}
+
+                {/* Image Gallery Modal */}
+                <Dialog
+                    open={openImageGallery}
+                    onClose={handleCloseImageGallery}
+                    maxWidth="lg"
+                    fullWidth
+                    PaperProps={{
+                        sx: {
+                            bgcolor: 'rgba(0, 0, 0, 0.95)',
+                            boxShadow: 'none',
+                        },
+                    }}
+                >
+                    <DialogContent sx={{ position: 'relative', p: 0, overflow: 'hidden' }}>
+                        <IconButton
+                            onClick={handleCloseImageGallery}
+                            sx={{
+                                position: 'absolute',
+                                top: 16,
+                                right: 16,
+                                color: 'white',
+                                bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                zIndex: 1,
+                                '&:hover': {
+                                    bgcolor: 'rgba(0, 0, 0, 0.7)',
+                                },
+                            }}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+
+                        <Box
+                            sx={{
+                                position: 'relative',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                minHeight: '80vh',
+                            }}
+                        >
+                            {selectedImageUrls.length > 0 && (
+                                <>
+                                    <IconButton
+                                        onClick={handlePrevImage}
+                                        sx={{
+                                            position: 'absolute',
+                                            left: 16,
+                                            color: 'white',
+                                            bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                            '&:hover': {
+                                                bgcolor: 'rgba(0, 0, 0, 0.7)',
+                                            },
+                                        }}
+                                    >
+                                        <NavigateBeforeIcon sx={{ fontSize: 40 }} />
+                                    </IconButton>
+
+                                    <Box
+                                        component="img"
+                                        src={selectedImageUrls[selectedImageIndex]}
+                                        alt={`Image ${selectedImageIndex + 1}`}
+                                        sx={{
+                                            maxWidth: '100%',
+                                            maxHeight: '80vh',
+                                            objectFit: 'contain',
+                                        }}
+                                    />
+
+                                    <IconButton
+                                        onClick={handleNextImage}
+                                        sx={{
+                                            position: 'absolute',
+                                            right: 16,
+                                            color: 'white',
+                                            bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                            '&:hover': {
+                                                bgcolor: 'rgba(0, 0, 0, 0.7)',
+                                            },
+                                        }}
+                                    >
+                                        <NavigateNextIcon sx={{ fontSize: 40 }} />
+                                    </IconButton>
+                                </>
+                            )}
+                        </Box>
+
+                        <Typography
+                            sx={{
+                                textAlign: 'center',
+                                color: 'white',
+                                py: 2,
+                            }}
+                        >
+                            {selectedImageIndex + 1} / {selectedImageUrls.length}
+                        </Typography>
+                    </DialogContent>
+                </Dialog>
             </Container>
         </Box>
     );

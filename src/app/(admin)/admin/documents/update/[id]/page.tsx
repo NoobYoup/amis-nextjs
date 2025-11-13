@@ -40,14 +40,15 @@ export default function UpdateDocumentPage() {
         field: '',
         summary: '',
         fileUrl: '',
-        file: null as File | null,
-        fileType: 'pdf',
+        files: [] as File[],
+        fileTypes: [] as string[],
         isNew: false,
     });
     const [dragActive, setDragActive] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
-    const [filePreview, setFilePreview] = useState<string | null>(null);
+    const [filePreviews, setFilePreviews] = useState<string[]>([]);
+    const [previewFileTypes, setPreviewFileTypes] = useState<string[]>([]);
 
     useEffect(() => {
         const loadDocument = async () => {
@@ -55,6 +56,15 @@ export default function UpdateDocumentPage() {
                 const res = await fetch(`/api/admin/documents/${documentId}`);
                 if (!res.ok) throw new Error('Error loading document');
                 const data = await res.json();
+                
+                // Extract file URLs and types from files array
+                interface FileItem {
+                    fileUrl: string;
+                    fileType: string;
+                }
+                const fileUrls = data.files?.map((f: FileItem) => f.fileUrl) || [];
+                const fileTypes = data.files?.map((f: FileItem) => f.fileType) || [];
+                
                 setFormData({
                     title: data.title,
                     type: data.type,
@@ -62,12 +72,13 @@ export default function UpdateDocumentPage() {
                     date: data.date.split('T')[0], // Format date input
                     field: data.field,
                     summary: data.summary || '',
-                    fileUrl: data.fileUrl,
-                    file: null,
-                    fileType: data.fileType,
+                    fileUrl: fileUrls[0] || '', // Keep first URL for backward compatibility
+                    files: [],
+                    fileTypes: [],
                     isNew: data.isNew || false,
                 });
-                setFilePreview(data.fileUrl); // Preview existing URL
+                setFilePreviews(fileUrls); // Preview existing URLs
+                setPreviewFileTypes(fileTypes); // Store file types for preview
                 setLoading(false);
             } catch (err) {
                 setError((err as Error).message || 'Lỗi tải dữ liệu');
@@ -114,6 +125,9 @@ export default function UpdateDocumentPage() {
     const handleFiles = (files: FileList) => {
         const fileArray = Array.from(files).filter((file) =>
             [
+                'image/jpeg',
+                'image/png',
+                'image/gif',
                 'application/pdf',
                 'application/msword',
                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -121,23 +135,39 @@ export default function UpdateDocumentPage() {
         );
 
         if (fileArray.length === 0) {
-            setError('Vui lòng chọn file PDF, DOC hoặc DOCX');
+            setError('Vui lòng chọn file PDF, DOC, DOCX hoặc Hình ảnh');
             return;
         }
 
-        const file = fileArray[0];
+        // Determine file types for all selected files
+        const fileTypes = fileArray.map((file) => {
+            if (file.type.startsWith('image/')) {
+                return 'image';
+            }
+            return file.name.split('.').pop() || 'pdf';
+        });
+
+        // Create previews for all files
+        const previews = fileArray.map((file) => URL.createObjectURL(file));
+
         setFormData((prev) => ({
             ...prev,
-            file,
-            fileType: file.name.split('.').pop() as 'pdf' | 'doc' | 'docx',
+            files: fileArray,
+            fileTypes,
         }));
-        setFilePreview(URL.createObjectURL(file));
+        setFilePreviews(previews);
+        setPreviewFileTypes(fileTypes);
         setError('');
     };
 
-    const handleRemoveFile = () => {
-        setFormData((prev) => ({ ...prev, file: null, fileType: 'pdf' }));
-        setFilePreview(formData.fileUrl || null); // Back to old URL
+    const handleRemoveFile = (index: number) => {
+        setFormData((prev) => ({
+            ...prev,
+            files: prev.files.filter((_, i) => i !== index),
+            fileTypes: prev.fileTypes.filter((_, i) => i !== index),
+        }));
+        setFilePreviews((prev) => prev.filter((_, i) => i !== index));
+        setPreviewFileTypes((prev) => prev.filter((_, i) => i !== index));
     };
 
     const handleSave = async () => {
@@ -147,30 +177,33 @@ export default function UpdateDocumentPage() {
             return;
         }
 
-        const submitData = new FormData();
-        submitData.append('title', formData.title);
-        submitData.append('type', formData.type);
-        submitData.append('number', formData.number);
-        submitData.append('date', formData.date);
-        submitData.append('field', formData.field);
-        submitData.append('summary', formData.summary);
-        submitData.append('fileType', formData.fileType);
-        submitData.append('isNew', formData.isNew.toString());
-
-        if (formData.file) {
-            submitData.append('file', formData.file); // New file
-        }
-
         try {
+            const submitData = new FormData();
+            submitData.append('title', formData.title);
+            submitData.append('type', formData.type);
+            submitData.append('number', formData.number);
+            submitData.append('date', formData.date);
+            submitData.append('field', formData.field);
+            submitData.append('summary', formData.summary);
+            submitData.append('isNew', formData.isNew.toString());
+
+            // Append all new files with same key 'file'
+            for (let i = 0; i < formData.files.length; i++) {
+                submitData.append('file', formData.files[i]);
+                submitData.append(`fileType_${i}`, formData.fileTypes[i]);
+            }
+
             const res = await fetch(`/api/admin/documents/${documentId}`, {
                 method: 'PUT',
                 body: submitData,
             });
+
             if (!res.ok) {
                 const err = await res.json();
                 setError(err.error || 'Lỗi cập nhật tài liệu');
                 return;
             }
+
             router.push('/admin/documents');
         } catch (err) {
             setError((err as Error).message || 'Có lỗi xảy ra. Vui lòng thử lại.');
@@ -342,7 +375,7 @@ export default function UpdateDocumentPage() {
                         {/* File Upload - Drag & Drop */}
                         <Grid size={{ xs: 12 }}>
                             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-                                Tải lên tài liệu {formData.file ? '(Tùy chọn)' : '*'}
+                                Tải lên tài liệu {formData.files.length > 0 ? '(Tùy chọn)' : '(Tùy chọn)'}
                             </Typography>
                             <Box
                                 onDragEnter={handleDrag}
@@ -362,10 +395,11 @@ export default function UpdateDocumentPage() {
                             >
                                 <input
                                     type="file"
-                                    accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                    accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                                     onChange={handleFileInputChange}
                                     style={{ display: 'none' }}
                                     id="file-input"
+                                    multiple
                                 />
                                 <label htmlFor="file-input" style={{ cursor: 'pointer', display: 'block' }}>
                                     <CloudUploadIcon sx={{ fontSize: 48, color: 'var(--primary-color)', mb: 1 }} />
@@ -373,115 +407,133 @@ export default function UpdateDocumentPage() {
                                         Kéo thả tài liệu vào đây hoặc nhấp để chọn
                                     </Typography>
                                     <Typography variant="caption" sx={{ color: '#999' }}>
-                                        Hỗ trợ các định dạng: PDF, DOC, DOCX
+                                        Hỗ trợ các định dạng: PDF, DOC, DOCX, Hình ảnh
                                     </Typography>
                                 </label>
                             </Box>
                         </Grid>
 
-                        {/* File Preview - New File */}
-                        {filePreview && formData.file && (
+                        {/* File Previews - New Files */}
+                        {filePreviews.length > 0 && (
                             <Grid size={{ xs: 12 }}>
-                                <Card
-                                    sx={{
-                                        p: 2,
-                                        bgcolor: 'rgba(124, 179, 66, 0.05)',
-                                        border: '1px solid var(--primary-color)',
-                                    }}
-                                >
-                                    <Box
-                                        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-                                    >
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                            <Box
-                                                sx={{
-                                                    width: 40,
-                                                    height: 40,
-                                                    borderRadius: 1,
-                                                    bgcolor: 'var(--primary-color)',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    color: 'white',
-                                                    fontWeight: 700,
-                                                }}
-                                            >
-                                                {formData.fileType.toUpperCase().charAt(0)}
-                                            </Box>
-                                            <Box>
-                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                                    {filePreview}
-                                                </Typography>
-                                                <Typography variant="caption" sx={{ color: '#999' }}>
-                                                    Loại: {formData.fileType.toUpperCase()}
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                        <IconButton
-                                            size="small"
-                                            onClick={handleRemoveFile}
+                                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
+                                    Các file đã chọn ({filePreviews.length})
+                                </Typography>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    {filePreviews.map((preview, index) => (
+                                        <Card
+                                            key={index}
                                             sx={{
-                                                bgcolor: '#d32f2f',
-                                                color: '#fff',
-                                                '&:hover': { bgcolor: '#b71c1c' },
+                                                p: 2,
+                                                bgcolor: formData.files[index]
+                                                    ? 'rgba(124, 179, 66, 0.05)'
+                                                    : 'rgba(33, 150, 243, 0.05)',
+                                                border: formData.files[index]
+                                                    ? '1px solid var(--primary-color)'
+                                                    : '1px solid rgba(33, 150, 243, 0.3)',
                                             }}
                                         >
-                                            <CloseIcon />
-                                        </IconButton>
-                                    </Box>
-                                </Card>
-                            </Grid>
-                        )}
-
-                        {/* Existing File Display */}
-                        {!formData.file && (
-                            <Grid size={{ xs: 12 }}>
-                                <Card
-                                    sx={{
-                                        p: 2,
-                                        bgcolor: 'rgba(33, 150, 243, 0.05)',
-                                        border: '1px solid rgba(33, 150, 243, 0.3)',
-                                    }}
-                                >
-                                    <Box
-                                        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-                                    >
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                            <Box
-                                                sx={{
-                                                    width: 40,
-                                                    height: 40,
-                                                    borderRadius: 1,
-                                                    bgcolor: 'rgba(33, 150, 243, 0.8)',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    color: 'white',
-                                                    fontWeight: 700,
-                                                }}
-                                            >
-                                                {formData.fileType.toUpperCase().charAt(0)}
-                                            </Box>
-                                            <Box>
-                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                                    {filePreview}
-                                                </Typography>
-                                                <Typography variant="caption" sx={{ color: '#999' }}>
-                                                    File hiện tại - Loại: {formData.fileType.toUpperCase()}
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                        <Button
-                                            size="small"
-                                            variant="outlined"
-                                            color="error"
-                                            onClick={handleRemoveFile}
-                                            sx={{ minWidth: 'auto' }}
-                                        >
-                                            Thay thế
-                                        </Button>
-                                    </Box>
-                                </Card>
+                                            {previewFileTypes[index] === 'image' ? (
+                                                // Image Preview
+                                                <Box sx={{ position: 'relative' }}>
+                                                    <Box
+                                                        component="img"
+                                                        src={preview}
+                                                        alt="Preview"
+                                                        sx={{
+                                                            width: '100%',
+                                                            maxHeight: 300,
+                                                            objectFit: 'contain',
+                                                            borderRadius: 1,
+                                                            mb: 2,
+                                                        }}
+                                                    />
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'space-between',
+                                                        }}
+                                                    >
+                                                        <Box>
+                                                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                                {formData.files[index]?.name || 'Hình ảnh hiện tại'}
+                                                            </Typography>
+                                                            <Typography variant="caption" sx={{ color: '#999' }}>
+                                                                Loại: Hình ảnh
+                                                                {formData.files[index] && ' (mới)'}
+                                                            </Typography>
+                                                        </Box>
+                                                        {formData.files[index] && (
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() => handleRemoveFile(index)}
+                                                                sx={{
+                                                                    bgcolor: '#d32f2f',
+                                                                    color: '#fff',
+                                                                    '&:hover': { bgcolor: '#b71c1c' },
+                                                                }}
+                                                            >
+                                                                <CloseIcon />
+                                                            </IconButton>
+                                                        )}
+                                                    </Box>
+                                                </Box>
+                                            ) : (
+                                                // File Preview
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-between',
+                                                    }}
+                                                >
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                        <Box
+                                                            sx={{
+                                                                width: 40,
+                                                                height: 40,
+                                                                borderRadius: 1,
+                                                                bgcolor: formData.files[index]
+                                                                    ? 'var(--primary-color)'
+                                                                    : 'rgba(33, 150, 243, 0.8)',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                color: 'white',
+                                                                fontWeight: 700,
+                                                            }}
+                                                        >
+                                                            {previewFileTypes[index]?.toUpperCase().charAt(0) || '?'}
+                                                        </Box>
+                                                        <Box>
+                                                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                                {formData.files[index]?.name || 'File hiện tại'}
+                                                            </Typography>
+                                                            <Typography variant="caption" sx={{ color: '#999' }}>
+                                                                Loại: {previewFileTypes[index]?.toUpperCase() || 'UNKNOWN'}
+                                                                {formData.files[index] && ' (mới)'}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Box>
+                                                    {formData.files[index] && (
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleRemoveFile(index)}
+                                                            sx={{
+                                                                bgcolor: '#d32f2f',
+                                                                color: '#fff',
+                                                                '&:hover': { bgcolor: '#b71c1c' },
+                                                            }}
+                                                        >
+                                                            <CloseIcon />
+                                                        </IconButton>
+                                                    )}
+                                                </Box>
+                                            )}
+                                        </Card>
+                                    ))}
+                                </Box>
                             </Grid>
                         )}
 
