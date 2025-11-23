@@ -97,15 +97,11 @@ export default function DocumentsPage() {
     };
 
     const handlePrevImage = () => {
-        setSelectedImageIndex((prev) =>
-            prev === 0 ? selectedImageUrls.length - 1 : prev - 1
-        );
+        setSelectedImageIndex((prev) => (prev === 0 ? selectedImageUrls.length - 1 : prev - 1));
     };
 
     const handleNextImage = () => {
-        setSelectedImageIndex((prev) =>
-            prev === selectedImageUrls.length - 1 ? 0 : prev + 1
-        );
+        setSelectedImageIndex((prev) => (prev === selectedImageUrls.length - 1 ? 0 : prev + 1));
     };
 
     // Load filters
@@ -275,7 +271,7 @@ export default function DocumentsPage() {
                                                     fontWeight: 600,
                                                 }}
                                             />
-                                            <Chip label={doc.number} size="small" variant="outlined" />
+                                            {doc.number && <Chip label={doc.number} size="small" variant="outlined" />}
                                             <Chip label={doc.field} size="small" color="default" />
                                             {doc.isNew && (
                                                 <Chip
@@ -301,13 +297,17 @@ export default function DocumentsPage() {
                                     <Grid size={{ xs: 12, md: 4 }} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
                                         {doc.files && doc.files.length > 0 && (
                                             <>
-                                                {doc.files.some(f => f.fileType === 'image') ? (
+                                                {doc.files.some((f) => f.fileType === 'image') ? (
                                                     <Button
                                                         variant="contained"
                                                         startIcon={<ImageIcon />}
-                                                        onClick={() => handleOpenImageGallery(
-                                                            doc.files.filter(f => f.fileType === 'image').map(f => f.fileUrl)
-                                                        )}
+                                                        onClick={() =>
+                                                            handleOpenImageGallery(
+                                                                doc.files
+                                                                    .filter((f) => f.fileType === 'image')
+                                                                    .map((f) => f.fileUrl),
+                                                            )
+                                                        }
                                                         sx={{
                                                             bgcolor: 'var(--primary-color)',
                                                             '&:hover': { bgcolor: 'var(--accent-color)' },

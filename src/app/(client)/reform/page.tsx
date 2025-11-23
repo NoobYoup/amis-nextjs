@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -10,6 +11,11 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import IconButton from '@mui/material/IconButton';
 import DownloadIcon from '@mui/icons-material/Download';
 import PublicIcon from '@mui/icons-material/Public';
 import PeopleIcon from '@mui/icons-material/People';
@@ -17,80 +23,156 @@ import SchoolIcon from '@mui/icons-material/School';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import ImageIcon from '@mui/icons-material/Image';
+import CloseIcon from '@mui/icons-material/Close';
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { toast } from 'react-toastify';
 
+interface ReformFile {
+    id: string;
+    fileUrl: string;
+    fileType: string;
+    order: number;
+}
+
+interface Reform {
+    id: string;
+    title: string;
+    description: string;
+    details: string[];
+    createdAt: string;
+    updatedAt: string;
+    files: ReformFile[];
+}
+
 interface DisclosureItem {
-    id: number;
+    id: string;
     title: string;
     icon: React.ReactNode;
     description: string;
     details: string[];
-    downloadUrl?: string;
+    files: ReformFile[];
 }
 
 export default function Reform() {
-    const disclosureItems: DisclosureItem[] = [
-        {
-            id: 1,
-            title: 'Thông tin về đội ngũ giáo viên, cán bộ quản lý và nhân viên',
-            icon: <PeopleIcon />,
-            description: 'Công khai đầy đủ thông tin về đội ngũ nhân sự của nhà trường',
-            details: [
-                'Danh sách giáo viên với trình độ, chuyên môn',
-                'Thông tin cán bộ quản lý và chức vụ',
-                'Thông tin nhân viên hành chính, kỹ thuật',
-                'Lịch sử công tác và bằng cấp',
-                'Các giải thưởng, khen thưởng',
-            ],
-            downloadUrl: '/files/thong-tin-doi-ngu.pdf',
-        },
-        {
-            id: 2,
-            title: 'Thông tin về cơ sở vật chất và tài liệu học tập sử dụng chung',
-            icon: <SchoolIcon />,
-            description: 'Công khai thông tin về cơ sở vật chất và tài liệu học tập',
-            details: [
-                'Danh sách phòng học, phòng chuyên môn',
-                'Trang thiết bị dạy học hiện có',
-                'Thư viện, tài liệu tham khảo',
-                'Phòng máy tính, phòng thí nghiệm',
-                'Các tiện ích phục vụ học sinh',
-            ],
-            downloadUrl: '/files/co-so-vat-chat.pdf',
-        },
-        {
-            id: 3,
-            title: 'Thông tin về kết quả đánh giá và kiểm định chất lượng giáo dục',
-            icon: <VerifiedUserIcon />,
-            description: 'Công khai kết quả đánh giá chất lượng giáo dục định kỳ',
-            details: [
-                'Kết quả đánh giá chất lượng ngoài nhà trường',
-                'Kết quả kiểm định chất lượng giáo dục',
-                'Báo cáo tự đánh giá chất lượng',
-                'Kết quả khảo sát sự hài lòng của phụ huynh',
-                'Kế hoạch cải thiện chất lượng',
-            ],
-            downloadUrl: '/files/ket-qua-danh-gia.pdf',
-        },
-        {
-            id: 4,
-            title: 'Thông tin về kết quả giáo dục thực tế của năm học trước',
-            icon: <AssignmentIcon />,
-            description: 'Công khai kết quả học tập và rèn luyện của học sinh',
-            details: [
-                'Tỷ lệ học sinh đạt các mức độ học lực',
-                'Tỷ lệ học sinh đạt các mức độ hạnh kiểm',
-                'Kết quả thi tuyển sinh vào cấp trên',
-                'Tỷ lệ học sinh hoàn thành chương trình',
-                'Kết quả các cuộc thi, hội thi',
-            ],
-            downloadUrl: '/files/ket-qua-giao-duc.pdf',
-        },
-    ];
+    const [reforms, setReforms] = useState<Reform[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [openImageGallery, setOpenImageGallery] = useState(false);
+    const [selectedImageUrls, setSelectedImageUrls] = useState<string[]>([]);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    const [downloading, setDownloading] = useState<string | null>(null);
 
-    const handleDownload = () => {
-        toast.info('Chức năng này đang phát triển');
+    // Default icons for different types of reforms
+    const getIcon = (index: number) => {
+        const icons = [<PeopleIcon />, <SchoolIcon />, <VerifiedUserIcon />, <AssignmentIcon />];
+        return icons[index % icons.length];
     };
+
+    useEffect(() => {
+        const loadReforms = async () => {
+            try {
+                const response = await fetch('/api/reforms');
+                if (!response.ok) throw new Error('Error loading reforms');
+
+                const { data } = await response.json();
+                setReforms(data || []);
+            } catch (err) {
+                console.error('Error loading reforms:', err);
+                setError('Có lỗi xảy ra khi tải thông tin công khai');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadReforms();
+    }, []);
+
+    // Convert reforms to disclosure items format
+    const disclosureItems: DisclosureItem[] = reforms.map((reform, index) => ({
+        id: reform.id,
+        title: reform.title,
+        icon: getIcon(index),
+        description: reform.description,
+        details: reform.details,
+        files: reform.files,
+    }));
+
+    const handleDownload = async (reform: Reform, fileType: string) => {
+        setDownloading(reform.id);
+        try {
+            const firstFile = reform.files.find((f) => f.fileType !== 'image') || reform.files[0];
+            const response = await fetch(`/api/download?url=${encodeURIComponent(firstFile.fileUrl)}`);
+
+            if (!response.ok) {
+                throw new Error('Download failed');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${reform.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${fileType}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Download error:', error);
+            toast.error('Lỗi khi tải file. Vui lòng thử lại.');
+        } finally {
+            setDownloading(null);
+        }
+    };
+
+    const handleOpenImageGallery = (imageUrls: string[]) => {
+        setSelectedImageUrls(imageUrls);
+        setSelectedImageIndex(0);
+        setOpenImageGallery(true);
+    };
+
+    const handleCloseImageGallery = () => {
+        setOpenImageGallery(false);
+        setSelectedImageUrls([]);
+        setSelectedImageIndex(0);
+    };
+
+    const handlePrevImage = () => {
+        setSelectedImageIndex((prev) => (prev === 0 ? selectedImageUrls.length - 1 : prev - 1));
+    };
+
+    const handleNextImage = () => {
+        setSelectedImageIndex((prev) => (prev === selectedImageUrls.length - 1 ? 0 : prev + 1));
+    };
+
+    if (loading) {
+        return (
+            <Box
+                sx={{
+                    bgcolor: 'var(--background)',
+                    minHeight: '100vh',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }}
+            >
+                <CircularProgress size={60} sx={{ color: 'var(--primary-color)' }} />
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Box sx={{ bgcolor: 'var(--background)', minHeight: '100vh', py: 8 }}>
+                <Container maxWidth="lg">
+                    <Alert severity="error" sx={{ mb: 4 }}>
+                        {error}
+                    </Alert>
+                </Container>
+            </Box>
+        );
+    }
 
     return (
         <Box sx={{ bgcolor: 'var(--background)', minHeight: '100vh' }}>
@@ -225,30 +307,58 @@ export default function Reform() {
                                     </List>
                                 </Box>
 
-                                {/* Card Footer - Download Button */}
-                                {item.downloadUrl && (
+                                {/* Card Footer - File Actions */}
+                                {item.files && item.files.length > 0 && (
                                     <Box
                                         sx={{
                                             p: 2,
                                             borderTop: '1px solid #e0e0e0',
                                             bgcolor: '#f9f9f9',
+                                            display: 'flex',
+                                            gap: 1,
                                         }}
                                     >
-                                        <Button
-                                            fullWidth
-                                            variant="contained"
-                                            startIcon={<DownloadIcon />}
-                                            // href={item.downloadUrl}
-                                            sx={{
-                                                bgcolor: 'var(--primary-color)',
-                                                '&:hover': {
-                                                    bgcolor: 'var(--accent-color)',
-                                                },
-                                            }}
-                                            onClick={handleDownload}
-                                        >
-                                            Tải Về PDF
-                                        </Button>
+                                        {item.files.some((f) => f.fileType === 'image') && (
+                                            <Button
+                                                variant="contained"
+                                                startIcon={<ImageIcon />}
+                                                onClick={() =>
+                                                    handleOpenImageGallery(
+                                                        item.files
+                                                            .filter((f) => f.fileType === 'image')
+                                                            .map((f) => f.fileUrl),
+                                                    )
+                                                }
+                                                sx={{
+                                                    bgcolor: 'var(--primary-color)',
+                                                    '&:hover': { bgcolor: 'var(--accent-color)' },
+                                                    flex: 1,
+                                                }}
+                                            >
+                                                Xem Hình Ảnh
+                                            </Button>
+                                        )}
+                                        {item.files.some((f) => f.fileType !== 'image') && (
+                                            <Button
+                                                variant="contained"
+                                                startIcon={<DownloadIcon />}
+                                                disabled={downloading === item.id}
+                                                onClick={() => {
+                                                    const reform = reforms.find((r) => r.id === item.id);
+                                                    const nonImageFile = item.files.find((f) => f.fileType !== 'image');
+                                                    if (reform && nonImageFile) {
+                                                        handleDownload(reform, nonImageFile.fileType);
+                                                    }
+                                                }}
+                                                sx={{
+                                                    bgcolor: 'var(--primary-color)',
+                                                    '&:hover': { bgcolor: 'var(--accent-color)' },
+                                                    flex: 1,
+                                                }}
+                                            >
+                                                {downloading === item.id ? 'Đang tải...' : 'Tải xuống PDF'}
+                                            </Button>
+                                        )}
                                     </Box>
                                 )}
                             </Card>
@@ -299,6 +409,104 @@ export default function Reform() {
                         </Button>
                     </Box>
                 </Card>
+
+                {/* Image Gallery Modal */}
+                <Dialog
+                    open={openImageGallery}
+                    onClose={handleCloseImageGallery}
+                    maxWidth="lg"
+                    fullWidth
+                    PaperProps={{
+                        sx: {
+                            bgcolor: 'rgba(0, 0, 0, 0.95)',
+                            boxShadow: 'none',
+                        },
+                    }}
+                >
+                    <DialogContent sx={{ position: 'relative', p: 0, overflow: 'hidden' }}>
+                        <IconButton
+                            onClick={handleCloseImageGallery}
+                            sx={{
+                                position: 'absolute',
+                                top: 16,
+                                right: 16,
+                                color: 'white',
+                                bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                zIndex: 1,
+                                '&:hover': {
+                                    bgcolor: 'rgba(0, 0, 0, 0.7)',
+                                },
+                            }}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+
+                        <Box
+                            sx={{
+                                position: 'relative',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                minHeight: '80vh',
+                            }}
+                        >
+                            {selectedImageUrls.length > 0 && (
+                                <>
+                                    <IconButton
+                                        onClick={handlePrevImage}
+                                        sx={{
+                                            position: 'absolute',
+                                            left: 16,
+                                            color: 'white',
+                                            bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                            '&:hover': {
+                                                bgcolor: 'rgba(0, 0, 0, 0.7)',
+                                            },
+                                        }}
+                                    >
+                                        <NavigateBeforeIcon sx={{ fontSize: 40 }} />
+                                    </IconButton>
+
+                                    <Box
+                                        component="img"
+                                        src={selectedImageUrls[selectedImageIndex]}
+                                        alt={`Image ${selectedImageIndex + 1}`}
+                                        sx={{
+                                            maxWidth: '100%',
+                                            maxHeight: '80vh',
+                                            objectFit: 'contain',
+                                        }}
+                                    />
+
+                                    <IconButton
+                                        onClick={handleNextImage}
+                                        sx={{
+                                            position: 'absolute',
+                                            right: 16,
+                                            color: 'white',
+                                            bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                            '&:hover': {
+                                                bgcolor: 'rgba(0, 0, 0, 0.7)',
+                                            },
+                                        }}
+                                    >
+                                        <NavigateNextIcon sx={{ fontSize: 40 }} />
+                                    </IconButton>
+                                </>
+                            )}
+                        </Box>
+
+                        <Typography
+                            sx={{
+                                textAlign: 'center',
+                                color: 'white',
+                                py: 2,
+                            }}
+                        >
+                            {selectedImageIndex + 1} / {selectedImageUrls.length}
+                        </Typography>
+                    </DialogContent>
+                </Dialog>
             </Container>
         </Box>
     );

@@ -47,6 +47,12 @@ const menuItems: SidebarMenuItem[] = [
         ],
     },
     {
+        id: 'reforms',
+        label: 'Thông tin công khai',
+        icon: EventNoteIcon,
+        subItems: [{ id: 'reforms-list', label: 'Danh sách thông tin công khai', href: '/admin/reforms' }],
+    },
+    {
         id: 'tuition',
         label: 'Học phí',
         icon: AttachMoneyIcon,

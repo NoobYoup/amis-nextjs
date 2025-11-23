@@ -62,7 +62,7 @@ export default function ActivityDetailPage() {
                     return;
                 }
                 const data = await res.json();
-                console.log(data);
+
                 setActivity(data);
 
                 // Load related activities

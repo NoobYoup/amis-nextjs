@@ -10,7 +10,8 @@
         "check:users": "tsx scripts/checkUsers.ts",
         "create:admin": "tsx scripts/seedAdmin.ts",
         "seed": "tsx scripts/seedData.ts",
-        "seed:categories": "tsx scripts/seedDocumentCategories.ts"
+        "seed:categories": "tsx scripts/seedDocumentCategories.ts",
+        "seed:reforms": "tsx scripts/seedReforms.ts"
     },
     "dependencies": {
         "@emotion/cache": "^11.14.0",

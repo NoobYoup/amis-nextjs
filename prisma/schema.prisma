@@ -137,3 +137,36 @@ model DocumentCategory {
   @@index([type])
   @@map("document_categories")
 }
+
+// Reform model - for public disclosure information
+model Reform {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text
+  details     Json     // Array of detail strings
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationship with files
+  files ReformFile[]
+
+  @@map("reforms")
+}
+
+// ReformFile model - for storing multiple files per reform
+model ReformFile {
+  id       String @id @default(uuid())
+  fileUrl  String
+  fileType String // 'image', 'pdf', 'doc', 'docx', etc.
+  order    Int    @default(0)
+
+  // Foreign key
+  reformId String
+  reform   Reform @relation(fields: [reformId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([reformId])
+  @@map("reform_files")
+}
