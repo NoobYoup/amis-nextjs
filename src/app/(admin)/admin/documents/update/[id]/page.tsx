@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import {
     Box,
@@ -25,8 +25,11 @@ import {
     Close as CloseIcon,
 } from '@mui/icons-material';
 
-const documentTypes = ['Thông tư', 'Quyết định', 'Quy chế', 'Kế hoạch', 'Quy định', 'Hướng dẫn'];
-const documentFields = ['Quản lý giáo dục', 'Tuyển sinh', 'Đánh giá', 'Kế hoạch', 'Học sinh', 'Chương trình'];
+interface DocumentCategory {
+    id: string;
+    name: string;
+    type: 'document_type' | 'document_field';
+}
 
 export default function UpdateDocumentPage() {
     const router = useRouter();
@@ -48,7 +51,50 @@ export default function UpdateDocumentPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
     const [filePreviews, setFilePreviews] = useState<string[]>([]);
+    const [submitLoading, setSubmitLoading] = useState(false);
+
+    // Categories state
+    const [documentTypes, setDocumentTypes] = useState<string[]>([]);
+    const [documentFields, setDocumentFields] = useState<string[]>([]);
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
     const [previewFileTypes, setPreviewFileTypes] = useState<string[]>([]);
+
+    // Load categories from API
+    const loadCategories = useCallback(async () => {
+        try {
+            setCategoriesLoading(true);
+            const response = await fetch('/api/admin/categories/document');
+            if (!response.ok) throw new Error('Error loading categories');
+
+            const { data } = await response.json();
+            const categories: DocumentCategory[] = data || [];
+
+            // Separate types and fields
+            const types = categories
+                .filter((cat) => cat.type === 'document_type')
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((cat) => cat.name);
+
+            const fields = categories
+                .filter((cat) => cat.type === 'document_field')
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((cat) => cat.name);
+
+            setDocumentTypes(types);
+            setDocumentFields(fields);
+        } catch (err) {
+            console.error('Error loading categories:', err);
+            // Fallback to hardcoded values if API fails
+            setDocumentTypes(['Thông tư', 'Quyết định', 'Quy chế', 'Kế hoạch', 'Quy định', 'Hướng dẫn']);
+            setDocumentFields(['Quản lý giáo dục', 'Tuyển sinh', 'Đánh giá', 'Kế hoạch', 'Học sinh', 'Chương trình']);
+        } finally {
+            setCategoriesLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        loadCategories();
+    }, [loadCategories]);
 
     useEffect(() => {
         const loadDocument = async () => {
@@ -56,7 +102,7 @@ export default function UpdateDocumentPage() {
                 const res = await fetch(`/api/admin/documents/${documentId}`);
                 if (!res.ok) throw new Error('Error loading document');
                 const data = await res.json();
-                
+
                 // Extract file URLs and types from files array
                 interface FileItem {
                     fileUrl: string;
@@ -64,7 +110,7 @@ export default function UpdateDocumentPage() {
                 }
                 const fileUrls = data.files?.map((f: FileItem) => f.fileUrl) || [];
                 const fileTypes = data.files?.map((f: FileItem) => f.fileType) || [];
-                
+
                 setFormData({
                     title: data.title,
                     type: data.type,
@@ -511,7 +557,8 @@ export default function UpdateDocumentPage() {
                                                                 {formData.files[index]?.name || 'File hiện tại'}
                                                             </Typography>
                                                             <Typography variant="caption" sx={{ color: '#999' }}>
-                                                                Loại: {previewFileTypes[index]?.toUpperCase() || 'UNKNOWN'}
+                                                                Loại:{' '}
+                                                                {previewFileTypes[index]?.toUpperCase() || 'UNKNOWN'}
                                                                 {formData.files[index] && ' (mới)'}
                                                             </Typography>
                                                         </Box>

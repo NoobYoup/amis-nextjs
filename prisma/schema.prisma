@@ -124,3 +124,16 @@ model Tuition {
   @@index([type])
   @@map("tuitions")
 }
+
+// DocumentCategory model - for document types and fields
+model DocumentCategory {
+  id        String   @id @default(uuid())
+  name      String
+  type      String   // 'document_type' or 'document_field'
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, type])
+  @@index([type])
+  @@map("document_categories")
+}

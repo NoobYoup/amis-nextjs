@@ -64,8 +64,11 @@ interface Document {
     files: DocumentFile[];
 }
 
-const documentTypes = ['Thông tư', 'Quyết định', 'Quy chế', 'Kế hoạch', 'Quy định', 'Hướng dẫn'];
-const documentFields = ['Quản lý giáo dục', 'Tuyển sinh', 'Đánh giá', 'Kế hoạch', 'Học sinh', 'Chương trình'];
+interface DocumentCategory {
+    id: string;
+    name: string;
+    type: 'document_type' | 'document_field';
+}
 
 export default function DocumentsPage() {
     const router = useRouter();
@@ -77,11 +80,49 @@ export default function DocumentsPage() {
     const [selectedType, setSelectedType] = useState('');
     const [selectedField, setSelectedField] = useState('');
     const [error, setError] = useState('');
+
+    // Categories state
+    const [documentTypes, setDocumentTypes] = useState<string[]>([]);
+    const [documentFields, setDocumentFields] = useState<string[]>([]);
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [openImageGallery, setOpenImageGallery] = useState(false);
     const [selectedImageUrls, setSelectedImageUrls] = useState<string[]>([]);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+    // Load categories from API
+    const loadCategories = useCallback(async () => {
+        try {
+            setCategoriesLoading(true);
+            const response = await fetch('/api/admin/categories/document');
+            if (!response.ok) throw new Error('Error loading categories');
+
+            const { data } = await response.json();
+            const categories: DocumentCategory[] = data || [];
+
+            // Separate types and fields
+            const types = categories
+                .filter((cat) => cat.type === 'document_type')
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((cat) => cat.name);
+
+            const fields = categories
+                .filter((cat) => cat.type === 'document_field')
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((cat) => cat.name);
+
+            setDocumentTypes(types);
+            setDocumentFields(fields);
+        } catch (err) {
+            console.error('Error loading categories:', err);
+            // Fallback to hardcoded values if API fails
+            setDocumentTypes(['Thông tư', 'Quyết định', 'Quy chế', 'Kế hoạch', 'Quy định', 'Hướng dẫn']);
+            setDocumentFields(['Quản lý giáo dục', 'Tuyển sinh', 'Đánh giá', 'Kế hoạch', 'Học sinh', 'Chương trình']);
+        } finally {
+            setCategoriesLoading(false);
+        }
+    }, []);
 
     const loadDocuments = useCallback(async () => {
         try {
@@ -101,6 +142,10 @@ export default function DocumentsPage() {
             setError((err as Error).message || 'Lỗi tải dữ liệu');
         }
     }, [page, searchQuery, selectedType, selectedField]);
+
+    useEffect(() => {
+        loadCategories();
+    }, [loadCategories]);
 
     useEffect(() => {
         loadDocuments();
@@ -161,17 +206,12 @@ export default function DocumentsPage() {
     };
 
     const handlePrevImage = () => {
-        setSelectedImageIndex((prev) =>
-            prev === 0 ? selectedImageUrls.length - 1 : prev - 1
-        );
+        setSelectedImageIndex((prev) => (prev === 0 ? selectedImageUrls.length - 1 : prev - 1));
     };
 
     const handleNextImage = () => {
-        setSelectedImageIndex((prev) =>
-            prev === selectedImageUrls.length - 1 ? 0 : prev + 1
-        );
+        setSelectedImageIndex((prev) => (prev === selectedImageUrls.length - 1 ? 0 : prev + 1));
     };
-
 
     return (
         <Box sx={{ py: 4, bgcolor: 'var(--background)', minHeight: '100vh' }}>
@@ -270,22 +310,26 @@ export default function DocumentsPage() {
                                         </IconButton>
                                         {doc.files && doc.files.length > 0 && (
                                             <>
-                                                {doc.files.some(f => f.fileType === 'image') ? (
+                                                {doc.files.some((f) => f.fileType === 'image') ? (
                                                     <IconButton
                                                         size="small"
-                                                        onClick={() => handleOpenImageGallery(
-                                                            doc.files.filter(f => f.fileType === 'image').map(f => f.fileUrl)
-                                                        )}
+                                                        onClick={() =>
+                                                            handleOpenImageGallery(
+                                                                doc.files
+                                                                    .filter((f) => f.fileType === 'image')
+                                                                    .map((f) => f.fileUrl),
+                                                            )
+                                                        }
                                                         title="Xem ảnh"
                                                         sx={{ color: 'var(--primary-color)' }}
                                                     >
                                                         <ImageIcon />
                                                     </IconButton>
                                                 ) : (
-                                                    <IconButton 
-                                                        size="small" 
-                                                        href={doc.files[0].fileUrl} 
-                                                        target="_blank" 
+                                                    <IconButton
+                                                        size="small"
+                                                        href={doc.files[0].fileUrl}
+                                                        target="_blank"
                                                         title="Tải xuống"
                                                     >
                                                         <DownloadIcon />

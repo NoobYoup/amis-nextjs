@@ -61,7 +61,10 @@ const menuItems: SidebarMenuItem[] = [
         id: 'documents',
         label: 'Tài liệu',
         icon: AttachFileIcon,
-        subItems: [{ id: 'documents-list', label: 'Danh sách tài liệu', href: '/admin/documents' }],
+        subItems: [
+            { id: 'documents-list', label: 'Danh sách tài liệu', href: '/admin/documents' },
+            { id: 'documents-categories', label: 'Danh mục tài liệu', href: '/admin/categories/document' },
+        ],
     },
     {
         id: 'settings',

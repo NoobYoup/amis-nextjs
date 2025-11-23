@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Box,
@@ -17,14 +17,14 @@ import {
     IconButton,
     CircularProgress,
 } from '@mui/material';
-import {
-    CloudUpload as CloudUploadIcon,
-    Close as CloseIcon,
-} from '@mui/icons-material';
+import { CloudUpload as CloudUploadIcon, Close as CloseIcon } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 
-const documentTypes = ['Thông tư', 'Quyết định', 'Quy chế', 'Kế hoạch', 'Quy định', 'Hướng dẫn'];
-const documentFields = ['Quản lý giáo dục', 'Tuyển sinh', 'Đánh giá', 'Kế hoạch', 'Học sinh', 'Chương trình'];
+interface DocumentCategory {
+    id: string;
+    name: string;
+    type: 'document_type' | 'document_field';
+}
 
 export default function AddDocumentPage() {
     const router = useRouter();
@@ -42,6 +42,48 @@ export default function AddDocumentPage() {
     const [dragActive, setDragActive] = useState(false);
     const [filePreviews, setFilePreviews] = useState<string[]>([]);
     const [submitLoading, setSubmitLoading] = useState(false);
+
+    // Categories state
+    const [documentTypes, setDocumentTypes] = useState<string[]>([]);
+    const [documentFields, setDocumentFields] = useState<string[]>([]);
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
+
+    // Load categories from API
+    const loadCategories = useCallback(async () => {
+        try {
+            setCategoriesLoading(true);
+            const response = await fetch('/api/admin/categories/document');
+            if (!response.ok) throw new Error('Error loading categories');
+
+            const { data } = await response.json();
+            const categories: DocumentCategory[] = data || [];
+
+            // Separate types and fields
+            const types = categories
+                .filter((cat) => cat.type === 'document_type')
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((cat) => cat.name);
+
+            const fields = categories
+                .filter((cat) => cat.type === 'document_field')
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((cat) => cat.name);
+
+            setDocumentTypes(types);
+            setDocumentFields(fields);
+        } catch (err) {
+            console.error('Error loading categories:', err);
+            // Fallback to hardcoded values if API fails
+            setDocumentTypes(['Thông tư', 'Quyết định', 'Quy chế', 'Kế hoạch', 'Quy định', 'Hướng dẫn']);
+            setDocumentFields(['Quản lý giáo dục', 'Tuyển sinh', 'Đánh giá', 'Kế hoạch', 'Học sinh', 'Chương trình']);
+        } finally {
+            setCategoriesLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        loadCategories();
+    }, [loadCategories]);
 
     const handleChange = (field: keyof typeof formData, value: string | File | null | boolean) => {
         setFormData((prev) => ({ ...prev, [field]: value }));

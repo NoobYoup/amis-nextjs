@@ -84,12 +84,12 @@ export async function POST(req: NextRequest) {
     // Get all files from formData (multiple files with same key)
     const files: File[] = [];
     const fileTypes: string[] = [];
-    
+
     // Iterate through formData to get all files
     for (const [key, value] of formData.entries()) {
         if (key === 'file' && value instanceof File) {
             files.push(value);
-            const ft = formData.get(`fileType_${files.length - 1}`) as string || 'pdf';
+            const ft = (formData.get(`fileType_${files.length - 1}`) as string) || 'pdf';
             fileTypes.push(ft);
         }
     }
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Validation
-    if (!title || !type || !number || !date || !field) {
+    if (!title || !type || !date || !field) {
         return NextResponse.json({ error: 'Vui lòng điền đầy đủ thông tin' }, { status: 400 });
     }
 
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
         // Upload files and create DocumentFile records
         for (let i = 0; i < files.length; i++) {
             const fileUrl = await uploadToCloudinary(files[i], fileTypes[i]);
-            
+
             await prisma.documentFile.create({
                 data: {
                     documentId: document.id,
@@ -142,9 +142,9 @@ export async function DELETE(req: NextRequest) {
 
     if (!id) return NextResponse.json({ error: 'Vui lòng chọn tài liệu' }, { status: 400 });
 
-    const document = await prisma.document.findUnique({ 
+    const document = await prisma.document.findUnique({
         where: { id },
-        include: { files: true }
+        include: { files: true },
     });
     if (!document) return NextResponse.json({ error: 'Tài liệu không tồn tại' }, { status: 404 });
 
