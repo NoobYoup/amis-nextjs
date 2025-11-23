@@ -46,6 +46,8 @@ export default function UpdateActivityPage() {
     });
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+    const [existingImages, setExistingImages] = useState<string[]>([]);
+    const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
     const [dragActive, setDragActive] = useState(false);
     const [error, setError] = useState('');
     const [categories, setCategories] = useState<Category[]>([]);
@@ -91,6 +93,7 @@ export default function UpdateActivityPage() {
                     images: data.images || [],
                     videos: data.videos || [],
                 });
+                setExistingImages(data.images || []);
                 setImagePreviews(data.images || []);
                 setThumbnailPreview(data.thumbnail || data.images?.[0] || null);
                 setLoading(false);
@@ -103,7 +106,7 @@ export default function UpdateActivityPage() {
         if (activityId) {
             loadActivity();
         }
-    }, [activityId]); // Now we only need activityId as a dependency
+    }, [activityId]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -131,44 +134,50 @@ export default function UpdateActivityPage() {
 
         const files = e.dataTransfer.files;
         if (files && files.length > 0) {
-            handleFiles(files);
+            handleImageUpload(files);
         }
     };
 
     const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
-            handleFiles(e.target.files);
+            handleImageUpload(e.target.files);
         }
     };
 
-    const handleFiles = (files: FileList) => {
-        const fileArray = Array.from(files).filter((file) => file.type.startsWith('image/'));
-        const newPreviews: string[] = [];
-        for (const file of fileArray) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                if (e.target?.result) {
-                    newPreviews.push(e.target.result as string);
-                    if (newPreviews.length === fileArray.length) {
-                        setImagePreviews((prev) => [...prev, ...newPreviews]);
-                        setFormData((prev) => ({
-                            ...prev,
-                            images: [...(prev.images || []), ...fileArray],
-                        }));
-                    }
-                }
-            };
-            reader.readAsDataURL(file);
+    const handleImageUpload = (files: FileList) => {
+        const newFiles = Array.from(files);
+        const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+
+        setNewImageFiles((prev) => [...prev, ...newFiles]);
+        setImagePreviews((prev) => [...prev, ...newPreviews]);
+
+        if (!thumbnailPreview && newPreviews.length > 0) {
+            setThumbnailPreview(newPreviews[0]);
         }
     };
 
     const handleRemoveImage = (index: number) => {
+        const imageUrl = imagePreviews[index];
+
+        // Check if it's an existing image or new file
+        const existingIndex = existingImages.indexOf(imageUrl);
+        if (existingIndex !== -1) {
+            // Remove from existing images
+            setExistingImages((prev) => prev.filter((_, i) => i !== existingIndex));
+        } else {
+            // Remove from new files
+            const newFileIndex = imagePreviews.slice(existingImages.length).indexOf(imageUrl);
+            if (newFileIndex !== -1) {
+                setNewImageFiles((prev) => prev.filter((_, i) => i !== newFileIndex));
+                // Revoke object URL to prevent memory leaks
+                URL.revokeObjectURL(imageUrl);
+            }
+        }
+
         setImagePreviews((prev) => prev.filter((_, i) => i !== index));
-        setFormData((prev) => ({
-            ...prev,
-            images: (prev.images || []).filter((_, i) => i !== index),
-        }));
-        if (thumbnailPreview === imagePreviews[index]) setThumbnailPreview(null);
+        if (thumbnailPreview === imageUrl) {
+            setThumbnailPreview(imagePreviews.length > 1 ? imagePreviews[0] : null);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -184,9 +193,12 @@ export default function UpdateActivityPage() {
         submitData.append('author', formData.author || '');
         submitData.append('videos', formData.videos?.join('\n') || '');
 
-        // Chỉ append new files (giả sử images array là files mới + old URLs, nhưng backend append)
-        formData.images?.forEach((item) => {
-            if (item instanceof File) submitData.append('images', item);
+        // Send existing images that should be kept
+        submitData.append('existingImages', JSON.stringify(existingImages));
+
+        // Send new image files
+        newImageFiles.forEach((file) => {
+            submitData.append('images', file);
         });
 
         try {

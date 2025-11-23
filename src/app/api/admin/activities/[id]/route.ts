@@ -48,15 +48,16 @@ export async function PUT(
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
     const categoryId = formData.get('category') as string;
-    const date = new Date(formData.get('date') as string);
+    const date = formData.get('date') as string;
     const author = formData.get('author') as string;
-    const videosStr = (formData.get('videos') as string) || '';
-    const videos = videosStr.split('\n').filter(Boolean);
-
-    const imagesFiles = formData.getAll('images') as File[];
+    const videosString = formData.get('videos') as string;
+    const videos = videosString ? videosString.split('\n').filter(Boolean) : [];
+    const imageFiles = formData.getAll('images') as File[];
+    const existingImagesString = formData.get('existingImages') as string;
+    const existingImages = existingImagesString ? JSON.parse(existingImagesString) : [];
     const newImageUrls: string[] = [];
 
-    for (const file of imagesFiles) {
+    for (const file of imageFiles) {
         if (file) {
             const url = await uploadToCloudinary(file);
             newImageUrls.push(url);
@@ -66,9 +67,33 @@ export async function PUT(
     const activity = await prisma.activity.findUnique({ where: { id } });
     if (!activity) return NextResponse.json({ error: 'Activity not found' }, { status: 404 });
 
-    const existingImages = (activity.images as string[]) || [];
-    const updatedImages = newImageUrls.length ? [...existingImages, ...newImageUrls] : existingImages;
-    const updatedThumbnail = newImageUrls[0] || activity.thumbnail;
+    const oldImages = (activity.images as string[]) || [];
+
+    // Combine existing images (that user wants to keep) with new uploaded images
+    const updatedImages = [...existingImages, ...newImageUrls];
+
+    // Find images that need to be deleted from Cloudinary
+    const imagesToDelete = oldImages.filter((img) => !existingImages.includes(img));
+
+    // Delete unused images from Cloudinary
+    for (const imageUrl of imagesToDelete) {
+        try {
+            const publicId = imageUrl.split('/').pop()?.split('.')[0];
+            if (publicId) {
+                await cloudinary.uploader.destroy(publicId);
+            }
+        } catch (error) {
+            console.error('Error deleting image from Cloudinary:', error);
+        }
+    }
+
+    // Update thumbnail - use first image from updated list or keep existing if still valid
+    const updatedThumbnail =
+        updatedImages.length > 0
+            ? existingImages.includes(activity.thumbnail)
+                ? activity.thumbnail
+                : updatedImages[0]
+            : null;
 
     const updatedActivity = await prisma.activity.update({
         where: { id },

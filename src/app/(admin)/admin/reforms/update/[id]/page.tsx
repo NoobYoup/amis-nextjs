@@ -17,6 +17,9 @@ import {
     Chip,
     Alert,
     CircularProgress,
+    Dialog,
+    DialogContent,
+    CardMedia,
 } from '@mui/material';
 import {
     ArrowBack as ArrowBackIcon,
@@ -25,6 +28,9 @@ import {
     Close as CloseIcon,
     Add as AddIcon,
     Delete as DeleteIcon,
+    Visibility as VisibilityIcon,
+    NavigateBefore as NavigateBeforeIcon,
+    NavigateNext as NavigateNextIcon,
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 
@@ -45,6 +51,8 @@ export default function UpdateReformPage() {
     const [filePreviews, setFilePreviews] = useState<string[]>([]);
     const [submitLoading, setSubmitLoading] = useState(false);
     const [existingFiles, setExistingFiles] = useState<any[]>([]);
+    const [openImageGallery, setOpenImageGallery] = useState(false);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
     useEffect(() => {
         const loadReform = async () => {
@@ -159,12 +167,64 @@ export default function UpdateReformPage() {
     };
 
     const handleRemoveFile = (index: number) => {
-        setFormData((prev) => ({
-            ...prev,
-            files: prev.files.filter((_, i) => i !== index),
-            fileTypes: prev.fileTypes.filter((_, i) => i !== index),
-        }));
-        setFilePreviews((prev) => prev.filter((_, i) => i !== index));
+        const newFiles = formData.files.filter((_, i) => i !== index);
+        const newFileTypes = formData.fileTypes.filter((_, i) => i !== index);
+        const newPreviews = filePreviews.filter((_, i) => i !== index);
+
+        setFormData({ ...formData, files: newFiles, fileTypes: newFileTypes });
+        setFilePreviews(newPreviews);
+    };
+
+    const handleOpenImageGallery = (index: number) => {
+        setSelectedImageIndex(index);
+        setOpenImageGallery(true);
+    };
+
+    const handleCloseImageGallery = () => {
+        setOpenImageGallery(false);
+        setSelectedImageIndex(0);
+    };
+
+    const handlePrevImage = () => {
+        const imageIndexes = getImageIndexes();
+        const currentPos = imageIndexes.indexOf(selectedImageIndex);
+        const newPos = currentPos === 0 ? imageIndexes.length - 1 : currentPos - 1;
+        setSelectedImageIndex(imageIndexes[newPos]);
+    };
+
+    const handleNextImage = () => {
+        const imageIndexes = getImageIndexes();
+        const currentPos = imageIndexes.indexOf(selectedImageIndex);
+        const newPos = currentPos === imageIndexes.length - 1 ? 0 : currentPos + 1;
+        setSelectedImageIndex(imageIndexes[newPos]);
+    };
+
+    const getImageIndexes = () => {
+        const allPreviews = [...existingFiles.map((f) => f.fileUrl), ...filePreviews];
+        return allPreviews
+            .map((_, index) => index)
+            .filter((index) => {
+                const fileType =
+                    index < existingFiles.length
+                        ? existingFiles[index].fileType
+                        : formData.fileTypes[index - existingFiles.length];
+                return fileType === 'image';
+            });
+    };
+
+    const getAllImagePreviews = () => {
+        return [...existingFiles.map((f) => f.fileUrl), ...filePreviews].filter((_, index) => {
+            const fileType =
+                index < existingFiles.length
+                    ? existingFiles[index].fileType
+                    : formData.fileTypes[index - existingFiles.length];
+            return fileType === 'image';
+        });
+    };
+
+    const handleRemoveExistingFile = (index: number) => {
+        const newExistingFiles = existingFiles.filter((_, i) => i !== index);
+        setExistingFiles(newExistingFiles);
     };
 
     const handleSave = async () => {
@@ -191,7 +251,10 @@ export default function UpdateReformPage() {
             submitData.append('description', formData.description.trim());
             submitData.append('details', JSON.stringify(validDetails));
 
-            // Append new files if any (will replace all existing files)
+            // Send existing files that should be kept
+            submitData.append('existingFiles', JSON.stringify(existingFiles));
+
+            // Append new files
             for (let i = 0; i < formData.files.length; i++) {
                 submitData.append('file', formData.files[i]);
                 submitData.append(`fileType_${i}`, formData.fileTypes[i]);
@@ -358,19 +421,73 @@ export default function UpdateReformPage() {
                                 <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                                     File hiện tại ({existingFiles.length})
                                 </Typography>
-                                <Stack direction="row" spacing={2} flexWrap="wrap">
+                                <Grid container spacing={2}>
                                     {existingFiles.map((file, index) => (
-                                        <Chip
-                                            key={index}
-                                            label={`File ${index + 1} (${file.fileType})`}
-                                            variant="outlined"
-                                            color="primary"
-                                        />
+                                        <Grid size={{ xs: 12, sm: 6, md: 4 }} key={`existing-${index}`}>
+                                            <Card sx={{ position: 'relative', height: 200 }}>
+                                                {file.fileType === 'image' ? (
+                                                    <CardMedia
+                                                        component="img"
+                                                        height="200"
+                                                        image={file.fileUrl}
+                                                        alt={`Existing ${index + 1}`}
+                                                        sx={{ objectFit: 'cover', cursor: 'pointer' }}
+                                                        onClick={() => handleOpenImageGallery(index)}
+                                                    />
+                                                ) : (
+                                                    <Box
+                                                        sx={{
+                                                            height: '100%',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            bgcolor: '#f5f5f5',
+                                                            flexDirection: 'column',
+                                                        }}
+                                                    >
+                                                        <CloudUploadIcon sx={{ fontSize: 48, color: '#999' }} />
+                                                        <Typography variant="body2" sx={{ mt: 1, color: '#666' }}>
+                                                            PDF File
+                                                        </Typography>
+                                                    </Box>
+                                                )}
+                                                <Box
+                                                    sx={{
+                                                        position: 'absolute',
+                                                        top: 8,
+                                                        right: 8,
+                                                        display: 'flex',
+                                                        gap: 0.5,
+                                                    }}
+                                                >
+                                                    {file.fileType === 'image' && (
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleOpenImageGallery(index)}
+                                                            sx={{
+                                                                bgcolor: 'rgba(0, 0, 0, 0.6)',
+                                                                color: 'white',
+                                                                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' },
+                                                            }}
+                                                        >
+                                                            <VisibilityIcon fontSize="small" />
+                                                        </IconButton>
+                                                    )}
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() => handleRemoveExistingFile(index)}
+                                                        sx={{
+                                                            bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                                            '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.9)' },
+                                                        }}
+                                                    >
+                                                        <CloseIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Box>
+                                            </Card>
+                                        </Grid>
                                     ))}
-                                </Stack>
-                                <Typography variant="body2" sx={{ color: '#666', mt: 1 }}>
-                                    Tải lên file mới sẽ thay thế tất cả file hiện tại
-                                </Typography>
+                                </Grid>
                             </Grid>
                         )}
 
@@ -418,18 +535,79 @@ export default function UpdateReformPage() {
                                     <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
                                         File mới đã chọn ({formData.files.length}):
                                     </Typography>
-                                    <Stack direction="row" spacing={2} flexWrap="wrap">
-                                        {formData.files.map((file, index) => (
-                                            <Box key={index} sx={{ position: 'relative' }}>
-                                                <Chip
-                                                    label={`${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`}
-                                                    onDelete={() => handleRemoveFile(index)}
-                                                    deleteIcon={<CloseIcon />}
-                                                    sx={{ maxWidth: 300 }}
-                                                />
-                                            </Box>
-                                        ))}
-                                    </Stack>
+                                    <Grid container spacing={2}>
+                                        {filePreviews.map((preview, index) => {
+                                            const actualIndex = existingFiles.length + index;
+                                            return (
+                                                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={`new-${index}`}>
+                                                    <Card sx={{ position: 'relative', height: 200 }}>
+                                                        {formData.fileTypes[index] === 'image' ? (
+                                                            <CardMedia
+                                                                component="img"
+                                                                height="200"
+                                                                image={preview}
+                                                                alt={`Preview ${index + 1}`}
+                                                                sx={{ objectFit: 'cover', cursor: 'pointer' }}
+                                                                onClick={() => handleOpenImageGallery(actualIndex)}
+                                                            />
+                                                        ) : (
+                                                            <Box
+                                                                sx={{
+                                                                    height: '100%',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    bgcolor: '#f5f5f5',
+                                                                    flexDirection: 'column',
+                                                                }}
+                                                            >
+                                                                <CloudUploadIcon sx={{ fontSize: 48, color: '#999' }} />
+                                                                <Typography
+                                                                    variant="body2"
+                                                                    sx={{ mt: 1, color: '#666' }}
+                                                                >
+                                                                    {formData.files[index].name}
+                                                                </Typography>
+                                                            </Box>
+                                                        )}
+                                                        <Box
+                                                            sx={{
+                                                                position: 'absolute',
+                                                                top: 8,
+                                                                right: 8,
+                                                                display: 'flex',
+                                                                gap: 0.5,
+                                                            }}
+                                                        >
+                                                            {formData.fileTypes[index] === 'image' && (
+                                                                <IconButton
+                                                                    size="small"
+                                                                    onClick={() => handleOpenImageGallery(actualIndex)}
+                                                                    sx={{
+                                                                        bgcolor: 'rgba(0, 0, 0, 0.6)',
+                                                                        color: 'white',
+                                                                        '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' },
+                                                                    }}
+                                                                >
+                                                                    <VisibilityIcon fontSize="small" />
+                                                                </IconButton>
+                                                            )}
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() => handleRemoveFile(index)}
+                                                                sx={{
+                                                                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                                                    '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.9)' },
+                                                                }}
+                                                            >
+                                                                <CloseIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </Box>
+                                                    </Card>
+                                                </Grid>
+                                            );
+                                        })}
+                                    </Grid>
                                 </Box>
                             )}
                         </Grid>
@@ -457,6 +635,114 @@ export default function UpdateReformPage() {
                         </Grid>
                     </Grid>
                 </Card>
+
+                {/* Image Gallery Modal */}
+                <Dialog
+                    open={openImageGallery}
+                    onClose={handleCloseImageGallery}
+                    maxWidth="lg"
+                    fullWidth
+                    PaperProps={{
+                        sx: {
+                            bgcolor: 'rgba(0, 0, 0, 0.95)',
+                            boxShadow: 'none',
+                        },
+                    }}
+                >
+                    <DialogContent sx={{ position: 'relative', p: 0, overflow: 'hidden' }}>
+                        <IconButton
+                            onClick={handleCloseImageGallery}
+                            sx={{
+                                position: 'absolute',
+                                top: 16,
+                                right: 16,
+                                color: 'white',
+                                bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                zIndex: 1,
+                                '&:hover': {
+                                    bgcolor: 'rgba(0, 0, 0, 0.7)',
+                                },
+                            }}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+
+                        <Box
+                            sx={{
+                                position: 'relative',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                minHeight: '80vh',
+                            }}
+                        >
+                            {getAllImagePreviews().length > 0 && (
+                                <>
+                                    {getAllImagePreviews().length > 1 && (
+                                        <IconButton
+                                            onClick={handlePrevImage}
+                                            sx={{
+                                                position: 'absolute',
+                                                left: 16,
+                                                color: 'white',
+                                                bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                                '&:hover': {
+                                                    bgcolor: 'rgba(0, 0, 0, 0.7)',
+                                                },
+                                            }}
+                                        >
+                                            <NavigateBeforeIcon sx={{ fontSize: 40 }} />
+                                        </IconButton>
+                                    )}
+
+                                    <Box
+                                        component="img"
+                                        src={
+                                            [...existingFiles.map((f) => f.fileUrl), ...filePreviews][
+                                                selectedImageIndex
+                                            ]
+                                        }
+                                        alt={`Image ${selectedImageIndex + 1}`}
+                                        sx={{
+                                            maxWidth: '100%',
+                                            maxHeight: '80vh',
+                                            objectFit: 'contain',
+                                        }}
+                                    />
+
+                                    {getAllImagePreviews().length > 1 && (
+                                        <IconButton
+                                            onClick={handleNextImage}
+                                            sx={{
+                                                position: 'absolute',
+                                                right: 16,
+                                                color: 'white',
+                                                bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                                '&:hover': {
+                                                    bgcolor: 'rgba(0, 0, 0, 0.7)',
+                                                },
+                                            }}
+                                        >
+                                            <NavigateNextIcon sx={{ fontSize: 40 }} />
+                                        </IconButton>
+                                    )}
+                                </>
+                            )}
+                        </Box>
+
+                        {getAllImagePreviews().length > 1 && (
+                            <Typography
+                                sx={{
+                                    textAlign: 'center',
+                                    color: 'white',
+                                    py: 2,
+                                }}
+                            >
+                                {getImageIndexes().indexOf(selectedImageIndex) + 1} / {getAllImagePreviews().length}
+                            </Typography>
+                        )}
+                    </DialogContent>
+                </Dialog>
             </Container>
         </Box>
     );

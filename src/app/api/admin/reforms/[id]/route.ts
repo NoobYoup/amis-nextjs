@@ -80,6 +80,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         const title = formData.get('title') as string;
         const description = formData.get('description') as string;
         const detailsJson = formData.get('details') as string;
+        const existingFilesJson = formData.get('existingFiles') as string;
 
         // Parse details array
         let details: string[] = [];
@@ -87,6 +88,14 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
             details = JSON.parse(detailsJson || '[]');
         } catch (e) {
             return NextResponse.json({ error: 'Invalid details format' }, { status: 400 });
+        }
+
+        // Parse existing files that should be kept
+        let existingFilesToKeep: any[] = [];
+        try {
+            existingFilesToKeep = JSON.parse(existingFilesJson || '[]');
+        } catch (e) {
+            console.error('Error parsing existingFiles:', e);
         }
 
         // Get all files from formData (multiple files with same key)
@@ -127,23 +136,35 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
             },
         });
 
-        // If new files are uploaded, replace all existing files
-        if (files.length > 0) {
-            // Delete old files from Cloudinary
-            for (const file of existingReform.files) {
-                try {
-                    await deleteFromCloudinary(file.fileUrl);
-                } catch (error) {
-                    console.error('Error deleting file from Cloudinary:', error);
-                }
+        // Handle file updates
+        const currentFiles = existingReform.files;
+        const filesToDelete = currentFiles.filter(
+            (file) => !existingFilesToKeep.some((keepFile) => keepFile.id === file.id),
+        );
+
+        // Delete removed files from Cloudinary
+        for (const file of filesToDelete) {
+            try {
+                await deleteFromCloudinary(file.fileUrl);
+            } catch (error) {
+                console.error('Error deleting file from Cloudinary:', error);
             }
+        }
 
-            // Delete old file records from database
+        // Delete removed file records from database
+        if (filesToDelete.length > 0) {
             await prisma.reformFile.deleteMany({
-                where: { reformId: params.id },
+                where: {
+                    id: { in: filesToDelete.map((f) => f.id) },
+                },
             });
+        }
 
-            // Upload new files and create new records
+        // Upload new files and create new records
+        if (files.length > 0) {
+            const maxOrder =
+                existingFilesToKeep.length > 0 ? Math.max(...existingFilesToKeep.map((f) => f.order || 0)) : -1;
+
             for (let i = 0; i < files.length; i++) {
                 const fileUrl = await uploadToCloudinary(files[i], fileTypes[i]);
 
@@ -152,7 +173,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
                         reformId: params.id,
                         fileUrl,
                         fileType: fileTypes[i],
-                        order: i,
+                        order: maxOrder + i + 1,
                     },
                 });
             }

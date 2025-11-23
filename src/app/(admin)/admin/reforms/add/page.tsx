@@ -16,12 +16,18 @@ import {
     IconButton,
     Chip,
     Alert,
+    Dialog,
+    DialogContent,
+    CardMedia,
 } from '@mui/material';
 import {
     CloudUpload as CloudUploadIcon,
     Close as CloseIcon,
     Add as AddIcon,
     Delete as DeleteIcon,
+    Visibility as VisibilityIcon,
+    NavigateBefore as NavigateBeforeIcon,
+    NavigateNext as NavigateNextIcon,
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 
@@ -38,6 +44,8 @@ export default function AddReformPage() {
     const [filePreviews, setFilePreviews] = useState<string[]>([]);
     const [submitLoading, setSubmitLoading] = useState(false);
     const [error, setError] = useState('');
+    const [openImageGallery, setOpenImageGallery] = useState(false);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
     const handleChange = (field: keyof typeof formData, value: string | string[]) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -125,12 +133,53 @@ export default function AddReformPage() {
     };
 
     const handleRemoveFile = (index: number) => {
-        setFormData((prev) => ({
-            ...prev,
-            files: prev.files.filter((_, i) => i !== index),
-            fileTypes: prev.fileTypes.filter((_, i) => i !== index),
-        }));
-        setFilePreviews((prev) => prev.filter((_, i) => i !== index));
+        const newFiles = formData.files.filter((_, i) => i !== index);
+        const newFileTypes = formData.fileTypes.filter((_, i) => i !== index);
+        const newPreviews = filePreviews.filter((_, i) => i !== index);
+
+        // Revoke object URL to prevent memory leaks
+        URL.revokeObjectURL(filePreviews[index]);
+
+        setFormData({ ...formData, files: newFiles, fileTypes: newFileTypes });
+        setFilePreviews(newPreviews);
+    };
+
+    const handleOpenImageGallery = (index: number) => {
+        setSelectedImageIndex(index);
+        setOpenImageGallery(true);
+    };
+
+    const handleCloseImageGallery = () => {
+        setOpenImageGallery(false);
+        setSelectedImageIndex(0);
+    };
+
+    const handlePrevImage = () => {
+        const imageIndexes = getImageIndexes();
+        const currentPos = imageIndexes.indexOf(selectedImageIndex);
+        const newPos = currentPos === 0 ? imageIndexes.length - 1 : currentPos - 1;
+        setSelectedImageIndex(imageIndexes[newPos]);
+    };
+
+    const handleNextImage = () => {
+        const imageIndexes = getImageIndexes();
+        const currentPos = imageIndexes.indexOf(selectedImageIndex);
+        const newPos = currentPos === imageIndexes.length - 1 ? 0 : currentPos + 1;
+        setSelectedImageIndex(imageIndexes[newPos]);
+    };
+
+    const getImageIndexes = () => {
+        return filePreviews
+            .map((_, index) => index)
+            .filter((index) => {
+                return formData.fileTypes[index] === 'image';
+            });
+    };
+
+    const getImagePreviews = () => {
+        return filePreviews.filter((_, index) => {
+            return formData.fileTypes[index] === 'image';
+        });
     };
 
     const handleSave = async () => {
@@ -358,18 +407,73 @@ export default function AddReformPage() {
                                     <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
                                         File đã chọn ({formData.files.length}):
                                     </Typography>
-                                    <Stack direction="row" spacing={2} flexWrap="wrap">
-                                        {formData.files.map((file, index) => (
-                                            <Box key={index} sx={{ position: 'relative' }}>
-                                                <Chip
-                                                    label={`${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`}
-                                                    onDelete={() => handleRemoveFile(index)}
-                                                    deleteIcon={<CloseIcon />}
-                                                    sx={{ maxWidth: 300 }}
-                                                />
-                                            </Box>
+                                    <Grid container spacing={2}>
+                                        {filePreviews.map((preview, index) => (
+                                            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
+                                                <Card sx={{ position: 'relative', height: 200 }}>
+                                                    {formData.fileTypes[index] === 'image' ? (
+                                                        <CardMedia
+                                                            component="img"
+                                                            height="200"
+                                                            image={preview}
+                                                            alt={`Preview ${index + 1}`}
+                                                            sx={{ objectFit: 'cover', cursor: 'pointer' }}
+                                                            onClick={() => handleOpenImageGallery(index)}
+                                                        />
+                                                    ) : (
+                                                        <Box
+                                                            sx={{
+                                                                height: '100%',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                bgcolor: '#f5f5f5',
+                                                                flexDirection: 'column',
+                                                            }}
+                                                        >
+                                                            <CloudUploadIcon sx={{ fontSize: 48, color: '#999' }} />
+                                                            <Typography variant="body2" sx={{ mt: 1, color: '#666' }}>
+                                                                {formData.files[index].name}
+                                                            </Typography>
+                                                        </Box>
+                                                    )}
+                                                    <Box
+                                                        sx={{
+                                                            position: 'absolute',
+                                                            top: 8,
+                                                            right: 8,
+                                                            display: 'flex',
+                                                            gap: 0.5,
+                                                        }}
+                                                    >
+                                                        {formData.fileTypes[index] === 'image' && (
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() => handleOpenImageGallery(index)}
+                                                                sx={{
+                                                                    bgcolor: 'rgba(0, 0, 0, 0.6)',
+                                                                    color: 'white',
+                                                                    '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' },
+                                                                }}
+                                                            >
+                                                                <VisibilityIcon fontSize="small" />
+                                                            </IconButton>
+                                                        )}
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleRemoveFile(index)}
+                                                            sx={{
+                                                                bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                                                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.9)' },
+                                                            }}
+                                                        >
+                                                            <CloseIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Box>
+                                                </Card>
+                                            </Grid>
                                         ))}
-                                    </Stack>
+                                    </Grid>
                                 </Box>
                             )}
                         </Grid>
@@ -396,6 +500,110 @@ export default function AddReformPage() {
                         </Grid>
                     </Grid>
                 </Card>
+
+                {/* Image Gallery Modal */}
+                <Dialog
+                    open={openImageGallery}
+                    onClose={handleCloseImageGallery}
+                    maxWidth="lg"
+                    fullWidth
+                    PaperProps={{
+                        sx: {
+                            bgcolor: 'rgba(0, 0, 0, 0.95)',
+                            boxShadow: 'none',
+                        },
+                    }}
+                >
+                    <DialogContent sx={{ position: 'relative', p: 0, overflow: 'hidden' }}>
+                        <IconButton
+                            onClick={handleCloseImageGallery}
+                            sx={{
+                                position: 'absolute',
+                                top: 16,
+                                right: 16,
+                                color: 'white',
+                                bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                zIndex: 1,
+                                '&:hover': {
+                                    bgcolor: 'rgba(0, 0, 0, 0.7)',
+                                },
+                            }}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+
+                        <Box
+                            sx={{
+                                position: 'relative',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                minHeight: '80vh',
+                            }}
+                        >
+                            {getImagePreviews().length > 0 && (
+                                <>
+                                    {getImagePreviews().length > 1 && (
+                                        <IconButton
+                                            onClick={handlePrevImage}
+                                            sx={{
+                                                position: 'absolute',
+                                                left: 16,
+                                                color: 'white',
+                                                bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                                '&:hover': {
+                                                    bgcolor: 'rgba(0, 0, 0, 0.7)',
+                                                },
+                                            }}
+                                        >
+                                            <NavigateBeforeIcon sx={{ fontSize: 40 }} />
+                                        </IconButton>
+                                    )}
+
+                                    <Box
+                                        component="img"
+                                        src={filePreviews[selectedImageIndex]}
+                                        alt={`Image ${selectedImageIndex + 1}`}
+                                        sx={{
+                                            maxWidth: '100%',
+                                            maxHeight: '80vh',
+                                            objectFit: 'contain',
+                                        }}
+                                    />
+
+                                    {getImagePreviews().length > 1 && (
+                                        <IconButton
+                                            onClick={handleNextImage}
+                                            sx={{
+                                                position: 'absolute',
+                                                right: 16,
+                                                color: 'white',
+                                                bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                                '&:hover': {
+                                                    bgcolor: 'rgba(0, 0, 0, 0.7)',
+                                                },
+                                            }}
+                                        >
+                                            <NavigateNextIcon sx={{ fontSize: 40 }} />
+                                        </IconButton>
+                                    )}
+                                </>
+                            )}
+                        </Box>
+
+                        {getImagePreviews().length > 1 && (
+                            <Typography
+                                sx={{
+                                    textAlign: 'center',
+                                    color: 'white',
+                                    py: 2,
+                                }}
+                            >
+                                {getImageIndexes().indexOf(selectedImageIndex) + 1} / {getImagePreviews().length}
+                            </Typography>
+                        )}
+                    </DialogContent>
+                </Dialog>
             </Container>
         </Box>
     );
