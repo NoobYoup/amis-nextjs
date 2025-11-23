@@ -25,10 +25,10 @@ import {
     Dashboard as DashboardIcon,
     EventNote as EventNoteIcon,
     AttachMoney as AttachMoneyIcon,
-    Info as InfoIcon,
     AttachFile as AttachFileIcon,
     FirstPage as FirstPageIcon,
     LastPage as LastPageIcon,
+    Settings as SettingsIcon,
 } from '@mui/icons-material';
 import { SidebarMenuItem } from '@/types/sidebar';
 import { signOut } from 'next-auth/react';
@@ -58,19 +58,19 @@ const menuItems: SidebarMenuItem[] = [
         ],
     },
     {
-        id: 'info',
-        label: 'Thông tin',
-        icon: InfoIcon,
-        subItems: [
-            { id: 'info-school', label: 'Thông tin trường', href: '/admin/info/school' },
-            { id: 'info-settings', label: 'Cài đặt', href: '/admin/info/settings' },
-        ],
-    },
-    {
         id: 'documents',
         label: 'Tài liệu',
         icon: AttachFileIcon,
         subItems: [{ id: 'documents-list', label: 'Danh sách tài liệu', href: '/admin/documents' }],
+    },
+    {
+        id: 'settings',
+        label: 'Cài đặt',
+        icon: SettingsIcon,
+        subItems: [
+            { id: 'settings-school', label: 'Thông tin trường', href: '/admin/settings/school' },
+            { id: 'settings-password', label: 'Đổi mật khẩu', href: '/admin/settings/password' },
+        ],
     },
 ];
 
