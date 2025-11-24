@@ -6,12 +6,15 @@ declare global {
 }
 
 // Tạo Prisma Client với caching để tránh tạo nhiều instance trong development
-const prisma = globalThis.prisma || new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-});
+const prismaClient =
+    globalThis.prisma ||
+    new PrismaClient({
+        log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    });
 
 if (process.env.NODE_ENV !== 'production') {
-    globalThis.prisma = prisma;
+    globalThis.prisma = prismaClient;
 }
 
-export default prisma;
+export const prisma = prismaClient;
+export default prismaClient;

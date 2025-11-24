@@ -170,3 +170,53 @@ model ReformFile {
   @@index([reformId])
   @@map("reform_files")
 }
+
+// Procedure model - for school regulations and procedures
+model Procedure {
+  id          String   @id @default(uuid())
+  title       String   // "Nội quy học sinh"
+  category    String   // "Học sinh", "Tuyển sinh", "Học tập", etc.
+  description String   @db.Text // Mô tả ngắn
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  content ProcedureContent[]
+  files   ProcedureFile[]
+
+  @@index([category])
+  @@map("procedures")
+}
+
+// ProcedureContent model - for content sections of each procedure
+model ProcedureContent {
+  id          String   @id @default(uuid())
+  procedureId String
+  title       String   // "Quy tắc ứng xử cơ bản"
+  items       Json     // Array of string items
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  procedure Procedure @relation(fields: [procedureId], references: [id], onDelete: Cascade)
+
+  @@index([procedureId])
+  @@map("procedure_contents")
+}
+
+// ProcedureFile model - for storing multiple files per procedure
+model ProcedureFile {
+  id          String   @id @default(uuid())
+  procedureId String
+  fileUrl     String   @db.Text
+  fileType    String   // 'image', 'pdf', 'doc', 'docx', etc.
+  fileName    String?  // Original file name
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  procedure Procedure @relation(fields: [procedureId], references: [id], onDelete: Cascade)
+
+  @@index([procedureId])
+  @@map("procedure_files")
+}

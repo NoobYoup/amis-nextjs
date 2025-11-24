@@ -366,50 +366,6 @@ export default function Reform() {
                     ))}
                 </Grid>
 
-                {/* Contact Section */}
-                <Card
-                    sx={{
-                        p: 4,
-                        mt: 6,
-                        textAlign: 'center',
-                        bgcolor: 'rgba(124, 179, 66, 0.05)',
-                        border: '2px solid var(--primary-color)',
-                    }}
-                >
-                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: 'var(--primary-color)' }}>
-                        📞 Cần Hỗ Trợ?
-                    </Typography>
-                    <Typography variant="body1" sx={{ color: '#666', mb: 3 }}>
-                        Liên hệ với Phòng Hành chính để được tư vấn chi tiết về các thông tin công khai
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <Button
-                            variant="contained"
-                            sx={{
-                                bgcolor: 'var(--primary-color)',
-                                '&:hover': { bgcolor: 'var(--accent-color)' },
-                                px: 3,
-                            }}
-                        >
-                            📱 Gọi: 024 1234 5678
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            sx={{
-                                borderColor: 'var(--primary-color)',
-                                color: 'var(--primary-color)',
-                                '&:hover': {
-                                    borderColor: 'var(--accent-color)',
-                                    bgcolor: 'rgba(124, 179, 66, 0.05)',
-                                },
-                                px: 3,
-                            }}
-                        >
-                            ✉️ Email: admin@amis.edu.vn
-                        </Button>
-                    </Box>
-                </Card>
-
                 {/* Image Gallery Modal */}
                 <Dialog
                     open={openImageGallery}

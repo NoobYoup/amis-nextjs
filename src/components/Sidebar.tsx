@@ -29,6 +29,8 @@ import {
     FirstPage as FirstPageIcon,
     LastPage as LastPageIcon,
     Settings as SettingsIcon,
+    School as SchoolIcon,
+    Receipt as ReceiptIcon,
 } from '@mui/icons-material';
 import { SidebarMenuItem } from '@/types/sidebar';
 import { signOut } from 'next-auth/react';
@@ -48,9 +50,15 @@ const menuItems: SidebarMenuItem[] = [
     },
     {
         id: 'reforms',
-        label: 'Thông tin công khai',
-        icon: EventNoteIcon,
+        label: 'Cải cách hành chính',
+        icon: SchoolIcon,
         subItems: [{ id: 'reforms-list', label: 'Danh sách thông tin công khai', href: '/admin/reforms' }],
+    },
+    {
+        id: 'procedures',
+        label: 'Thủ tục',
+        icon: ReceiptIcon,
+        subItems: [{ id: 'procedures-list', label: 'Danh sách thủ tục', href: '/admin/procedures' }],
     },
     {
         id: 'tuition',
@@ -65,11 +73,11 @@ const menuItems: SidebarMenuItem[] = [
     },
     {
         id: 'documents',
-        label: 'Tài liệu',
+        label: 'Văn bản',
         icon: AttachFileIcon,
         subItems: [
-            { id: 'documents-list', label: 'Danh sách tài liệu', href: '/admin/documents' },
-            { id: 'documents-categories', label: 'Danh mục tài liệu', href: '/admin/categories/document' },
+            { id: 'documents-list', label: 'Danh sách văn bản', href: '/admin/documents' },
+            { id: 'documents-categories', label: 'Danh mục văn bản', href: '/admin/categories/document' },
         ],
     },
     {
