@@ -52,7 +52,7 @@ export default function ActivityDetailPage() {
         const loadActivity = async () => {
             setLoading(true);
             try {
-                const res = await fetch(`/api/activities/${params.id}`);
+                const res = await fetch(`/api/client/activities/${params.id}`);
                 if (!res.ok) {
                     if (res.status === 404) {
                         setError('Không tìm thấy hoạt động');
@@ -66,7 +66,7 @@ export default function ActivityDetailPage() {
                 setActivity(data);
 
                 // Load related activities
-                const relatedRes = await fetch(`/api/activities?categoryId=${data.categoryId}&limit=3`);
+                const relatedRes = await fetch(`/api/client/activities?categoryId=${data.categoryId}&limit=3`);
                 if (relatedRes.ok) {
                     const { data: related } = await relatedRes.json();
                     setRelatedActivities(related.filter((a: Activity) => a.id !== data.id).slice(0, 3));

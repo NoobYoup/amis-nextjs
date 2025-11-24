@@ -61,7 +61,7 @@ export default function DocumentsPage() {
         setDownloading(doc.id);
         try {
             const firstFile = doc.files[0];
-            const response = await fetch(`/api/download?url=${encodeURIComponent(firstFile.fileUrl)}`);
+            const response = await fetch(`/api/client/download?url=${encodeURIComponent(firstFile.fileUrl)}`);
 
             if (!response.ok) {
                 throw new Error('Download failed');
@@ -108,7 +108,7 @@ export default function DocumentsPage() {
     useEffect(() => {
         const loadFilters = async () => {
             try {
-                const res = await fetch('/api/documents/filters');
+                const res = await fetch('/api/client/documents/filters');
                 if (res.ok) {
                     const data = await res.json();
                     setYears(data.years);
@@ -142,7 +142,7 @@ export default function DocumentsPage() {
                     params.append('field', selectedField);
                 }
 
-                const res = await fetch(`/api/documents?${params.toString()}`);
+                const res = await fetch(`/api/client/documents?${params.toString()}`);
                 if (res.ok) {
                     const { data } = await res.json();
                     console.log(data);

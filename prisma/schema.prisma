@@ -220,3 +220,40 @@ model ProcedureFile {
   @@index([procedureId])
   @@map("procedure_files")
 }
+
+// News model - for news articles
+model News {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text // Short description/excerpt
+  content     String   @db.Text // Rich text content from Quill editor
+  category    String   // 'Tiểu học' or 'Trung học'
+  date        DateTime // Publication date
+  thumbnail   String?  @db.Text // Auto-generated from first image
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  images NewsImage[]
+
+  @@index([category])
+  @@index([date])
+  @@map("news")
+}
+
+// NewsImage model - for storing multiple images per news article
+model NewsImage {
+  id       String   @id @default(uuid())
+  newsId   String
+  imageUrl String   @db.Text
+  order    Int      @default(0) // Order of images
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
+
+  @@index([newsId])
+  @@index([order])
+  @@map("news_images")
+}

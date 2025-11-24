@@ -52,7 +52,7 @@ export default function ActivitiesPage() {
     useEffect(() => {
         const loadCategories = async () => {
             try {
-                const res = await fetch('/api/categories/activity');
+                const res = await fetch('/api/client/categories/activity');
                 if (res.ok) {
                     const data = await res.json();
                     setCategories(data);
@@ -77,7 +77,7 @@ export default function ActivitiesPage() {
                 params.append('categoryId', selectedCategory);
             }
 
-            const res = await fetch(`/api/activities?${params}`);
+            const res = await fetch(`/api/client/activities?${params}`);
             if (res.ok) {
                 const { data, pages } = await res.json();
                 setActivities(data);

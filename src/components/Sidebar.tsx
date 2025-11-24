@@ -31,6 +31,7 @@ import {
     Settings as SettingsIcon,
     School as SchoolIcon,
     Receipt as ReceiptIcon,
+    Notifications,
 } from '@mui/icons-material';
 import { SidebarMenuItem } from '@/types/sidebar';
 import { signOut } from 'next-auth/react';
@@ -59,6 +60,12 @@ const menuItems: SidebarMenuItem[] = [
         label: 'Thủ tục',
         icon: ReceiptIcon,
         subItems: [{ id: 'procedures-list', label: 'Danh sách thủ tục', href: '/admin/procedures' }],
+    },
+    {
+        id: 'news',
+        label: 'Tin tức',
+        icon: Notifications,
+        subItems: [{ id: 'news-list', label: 'Danh sách tin tức', href: '/admin/news' }],
     },
     {
         id: 'tuition',

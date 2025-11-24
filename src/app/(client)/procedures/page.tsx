@@ -75,7 +75,7 @@ export default function ProceduresPage() {
                     params.append('category', selectedCategory);
                 }
 
-                const res = await fetch(`/api/procedures?${params}`);
+                const res = await fetch(`/api/client/procedures?${params}`);
                 if (!res.ok) {
                     throw new Error('Failed to fetch procedures');
                 }

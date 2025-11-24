@@ -73,7 +73,7 @@ export default function Reform() {
     useEffect(() => {
         const loadReforms = async () => {
             try {
-                const response = await fetch('/api/reforms');
+                const response = await fetch('/api/client/reforms');
                 if (!response.ok) throw new Error('Error loading reforms');
 
                 const { data } = await response.json();
@@ -103,7 +103,7 @@ export default function Reform() {
         setDownloading(reform.id);
         try {
             const firstFile = reform.files.find((f) => f.fileType !== 'image') || reform.files[0];
-            const response = await fetch(`/api/download?url=${encodeURIComponent(firstFile.fileUrl)}`);
+            const response = await fetch(`/api/client/download?url=${encodeURIComponent(firstFile.fileUrl)}`);
 
             if (!response.ok) {
                 throw new Error('Download failed');
