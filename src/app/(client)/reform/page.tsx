@@ -66,7 +66,12 @@ export default function Reform() {
 
     // Default icons for different types of reforms
     const getIcon = (index: number) => {
-        const icons = [<PeopleIcon />, <SchoolIcon />, <VerifiedUserIcon />, <AssignmentIcon />];
+        const icons = [
+            <PeopleIcon key="people" />,
+            <SchoolIcon key="school" />,
+            <VerifiedUserIcon key="verified" />,
+            <AssignmentIcon key="assignment" />,
+        ];
         return icons[index % icons.length];
     };
 

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const type = searchParams.get('type'); // 'document_type' hoặc 'document_field'
 
-        const where: any = {};
+        const where: { type?: string } = {};
         if (type) {
             where.type = type;
         }

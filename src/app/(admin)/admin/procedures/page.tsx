@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Box,
@@ -33,7 +33,6 @@ import {
     Edit as EditIcon,
     Delete as DeleteIcon,
     Search as SearchIcon,
-    Visibility as VisibilityIcon,
     FilePresent as FileIcon,
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
@@ -78,7 +77,7 @@ export default function ProceduresPage() {
     });
 
     // Fetch procedures
-    const fetchProcedures = async () => {
+    const fetchProcedures = useCallback(async () => {
         try {
             setLoading(true);
             const params = new URLSearchParams();
@@ -98,11 +97,11 @@ export default function ProceduresPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [searchTerm]);
 
     useEffect(() => {
         fetchProcedures();
-    }, []);
+    }, [fetchProcedures]);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -110,7 +109,7 @@ export default function ProceduresPage() {
         }, 500);
 
         return () => clearTimeout(timeoutId);
-    }, [searchTerm]);
+    }, [searchTerm, fetchProcedures]);
 
     const handleDelete = async () => {
         if (!deleteDialog.procedure) return;
@@ -337,7 +336,9 @@ export default function ProceduresPage() {
                 >
                     <DialogTitle>Xác nhận xóa</DialogTitle>
                     <DialogContent>
-                        <Typography>Bạn có chắc chắn muốn xóa quy chế "{deleteDialog.procedure?.title}"?</Typography>
+                        <Typography>
+                            Bạn có chắc chắn muốn xóa quy chế &quot;{deleteDialog.procedure?.title}&quot;?
+                        </Typography>
                         <Typography variant="body2" sx={{ color: '#d32f2f', mt: 1 }}>
                             Hành động này không thể hoàn tác.
                         </Typography>

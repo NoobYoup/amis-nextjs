@@ -84,7 +84,7 @@ export default function DocumentsPage() {
     // Categories state
     const [documentTypes, setDocumentTypes] = useState<string[]>([]);
     const [documentFields, setDocumentFields] = useState<string[]>([]);
-    const [categoriesLoading, setCategoriesLoading] = useState(true);
+    const [, setCategoriesLoading] = useState(true);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [openImageGallery, setOpenImageGallery] = useState(false);

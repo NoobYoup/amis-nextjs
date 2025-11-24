@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
         let details: string[] = [];
         try {
             details = JSON.parse(detailsJson || '[]');
-        } catch (e) {
+        } catch {
             return NextResponse.json({ error: 'Invalid details format' }, { status: 400 });
         }
 

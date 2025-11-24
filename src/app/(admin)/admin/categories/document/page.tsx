@@ -21,17 +21,13 @@ import {
     DialogContent,
     DialogActions,
     TextField,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel,
     Chip,
     Alert,
     CircularProgress,
     Tabs,
     Tab,
 } from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Category as CategoryIcon } from '@mui/icons-material';
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
@@ -67,11 +63,6 @@ export default function DocumentCategoriesPage() {
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [submitting, setSubmitting] = useState(false);
 
-    const categoryTypes = [
-        { value: 'document_type', label: 'Loại tài liệu' },
-        { value: 'document_field', label: 'Lĩnh vực' },
-    ];
-
     // Fetch categories
     const fetchCategories = async () => {
         try {
@@ -97,7 +88,7 @@ export default function DocumentCategoriesPage() {
     };
 
     // Handle form
-    const handleInputChange = (field: keyof CategoryFormData, value: any) => {
+    const handleInputChange = (field: keyof CategoryFormData, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
         if (formErrors[field]) {
             setFormErrors((prev) => ({ ...prev, [field]: '' }));
@@ -137,8 +128,9 @@ export default function DocumentCategoriesPage() {
 
             handleCloseDialog();
             fetchCategories();
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.error || 'Có lỗi xảy ra';
+        } catch (error: unknown) {
+            const errorMessage =
+                (error as { response?: { data?: { error?: string } } }).response?.data?.error || 'Có lỗi xảy ra';
             toast.error(errorMessage);
         } finally {
             setSubmitting(false);
@@ -163,8 +155,10 @@ export default function DocumentCategoriesPage() {
             setDeleteDialogOpen(false);
             setCategoryToDelete(null);
             fetchCategories();
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.error || 'Có lỗi xảy ra khi xóa danh mục';
+        } catch (error: unknown) {
+            const errorMessage =
+                (error as { response?: { data?: { error?: string } } }).response?.data?.error ||
+                'Có lỗi xảy ra khi xóa danh mục';
             toast.error(errorMessage);
         }
     };
@@ -314,7 +308,7 @@ export default function DocumentCategoriesPage() {
                 <DialogTitle>Xác nhận xóa</DialogTitle>
                 <DialogContent>
                     <Typography>
-                        Bạn có chắc chắn muốn xóa danh mục "{categoryToDelete?.name}"?
+                        Bạn có chắc chắn muốn xóa danh mục &quot;{categoryToDelete?.name}&quot;?
                         <br />
                         <strong>Lưu ý:</strong> Không thể xóa danh mục đang được sử dụng bởi tài liệu.
                     </Typography>

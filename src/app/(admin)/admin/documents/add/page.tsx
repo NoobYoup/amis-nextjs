@@ -46,7 +46,7 @@ export default function AddDocumentPage() {
     // Categories state
     const [documentTypes, setDocumentTypes] = useState<string[]>([]);
     const [documentFields, setDocumentFields] = useState<string[]>([]);
-    const [categoriesLoading, setCategoriesLoading] = useState(true);
+    const [, setCategoriesLoading] = useState(true);
 
     // Load categories from API
     const loadCategories = useCallback(async () => {

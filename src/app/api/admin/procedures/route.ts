@@ -10,7 +10,10 @@ export async function GET(request: NextRequest) {
         const category = searchParams.get('category');
         const search = searchParams.get('search');
 
-        const where: any = {};
+        const where: {
+            category?: string;
+            OR?: Array<{ title?: { contains: string } } | { description?: { contains: string } }>;
+        } = {};
 
         if (category && category !== 'all') {
             where.category = category;
@@ -64,7 +67,7 @@ export async function POST(request: NextRequest) {
         let content: Array<{ title: string; items: string[] }> = [];
         try {
             content = JSON.parse(contentJson || '[]');
-        } catch (e) {
+        } catch {
             return NextResponse.json({ error: 'Invalid content format' }, { status: 400 });
         }
 

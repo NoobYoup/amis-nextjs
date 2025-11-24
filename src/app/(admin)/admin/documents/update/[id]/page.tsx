@@ -51,12 +51,10 @@ export default function UpdateDocumentPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
     const [filePreviews, setFilePreviews] = useState<string[]>([]);
-    const [submitLoading, setSubmitLoading] = useState(false);
-
     // Categories state
     const [documentTypes, setDocumentTypes] = useState<string[]>([]);
     const [documentFields, setDocumentFields] = useState<string[]>([]);
-    const [categoriesLoading, setCategoriesLoading] = useState(true);
+    const [, setCategoriesLoading] = useState(true);
     const [previewFileTypes, setPreviewFileTypes] = useState<string[]>([]);
 
     // Load categories from API

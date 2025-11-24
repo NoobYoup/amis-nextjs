@@ -13,12 +13,10 @@ import {
     Paper,
     Grid,
     Card,
-    CardContent,
     CardMedia,
     IconButton,
     Dialog,
     DialogContent,
-    DialogActions,
     CircularProgress,
 } from '@mui/material';
 import {
@@ -114,7 +112,7 @@ const TiptapEditor = ({ content, onChange }: { content: string; onChange: (conte
                     variant={editor.isActive('blockquote') ? 'contained' : 'outlined'}
                     onClick={() => editor.chain().focus().toggleBlockquote().run()}
                 >
-                    "
+                    &quot;
                 </Button>
             </Box>
 

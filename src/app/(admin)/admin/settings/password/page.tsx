@@ -8,13 +8,12 @@ import {
     TextField,
     Button,
     Typography,
-    Alert,
     IconButton,
     InputAdornment,
     CircularProgress,
     Container,
 } from '@mui/material';
-import { Visibility, VisibilityOff, Lock } from '@mui/icons-material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
@@ -128,8 +127,10 @@ export default function ChangePasswordPage() {
                 confirmPassword: '',
             });
             setErrors({});
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.error || 'Có lỗi xảy ra khi thay đổi mật khẩu';
+        } catch (error: unknown) {
+            const errorMessage =
+                (error as { response?: { data?: { error?: string } } }).response?.data?.error ||
+                'Có lỗi xảy ra khi thay đổi mật khẩu';
             toast.error(errorMessage);
         } finally {
             setLoading(false);

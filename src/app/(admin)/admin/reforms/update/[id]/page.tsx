@@ -14,7 +14,6 @@ import {
     Breadcrumbs,
     Link,
     IconButton,
-    Chip,
     Alert,
     CircularProgress,
     Dialog,
@@ -50,7 +49,7 @@ export default function UpdateReformPage() {
     const [loading, setLoading] = useState(true);
     const [filePreviews, setFilePreviews] = useState<string[]>([]);
     const [submitLoading, setSubmitLoading] = useState(false);
-    const [existingFiles, setExistingFiles] = useState<any[]>([]);
+    const [existingFiles, setExistingFiles] = useState<{ id: string; fileUrl: string; fileType: string }[]>([]);
     const [openImageGallery, setOpenImageGallery] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 

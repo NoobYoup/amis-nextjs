@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
 // GET - Lấy danh sách reforms cho client (public)
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         const reforms = await prisma.reform.findMany({
             include: {

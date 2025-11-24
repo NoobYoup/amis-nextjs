@@ -14,7 +14,10 @@ export async function GET(request: NextRequest) {
         const skip = (page - 1) * limit;
 
         // Build where clause
-        const where: any = {};
+        const where: {
+            OR?: Array<{ title?: { contains: string } } | { description?: { contains: string } }>;
+            category?: string;
+        } = {};
 
         if (search) {
             where.OR = [{ title: { contains: search } }, { description: { contains: search } }];

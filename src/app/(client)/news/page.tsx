@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
@@ -38,7 +38,7 @@ export default function NewsPage() {
     const categories = ['all', 'Tiểu học', 'Trung học'];
 
     // Fetch news from API
-    const fetchNews = async () => {
+    const fetchNews = useCallback(async () => {
         try {
             setLoading(true);
             const params = new URLSearchParams({
@@ -67,11 +67,11 @@ export default function NewsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [currentPage, selectedCategory, itemsPerPage]);
 
     useEffect(() => {
         fetchNews();
-    }, [currentPage, selectedCategory]);
+    }, [fetchNews]);
 
     const handleCategoryChange = (event: React.SyntheticEvent, newValue: string) => {
         setSelectedCategory(newValue);

@@ -14,7 +14,6 @@ import {
     Breadcrumbs,
     Link,
     IconButton,
-    Chip,
     Alert,
     Dialog,
     DialogContent,

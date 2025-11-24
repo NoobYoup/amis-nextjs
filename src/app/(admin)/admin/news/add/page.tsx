@@ -11,14 +11,11 @@ import {
     Select,
     MenuItem,
     Paper,
-    Grid,
     Card,
-    CardContent,
     CardMedia,
     IconButton,
     Dialog,
     DialogContent,
-    DialogActions,
     CircularProgress,
 } from '@mui/material';
 import {
@@ -114,7 +111,7 @@ const TiptapEditor = ({ content, onChange }: { content: string; onChange: (conte
                     variant={editor.isActive('blockquote') ? 'contained' : 'outlined'}
                     onClick={() => editor.chain().focus().toggleBlockquote().run()}
                 >
-                    "
+                    &quot;
                 </Button>
             </Box>
 
@@ -268,9 +265,9 @@ export default function AddNewsPage() {
             </Box>
 
             <form onSubmit={handleSubmit}>
-                <Grid container spacing={3}>
+                <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', md: 'row' } }}>
                     {/* Main Content */}
-                    <Grid item xs={12} md={8}>
+                    <Box sx={{ flex: 2 }}>
                         <Paper sx={{ p: 3 }}>
                             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                                 Thông tin cơ bản
@@ -303,10 +300,10 @@ export default function AddNewsPage() {
                                 onChange={(content) => handleInputChange('content', content)}
                             />
                         </Paper>
-                    </Grid>
+                    </Box>
 
                     {/* Sidebar */}
-                    <Grid item xs={12} md={4}>
+                    <Box sx={{ flex: 1 }}>
                         <Paper sx={{ p: 3, mb: 3 }}>
                             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                                 Cài đặt
@@ -359,9 +356,9 @@ export default function AddNewsPage() {
                                     <Typography variant="subtitle2" sx={{ mb: 1 }}>
                                         Ảnh đã tải lên ({imagePreviews.length})
                                     </Typography>
-                                    <Grid container spacing={1}>
+                                    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
                                         {imagePreviews.map((preview, index) => (
-                                            <Grid item xs={6} key={index}>
+                                            <Box key={index}>
                                                 <Card sx={{ position: 'relative' }}>
                                                     <CardMedia
                                                         component="img"
@@ -384,14 +381,14 @@ export default function AddNewsPage() {
                                                         <DeleteIcon fontSize="small" />
                                                     </IconButton>
                                                 </Card>
-                                            </Grid>
+                                            </Box>
                                         ))}
-                                    </Grid>
+                                    </Box>
                                 </Box>
                             )}
                         </Paper>
-                    </Grid>
-                </Grid>
+                    </Box>
+                </Box>
 
                 {/* Submit Button */}
                 <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>

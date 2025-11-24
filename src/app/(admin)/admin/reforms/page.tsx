@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
     Box,
     Container,
@@ -334,9 +335,11 @@ export default function ReformsPage() {
                 <DialogContent sx={{ textAlign: 'center', p: 2 }}>
                     {selectedImageUrls.length > 0 && (
                         <Box sx={{ position: 'relative' }}>
-                            <img
+                            <Image
                                 src={selectedImageUrls[selectedImageIndex]}
                                 alt={`Image ${selectedImageIndex + 1}`}
+                                width={800}
+                                height={600}
                                 style={{
                                     maxWidth: '100%',
                                     maxHeight: '70vh',

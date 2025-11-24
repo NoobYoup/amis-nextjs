@@ -6,7 +6,7 @@ import { uploadToCloudinary } from '@/lib/cloudinary';
 // Helper function to delete file from Cloudinary
 async function deleteFromCloudinary(fileUrl: string) {
     try {
-        const cloudinary = require('cloudinary').v2;
+        const { v2: cloudinary } = await import('cloudinary');
 
         // Extract public_id from Cloudinary URL
         const urlParts = fileUrl.split('/');
@@ -21,10 +21,11 @@ async function deleteFromCloudinary(fileUrl: string) {
 }
 
 // GET - Lấy procedure theo ID
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
         const procedure = await prisma.procedure.findUnique({
-            where: { id: params.id },
+            where: { id },
             include: {
                 content: {
                     orderBy: { createdAt: 'asc' },
@@ -47,13 +48,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // PUT - Cập nhật procedure
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await getServerSession();
         if (!session?.user?.email) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const { id } = await params;
         const formData = await request.formData();
         const title = formData.get('title') as string;
         const category = formData.get('category') as string;
@@ -65,12 +67,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         let content: Array<{ title: string; items: string[] }> = [];
         try {
             content = JSON.parse(contentJson || '[]');
-        } catch (e) {
+        } catch {
             return NextResponse.json({ error: 'Invalid content format' }, { status: 400 });
         }
 
         // Parse existing files that should be kept
-        let existingFilesToKeep: any[] = [];
+        let existingFilesToKeep: { id: string; fileUrl: string; fileType: string }[] = [];
         try {
             existingFilesToKeep = JSON.parse(existingFilesJson || '[]');
         } catch (e) {
@@ -100,7 +102,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
         // Check if procedure exists
         const existingProcedure = await prisma.procedure.findUnique({
-            where: { id: params.id },
+            where: { id },
             include: {
                 content: true,
                 files: true,
@@ -113,7 +115,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
         // Update procedure basic info
         await prisma.procedure.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 title: title.trim(),
                 category: category.trim(),
@@ -123,7 +125,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
         // Delete old content and create new ones
         await prisma.procedureContent.deleteMany({
-            where: { procedureId: params.id },
+            where: { procedureId: id },
         });
 
         for (let i = 0; i < content.length; i++) {
@@ -131,7 +133,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
             if (section.title && section.items && section.items.length > 0) {
                 await prisma.procedureContent.create({
                     data: {
-                        procedureId: params.id,
+                        procedureId: id,
                         title: section.title.trim(),
                         items: section.items.filter((item) => item.trim() !== ''),
                     },
@@ -170,7 +172,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
                 await prisma.procedureFile.create({
                     data: {
-                        procedureId: params.id,
+                        procedureId: id,
                         fileUrl,
                         fileType: fileTypes[i],
                         fileName: files[i].name,
@@ -181,7 +183,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
         // Return updated procedure with files
         const updatedProcedure = await prisma.procedure.findUnique({
-            where: { id: params.id },
+            where: { id },
             include: {
                 content: {
                     orderBy: { createdAt: 'asc' },
@@ -200,16 +202,18 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // DELETE - Xóa procedure
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await getServerSession();
         if (!session?.user?.email) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const { id } = await params;
+
         // Check if procedure exists
         const procedure = await prisma.procedure.findUnique({
-            where: { id: params.id },
+            where: { id },
             include: { files: true },
         });
 
@@ -228,7 +232,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
         // Hard delete the procedure (cascade will delete content and files)
         await prisma.procedure.delete({
-            where: { id: params.id },
+            where: { id },
         });
 
         return NextResponse.json({ message: 'Xóa quy chế thành công' });

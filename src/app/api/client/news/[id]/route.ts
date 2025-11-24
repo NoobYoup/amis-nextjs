@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/client/news/[id] - Get single news for client
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
         const news = await prisma.news.findUnique({
-            where: { id: params.id },
+            where: { id },
             include: {
                 images: {
                     orderBy: { order: 'asc' },

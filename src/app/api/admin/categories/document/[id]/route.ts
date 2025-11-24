@@ -3,15 +3,16 @@ import { getServerSession } from 'next-auth';
 import prisma from '@/lib/prisma';
 
 // GET - Lấy category theo ID
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await getServerSession();
         if (!session?.user?.email) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const { id } = await params;
         const category = await prisma.documentCategory.findUnique({
-            where: { id: params.id },
+            where: { id },
         });
 
         if (!category) {
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // PUT - Cập nhật category
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await getServerSession();
         if (!session?.user?.email) {
@@ -59,7 +60,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
             where: {
                 name,
                 type,
-                id: { not: params.id },
+                id: { not: id },
             },
         });
 
@@ -68,7 +69,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         }
 
         const updatedCategory = await prisma.documentCategory.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 name: name.trim(),
                 type,
@@ -83,7 +84,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // DELETE - Xóa category
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await getServerSession();
         if (!session?.user?.email) {
@@ -114,7 +115,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
         }
 
         await prisma.documentCategory.delete({
-            where: { id: params.id },
+            where: { id },
         });
 
         return NextResponse.json({ message: 'Xóa danh mục thành công' });

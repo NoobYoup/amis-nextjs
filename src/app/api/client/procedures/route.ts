@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const category = searchParams.get('category');
 
-        const where: any = {};
+        const where: { category?: string } = {};
 
         if (category && category !== 'all') {
             where.category = category;

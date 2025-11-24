@@ -18,7 +18,6 @@ import Divider from '@mui/material/Divider';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
-import CardMedia from '@mui/material/CardMedia';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -148,7 +147,7 @@ export default function ProceduresPage() {
             link.click();
             document.body.removeChild(link);
             toast.success('Đang tải file...');
-        } catch (err) {
+        } catch {
             toast.error('Có lỗi xảy ra khi tải file');
         }
     };
@@ -172,197 +171,6 @@ export default function ProceduresPage() {
             </Container>
         );
     }
-
-    // Fallback to hardcode data if API fails or no data
-    const fallbackRegulations = [
-        {
-            id: 1,
-            title: 'Nội quy học sinh',
-            category: 'Học sinh',
-            description: 'Các quy tắc ứng xử và kỷ luật học sinh trong trường',
-            icon: <SchoolIcon />,
-            downloadUrl: '/files/noi-quy-hoc-sinh.pdf',
-            content: [
-                {
-                    title: 'Quy tắc ứng xử cơ bản',
-                    items: [
-                        'Tôn trọng thầy cô và các cán bộ nhà trường',
-                        'Thân thiện và hỗ trợ các bạn học',
-                        'Tuân thủ quy định về trang phục, tóc tẩm',
-                        'Không sử dụng điện thoại trong giờ học',
-                        'Đến lớp đúng giờ, không vắng mặt không phép',
-                    ],
-                },
-                {
-                    title: 'Kỷ luật và xử phạt',
-                    items: [
-                        'Vi phạm nhẹ: Nhắc nhở, ghi chép',
-                        'Vi phạm trung bình: Cảnh cáo, viết kiểm điểm',
-                        'Vi phạm nặng: Cảnh cáo lần 2, thông báo phụ huynh',
-                        'Vi phạm rất nặng: Kỷ luật, có thể đình chỉ học',
-                    ],
-                },
-                {
-                    title: 'Quyền lợi học sinh',
-                    items: [
-                        'Được học tập trong môi trường an toàn, lành mạnh',
-                        'Được tham gia các hoạt động ngoại khóa',
-                        'Được tham gia các cuộc thi, hội thi',
-                        'Được hỗ trợ học tập và tư vấn tâm lý',
-                    ],
-                },
-            ],
-        },
-        {
-            id: 2,
-            title: 'Quy chế tuyển sinh',
-            category: 'Tuyển sinh',
-            description: 'Quy định về tuyển sinh và nhập học',
-            icon: <PersonIcon />,
-            downloadUrl: '/files/quy-che-tuyen-sinh.pdf',
-            content: [
-                {
-                    title: 'Điều kiện tuyển sinh',
-                    items: [
-                        'Hoàn thành chương trình học cấp dưới',
-                        'Có giấy khai sinh hợp lệ',
-                        'Có sức khỏe phù hợp với học tập',
-                        'Không bị bệnh truyền nhiễm nguy hiểm',
-                    ],
-                },
-                {
-                    title: 'Hồ sơ cần thiết',
-                    items: [
-                        'Đơn đăng ký tuyển sinh',
-                        'Giấy khai sinh (bản sao)',
-                        'Học bạ năm học trước',
-                        'Giấy khám sức khỏe',
-                        '4 ảnh 3x4 chụp trong 6 tháng',
-                    ],
-                },
-                {
-                    title: 'Quy trình xét tuyển',
-                    items: [
-                        'Kiểm tra hồ sơ đầu vào',
-                        'Tổ chức kiểm tra năng lực (nếu có)',
-                        'Công bố kết quả xét tuyển',
-                        'Nhập học và hoàn tất thủ tục hành chính',
-                    ],
-                },
-            ],
-        },
-        {
-            id: 3,
-            title: 'Quy chế học tập',
-            category: 'Học tập',
-            description: 'Quy định về quá trình học tập và đánh giá',
-            icon: <GavelIcon />,
-            downloadUrl: '/files/quy-che-hoc-tap.pdf',
-            content: [
-                {
-                    title: 'Yêu cầu học tập',
-                    items: [
-                        'Tham dự đầy đủ các buổi học',
-                        'Hoàn thành bài tập về nhà',
-                        'Tham gia kiểm tra, thi cử',
-                        'Tôn trọng quyền tác giả, không gian lận',
-                    ],
-                },
-                {
-                    title: 'Đánh giá học tập',
-                    items: [
-                        'Đánh giá thường xuyên qua bài tập, kiểm tra',
-                        'Đánh giá giữa kỳ và cuối kỳ',
-                        'Xếp loại: Xuất sắc, Giỏi, Khá, Trung bình, Yếu',
-                        'Cấp chứng chỉ hoàn thành khóa học',
-                    ],
-                },
-                {
-                    title: 'Hỗ trợ học tập',
-                    items: [
-                        'Dạy thêm cho học sinh yếu',
-                        'Tư vấn học tập từ giáo viên',
-                        'Thư viện và tài liệu học tập',
-                        'Hỗ trợ tâm lý và định hướng nghề nghiệp',
-                    ],
-                },
-            ],
-        },
-        {
-            id: 4,
-            title: 'Quy chế an toàn trường học',
-            category: 'An toàn',
-            description: 'Quy định về an toàn và bảo vệ học sinh',
-            icon: <SecurityIcon />,
-            downloadUrl: '/files/quy-che-an-toan.pdf',
-            content: [
-                {
-                    title: 'Trách nhiệm của nhà trường',
-                    items: [
-                        'Bảo đảm an toàn cơ sở vật chất',
-                        'Cấp cứu y tế khi cần thiết',
-                        'Bảo vệ học sinh khỏi bạo lực, xâm hại',
-                        'Quản lý an toàn giao thông',
-                    ],
-                },
-                {
-                    title: 'Trách nhiệm của học sinh',
-                    items: [
-                        'Tuân thủ quy tắc an toàn',
-                        'Báo cáo sự cố nguy hiểm cho thầy cô',
-                        'Không mang vật cấm vào trường',
-                        'Tham gia các hoạt động phòng chống tai nạn',
-                    ],
-                },
-                {
-                    title: 'Quy định về sức khỏe',
-                    items: [
-                        'Khám sức khỏe định kỳ hàng năm',
-                        'Tiêm chủng theo lịch quốc gia',
-                        'Báo cáo bệnh truyền nhiễm ngay',
-                        'Vệ sinh cá nhân và vệ sinh trường học',
-                    ],
-                },
-            ],
-        },
-        {
-            id: 5,
-            title: 'Quy chế khen thưởng - kỷ luật',
-            category: 'Khen thưởng',
-            description: 'Quy định về khen thưởng và xử phạt học sinh',
-            icon: <EmojiEventsIcon />,
-            downloadUrl: '/files/quy-che-khen-thuong.pdf',
-            content: [
-                {
-                    title: 'Hình thức khen thưởng',
-                    items: [
-                        'Khen thưởng lời nói',
-                        'Giấy khen, chứng chỉ',
-                        'Học sinh giỏi, học sinh tốt',
-                        'Bằng khen, huy chương',
-                    ],
-                },
-                {
-                    title: 'Tiêu chí khen thưởng',
-                    items: [
-                        'Học tập xuất sắc, giỏi',
-                        'Rèn luyện tốt, có đạo đức',
-                        'Tham gia hoạt động ngoại khóa nổi bật',
-                        'Có thành tích đặc biệt',
-                    ],
-                },
-                {
-                    title: 'Hình thức kỷ luật',
-                    items: [
-                        'Nhắc nhở, cảnh cáo',
-                        'Cảnh cáo lần 2, kỷ luật',
-                        'Đình chỉ học tập tạm thời',
-                        'Buộc thôi học (trường hợp đặc biệt)',
-                    ],
-                },
-            ],
-        },
-    ];
 
     const handleCategoryChange = (event: React.SyntheticEvent, newValue: string) => {
         setSelectedCategory(newValue);

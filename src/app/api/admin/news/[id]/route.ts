@@ -4,10 +4,11 @@ import { uploadToCloudinary } from '@/lib/cloudinary';
 import cloudinary from '@/lib/cloudinary';
 
 // GET /api/admin/news/[id] - Get single news
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
         const news = await prisma.news.findUnique({
-            where: { id: params.id },
+            where: { id },
             include: {
                 images: {
                     orderBy: { order: 'asc' },
@@ -27,11 +28,13 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // PUT /api/admin/news/[id] - Update news
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
+
         // Check if news exists
         const existingNews = await prisma.news.findUnique({
-            where: { id: params.id },
+            where: { id },
             include: {
                 images: true,
             },
@@ -85,13 +88,13 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
             // Delete existing images from database and create new ones
             await prisma.newsImage.deleteMany({
-                where: { newsId: params.id },
+                where: { newsId: id },
             });
         }
 
         // Update news
         const updatedNews = await prisma.news.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 title,
                 description,
@@ -120,11 +123,13 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // DELETE /api/admin/news/[id] - Delete news
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
+
         // Get news with images
         const news = await prisma.news.findUnique({
-            where: { id: params.id },
+            where: { id },
             include: {
                 images: true,
             },
@@ -149,7 +154,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
         // Delete news (images will be deleted automatically due to cascade)
         await prisma.news.delete({
-            where: { id: params.id },
+            where: { id },
         });
 
         return NextResponse.json({ message: 'News deleted successfully' });

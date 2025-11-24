@@ -46,10 +46,11 @@ async function deleteFromCloudinary(fileUrl: string): Promise<void> {
 }
 
 // GET - Lấy reform theo ID
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
         const reform = await prisma.reform.findUnique({
-            where: { id: params.id },
+            where: { id },
             include: {
                 files: {
                     orderBy: { order: 'asc' },
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // PUT - Cập nhật reform
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await getServerSession();
         if (!session?.user?.email) {
@@ -86,12 +87,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         let details: string[] = [];
         try {
             details = JSON.parse(detailsJson || '[]');
-        } catch (e) {
+        } catch {
             return NextResponse.json({ error: 'Invalid details format' }, { status: 400 });
         }
 
         // Parse existing files that should be kept
-        let existingFilesToKeep: any[] = [];
+        let existingFilesToKeep: { id: string; fileUrl: string; fileType: string }[] = [];
         try {
             existingFilesToKeep = JSON.parse(existingFilesJson || '[]');
         } catch (e) {
@@ -197,7 +198,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // DELETE - Xóa reform
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await getServerSession();
         if (!session?.user?.email) {

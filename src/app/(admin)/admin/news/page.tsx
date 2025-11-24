@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Box,
     Typography,
@@ -70,7 +70,7 @@ export default function NewsListPage() {
     const categories = ['all', 'Tiểu học', 'Trung học'];
 
     // Fetch news data
-    const fetchNews = async () => {
+    const fetchNews = useCallback(async () => {
         try {
             setLoading(true);
             const params = new URLSearchParams({
@@ -100,11 +100,11 @@ export default function NewsListPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, rowsPerPage, searchTerm, categoryFilter]);
 
     useEffect(() => {
         fetchNews();
-    }, [page, rowsPerPage, searchTerm, categoryFilter]);
+    }, [fetchNews]);
 
     const handleSearch = () => {
         setPage(0);
@@ -245,7 +245,16 @@ export default function NewsListPage() {
                                     <TableCell>
                                         <Chip
                                             label={item.category}
-                                            color={getCategoryColor(item.category) as any}
+                                            color={
+                                                getCategoryColor(item.category) as
+                                                    | 'default'
+                                                    | 'primary'
+                                                    | 'secondary'
+                                                    | 'error'
+                                                    | 'info'
+                                                    | 'success'
+                                                    | 'warning'
+                                            }
                                             size="small"
                                         />
                                     </TableCell>
@@ -302,7 +311,7 @@ export default function NewsListPage() {
                 <DialogTitle>Xác nhận xóa</DialogTitle>
                 <DialogContent>
                     <Typography>
-                        Bạn có chắc chắn muốn xóa tin tức "{newsToDelete?.title}"?
+                        Bạn có chắc chắn muốn xóa tin tức &quot;{newsToDelete?.title}&quot;?
                         <br />
                         <strong>Hành động này không thể hoàn tác.</strong>
                     </Typography>
