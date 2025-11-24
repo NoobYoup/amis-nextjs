@@ -220,7 +220,7 @@ export default function Reform() {
                 {/* Disclosure Items Grid */}
                 <Grid container spacing={3}>
                     {disclosureItems.map((item) => (
-                        <Grid size={{ xs: 12, md: 6 }} key={item.id}>
+                        <Grid size={{ xs: 12, md: 4 }} key={item.id}>
                             <Card
                                 sx={{
                                     height: '100%',
