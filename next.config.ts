@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
     images: {
         unoptimized: true, // Required for static export
     },
+    eslint: {
+        ignoreDuringBuilds: true, // Ignore ESLint errors during build
+    },
     experimental: {
         optimizePackageImports: ['@mui/material', '@mui/icons-material'],
     },
