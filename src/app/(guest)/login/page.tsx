@@ -14,11 +14,12 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff, School } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-toastify';
 
 export default function Login() {
     const router = useRouter();
+    const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -46,24 +47,14 @@ export default function Login() {
                 return;
             }
 
-            // Gọi NextAuth signIn
-            const result = await signIn('credentials', {
-                email,
-                password,
-                redirect: false, // Không auto redirect, handle manual
-            });
+            // Login with new AuthContext
+            await login(email, password);
 
-            if (!result?.ok) {
-                toast.error('Đăng nhập thất bại. Vui lòng kiểm tra lại email hoặc mật khẩu.');
-                return;
-            }
-
-            // Demo success
+            // Success
             toast.success('Đăng nhập thành công!');
             router.push('/admin/activities');
-            router.refresh();
-        } catch (err) {
-            toast.error('Có lỗi xảy ra. Vui lòng thử lại.');
+        } catch (err: any) {
+            toast.error(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại email hoặc mật khẩu.');
             console.error(err);
         } finally {
             setLoading(false);

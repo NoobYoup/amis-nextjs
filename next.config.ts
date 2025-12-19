@@ -1,11 +1,13 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-    /* config options here */
+    output: 'export', // Enable static HTML export
+    images: {
+        unoptimized: true, // Required for static export
+    },
     experimental: {
         optimizePackageImports: ['@mui/material', '@mui/icons-material'],
     },
-    // Enable proper CSS optimization for Material-UI
     compiler: {
         removeConsole: process.env.NODE_ENV === 'production' ? true : false,
     },
