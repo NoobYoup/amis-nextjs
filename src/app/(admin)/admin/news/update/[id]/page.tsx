@@ -31,6 +31,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import { api } from '@/lib/api';
 
 // Tiptap Editor Component
 const TiptapEditor = ({ content, onChange }: { content: string; onChange: (content: string) => void }) => {
@@ -176,12 +177,7 @@ export default function UpdateNewsPage() {
     useEffect(() => {
         const loadNews = async () => {
             try {
-                const response = await fetch(`/api/admin/news/${newsId}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch news');
-                }
-
-                const news: News = await response.json();
+                const news: News = await api.get(`/admin/news/${newsId}`);
                 setFormData({
                     title: news.title,
                     description: news.description,
@@ -302,14 +298,7 @@ export default function UpdateNewsPage() {
                 });
             }
 
-            const response = await fetch(`/api/admin/news/${newsId}`, {
-                method: 'PUT',
-                body: submitData,
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to update news');
-            }
+            await api.put(`/admin/news/${newsId}`, submitData);
 
             toast.success('Cập nhật tin tức thành công');
             router.push('/admin/news');

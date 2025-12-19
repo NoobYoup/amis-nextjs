@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { api } from '@/lib/api';
 import {
     Box,
     Container,
@@ -35,9 +36,7 @@ export default function UpdateTuitionFeePage() {
 
     const loadTuition = useCallback(async () => {
         try {
-            const res = await fetch(`/api/admin/tuition/${id}`);
-            if (!res.ok) throw new Error('Error loading');
-            const data = await res.json();
+            const data = await api.get(`/admin/tuition/${id}`);
             setFormData({
                 description: data.description || '',
                 name: data.name || '',
@@ -67,16 +66,7 @@ export default function UpdateTuitionFeePage() {
 
         const saveData = { ...formData, type: 'fee' };
         try {
-            const res = await fetch(`/api/admin/tuition/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(saveData),
-            });
-            if (!res.ok) {
-                const err = await res.json();
-                setError(err.error || 'Lỗi cập nhật');
-                return;
-            }
+            await api.put(`/admin/tuition/${id}`, saveData);
             router.push('/admin/tuition/fee');
         } catch (err) {
             setError((err as Error).message || 'Có lỗi xảy ra');

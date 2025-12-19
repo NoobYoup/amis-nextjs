@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { api } from '@/lib/api';
 import { Box, Container, Typography, TextField, Button, Paper, Stack, Alert, CircularProgress } from '@mui/material';
 
 export default function UpdateCategoryPage() {
@@ -16,9 +17,7 @@ export default function UpdateCategoryPage() {
     useEffect(() => {
         const loadCategory = async () => {
             try {
-                const res = await fetch(`/api/admin/categories/activity/${categoryId}`);
-                if (!res.ok) throw new Error('Lỗi tải danh mục');
-                const data = await res.json();
+                const data = await api.get(`/admin/categories/activity/${categoryId}`);
                 setName(data.name);
                 setLoading(false);
             } catch (err) {
@@ -44,20 +43,7 @@ export default function UpdateCategoryPage() {
         setSubmitting(true);
 
         try {
-            const res = await fetch(`/api/admin/categories/activity/${categoryId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name: name.trim() }),
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-                setError(err.error || 'Lỗi cập nhật danh mục');
-                return;
-            }
-
+            await api.put(`/admin/categories/activity/${categoryId}`, { name: name.trim() });
             router.push('/admin/categories/activity');
         } catch (err) {
             setError((err as Error).message || 'Lỗi không mong muốn');

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 import {
     Box,
     Typography,
@@ -35,9 +36,7 @@ export default function ActivityCategoriesPage() {
 
     const fetchCategories = useCallback(async () => {
         try {
-            const response = await fetch('/api/admin/categories/activity');
-            if (!response.ok) throw new Error('Lỗi khi tải danh sách danh mục');
-            const data = await response.json();
+            const data = await api.get('/admin/categories/activity');
             setCategories(data);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi');
@@ -61,8 +60,7 @@ export default function ActivityCategoriesPage() {
     const handleConfirmDelete = async () => {
         if (!selectedId) return;
         try {
-            const res = await fetch(`/api/admin/categories/activity/${selectedId}`, { method: 'DELETE' });
-            if (!res.ok) throw new Error('Error deleting');
+            await api.delete(`/admin/categories/activity/${selectedId}`);
             fetchCategories();
             handleCloseDeleteDialog();
         } catch (err) {

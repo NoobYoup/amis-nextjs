@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 import {
     Box,
     Container,
@@ -248,17 +249,7 @@ export default function AddProcedurePage() {
                 submitData.append(`fileType_${i}`, formData.fileTypes[i]);
             }
 
-            const res = await fetch('/api/admin/procedures', {
-                method: 'POST',
-                body: submitData,
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-                setError(err.error || 'Lỗi tạo quy chế');
-                setSubmitLoading(false);
-                return;
-            }
+            await api.post('/admin/procedures', submitData);
 
             toast.success('Tạo quy chế thành công');
             router.push('/admin/procedures');

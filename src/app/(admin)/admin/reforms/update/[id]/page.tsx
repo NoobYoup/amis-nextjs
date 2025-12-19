@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { api } from '@/lib/api';
 import {
     Box,
     Container,
@@ -56,9 +57,7 @@ export default function UpdateReformPage() {
     useEffect(() => {
         const loadReform = async () => {
             try {
-                const res = await fetch(`/api/admin/reforms/${reformId}`);
-                if (!res.ok) throw new Error('Error loading reform');
-                const data = await res.json();
+                const data = await api.get(`/admin/reforms/${reformId}`);
 
                 setFormData({
                     title: data.title,
@@ -259,17 +258,7 @@ export default function UpdateReformPage() {
                 submitData.append(`fileType_${i}`, formData.fileTypes[i]);
             }
 
-            const res = await fetch(`/api/admin/reforms/${reformId}`, {
-                method: 'PUT',
-                body: submitData,
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-                setError(err.error || 'Lỗi cập nhật mục công khai');
-                setSubmitLoading(false);
-                return;
-            }
+            await api.put(`/admin/reforms/${reformId}`, submitData);
 
             toast.success('Cập nhật mục công khai thành công');
             router.push('/admin/reforms');

@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import { api } from '@/lib/api';
 
 export default function ChangePasswordPage() {
     const [formData, setFormData] = useState({
@@ -113,9 +113,10 @@ export default function ChangePasswordPage() {
 
         setLoading(true);
         try {
-            await axios.put('/api/admin/change-password', {
+            await api.post('/admin/change-password', {
                 currentPassword: formData.currentPassword,
                 newPassword: formData.newPassword,
+                newPasswordConfirmation: formData.confirmPassword
             });
 
             toast.success('Thay đổi mật khẩu thành công!');

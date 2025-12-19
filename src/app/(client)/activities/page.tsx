@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -52,11 +53,8 @@ export default function ActivitiesPage() {
     useEffect(() => {
         const loadCategories = async () => {
             try {
-                const res = await fetch('/api/client/categories/activity');
-                if (res.ok) {
-                    const data = await res.json();
-                    setCategories(data);
-                }
+                const { data } = await api.get('/client/categories/activity');
+                setCategories(data);
             } catch (error) {
                 console.error('Error loading categories:', error);
             }
@@ -77,12 +75,9 @@ export default function ActivitiesPage() {
                 params.append('categoryId', selectedCategory);
             }
 
-            const res = await fetch(`/api/client/activities?${params}`);
-            if (res.ok) {
-                const { data, pages } = await res.json();
-                setActivities(data);
-                setTotalPages(pages);
-            }
+            const { data, pages } = await api.get(`/client/activities?${params}`);
+            setActivities(data);
+            setTotalPages(pages);
         } catch (error) {
             console.error('Error loading activities:', error);
         } finally {

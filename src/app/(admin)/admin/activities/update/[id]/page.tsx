@@ -1,5 +1,6 @@
 'use client';
 
+import { api } from '@/lib/api';
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import {
@@ -58,10 +59,7 @@ export default function UpdateActivityPage() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch('/api/admin/categories/activity');
-                if (!response.ok) throw new Error('Lỗi khi tải danh mục');
-                const data = await response.json();
-
+                const data = await api.get('/admin/categories/activity');
                 setCategories(data);
             } catch (err) {
                 setError('Không thể tải danh sách danh mục');
@@ -77,9 +75,7 @@ export default function UpdateActivityPage() {
     useEffect(() => {
         const loadActivity = async () => {
             try {
-                const res = await fetch(`/api/admin/activities/${activityId}`);
-                if (!res.ok) throw new Error('Error loading activity');
-                const data = await res.json();
+                const data = await api.get(`/admin/activities/${activityId}`);
 
                 // Extract categoryId from category object
                 const categoryId = data.categoryId || data.category?.id || '';
@@ -202,15 +198,7 @@ export default function UpdateActivityPage() {
         });
 
         try {
-            const res = await fetch(`/api/admin/activities/${activityId}`, {
-                method: 'PUT',
-                body: submitData,
-            });
-            if (!res.ok) {
-                const err = await res.json();
-                setError(err.error || 'Lỗi cập nhật');
-                return;
-            }
+            await api.put(`/admin/activities/${activityId}`, submitData);
             setSubmitLoading(false);
             router.push('/admin/activities');
         } catch (err) {

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { api } from '@/lib/api';
 import {
     Box,
     Container,
@@ -61,10 +62,9 @@ export default function UpdateDocumentPage() {
     const loadCategories = useCallback(async () => {
         try {
             setCategoriesLoading(true);
-            const response = await fetch('/api/admin/categories/document');
-            if (!response.ok) throw new Error('Error loading categories');
+            setCategoriesLoading(true);
+            const { data } = await api.get('/admin/categories/document');
 
-            const { data } = await response.json();
             const categories: DocumentCategory[] = data || [];
 
             // Separate types and fields
@@ -97,9 +97,7 @@ export default function UpdateDocumentPage() {
     useEffect(() => {
         const loadDocument = async () => {
             try {
-                const res = await fetch(`/api/admin/documents/${documentId}`);
-                if (!res.ok) throw new Error('Error loading document');
-                const data = await res.json();
+                const data = await api.get(`/admin/documents/${documentId}`);
 
                 // Extract file URLs and types from files array
                 interface FileItem {
@@ -237,16 +235,7 @@ export default function UpdateDocumentPage() {
                 submitData.append(`fileType_${i}`, formData.fileTypes[i]);
             }
 
-            const res = await fetch(`/api/admin/documents/${documentId}`, {
-                method: 'PUT',
-                body: submitData,
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-                setError(err.error || 'Lỗi cập nhật tài liệu');
-                return;
-            }
+            await api.put(`/admin/documents/${documentId}`, submitData);
 
             router.push('/admin/documents');
         } catch (err) {

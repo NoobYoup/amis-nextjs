@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -74,12 +75,7 @@ export default function ProceduresPage() {
                     params.append('category', selectedCategory);
                 }
 
-                const res = await fetch(`/api/client/procedures?${params}`);
-                if (!res.ok) {
-                    throw new Error('Failed to fetch procedures');
-                }
-
-                const data = await res.json();
+                const data = await api.get(`/client/procedures?${params}`);
                 setProcedures(data);
                 setError('');
             } catch (err) {

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 import Image from 'next/image';
 import {
     Box,
@@ -72,9 +73,7 @@ export default function ReformsPage() {
             const params = new URLSearchParams({
                 page: (page + 1).toString(),
             });
-            const res = await fetch(`/api/admin/reforms?${params}`);
-            if (!res.ok) throw new Error('Error loading reforms');
-            const { data, total } = await res.json();
+            const { data, total } = await api.get(`/admin/reforms?${params}`);
 
             setReforms(data);
             setTotal(total);
@@ -95,8 +94,7 @@ export default function ReformsPage() {
 
     const handleConfirmDelete = async () => {
         try {
-            const res = await fetch(`/api/admin/reforms/${selectedId}`, { method: 'DELETE' });
-            if (!res.ok) throw new Error('Error deleting');
+            await api.delete(`/admin/reforms/${selectedId}`);
             loadReforms();
             handleCloseDeleteDialog();
         } catch (err) {
@@ -118,7 +116,7 @@ export default function ReformsPage() {
         setDownloading(reform.id);
         try {
             const firstFile = reform.files.find((f) => f.fileType !== 'image') || reform.files[0];
-            const response = await fetch(`/api/download?url=${encodeURIComponent(firstFile.fileUrl)}`);
+            const response = await api.fetch(`/download?url=${encodeURIComponent(firstFile.fileUrl)}`);
 
             if (!response.ok) {
                 throw new Error('Download failed');

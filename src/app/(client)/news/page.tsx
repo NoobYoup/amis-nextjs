@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -50,12 +51,11 @@ export default function NewsPage() {
                 params.append('category', selectedCategory);
             }
 
-            const response = await fetch(`/api/client/news?${params}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch news');
+            if (selectedCategory !== 'all') {
+                params.append('category', selectedCategory);
             }
 
-            const data = await response.json();
+            const data = await api.get(`/client/news?${params}`);
             setNews(data.data);
             setTotalPages(data.pagination.pages);
             setError('');

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { api } from '@/lib/api';
 import {
     Box,
     Container,
@@ -33,9 +34,7 @@ export default function UpdateTuitionSchedulePage() {
     useEffect(() => {
         const loadSchedule = async () => {
             try {
-                const res = await fetch(`/api/admin/tuition/${id}`);
-                if (!res.ok) throw new Error('Error loading schedule');
-                const data = await res.json();
+                const data = await api.get(`/admin/tuition/${id}`);
                 setFormData({
                     description: data.description || '',
                     period: data.period || '',
@@ -67,12 +66,7 @@ export default function UpdateTuitionSchedulePage() {
         }
 
         try {
-            const res = await fetch(`/api/admin/tuition/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
-            if (!res.ok) throw new Error('Error updating schedule');
+            await api.put(`/admin/tuition/${id}`, formData);
             router.push('/admin/tuition/schedule');
         } catch (err) {
             setError((err as Error).message || 'Lỗi cập nhật lịch nộp');

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 import {
     Box,
     Container,
@@ -83,12 +84,7 @@ export default function ProceduresPage() {
             const params = new URLSearchParams();
             if (searchTerm) params.append('search', searchTerm);
 
-            const res = await fetch(`/api/admin/procedures?${params}`);
-            if (!res.ok) {
-                throw new Error('Failed to fetch procedures');
-            }
-
-            const data = await res.json();
+            const data = await api.get(`/admin/procedures?${params}`);
             setProcedures(data);
             setError('');
         } catch (err) {
@@ -115,14 +111,7 @@ export default function ProceduresPage() {
         if (!deleteDialog.procedure) return;
 
         try {
-            const res = await fetch(`/api/admin/procedures/${deleteDialog.procedure.id}`, {
-                method: 'DELETE',
-            });
-
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || 'Failed to delete procedure');
-            }
+            await api.delete(`/admin/procedures/${deleteDialog.procedure.id}`);
 
             toast.success('Xóa quy chế thành công');
             fetchProcedures();

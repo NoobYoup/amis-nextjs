@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -52,25 +53,12 @@ export default function ActivityDetailPage() {
         const loadActivity = async () => {
             setLoading(true);
             try {
-                const res = await fetch(`/api/client/activities/${params.id}`);
-                if (!res.ok) {
-                    if (res.status === 404) {
-                        setError('Không tìm thấy hoạt động');
-                    } else {
-                        setError('Lỗi khi tải dữ liệu');
-                    }
-                    return;
-                }
-                const data = await res.json();
-
+                const data = await api.get(`/client/activities/${params.id}`);
                 setActivity(data);
 
                 // Load related activities
-                const relatedRes = await fetch(`/api/client/activities?categoryId=${data.categoryId}&limit=3`);
-                if (relatedRes.ok) {
-                    const { data: related } = await relatedRes.json();
-                    setRelatedActivities(related.filter((a: Activity) => a.id !== data.id).slice(0, 3));
-                }
+                const { data: related } = await api.get(`/client/activities?categoryId=${data.categoryId}&limit=3`);
+                setRelatedActivities(related.filter((a: Activity) => a.id !== data.id).slice(0, 3));
             } catch (err) {
                 console.error('Error loading activity:', err);
                 setError('Lỗi khi tải dữ liệu');

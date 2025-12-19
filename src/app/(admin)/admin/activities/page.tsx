@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 import {
     Box,
     Container,
@@ -52,9 +53,7 @@ export default function ActivitiesPage() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const res = await fetch('/api/admin/categories/activity');
-                if (!res.ok) throw new Error('Error loading categories');
-                const data = await res.json();
+                const data = await api.get('/admin/categories/activity');
                 setCategories(data);
             } catch (err) {
                 console.error('Error fetching categories:', err);
@@ -70,9 +69,7 @@ export default function ActivitiesPage() {
                 category: selectedCategory,
                 page: (page + 1).toString(),
             });
-            const res = await fetch(`/api/admin/activities?${params}`);
-            if (!res.ok) throw new Error('Error loading activities');
-            const { data, total } = await res.json();
+            const { data, total } = await api.get(`/admin/activities?${params}`);
 
             setActivities(data);
             setTotal(total);
@@ -114,8 +111,7 @@ export default function ActivitiesPage() {
     const handleConfirmDelete = async () => {
         if (!selectedId) return;
         try {
-            const res = await fetch(`/api/admin/activities/${selectedId}`, { method: 'DELETE' });
-            if (!res.ok) throw new Error('Error deleting');
+            await api.delete(`/admin/activities/${selectedId}`);
             loadActivities(); // Refresh list
             handleCloseDeleteDialog();
         } catch (err) {

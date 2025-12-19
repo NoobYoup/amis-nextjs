@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { api } from '@/lib/api';
 import {
     Box,
     Container,
@@ -37,9 +38,7 @@ export default function UpdateTuitionGradePage() {
     useEffect(() => {
         const loadTuition = async () => {
             try {
-                const res = await fetch(`/api/admin/tuition/${id}`);
-                if (!res.ok) throw new Error('Error loading');
-                const data = await res.json();
+                const data = await api.get(`/admin/tuition/${id}`);
                 setFormData({
                     description: data.description || '',
                     grade: data.grade || '',
@@ -69,16 +68,7 @@ export default function UpdateTuitionGradePage() {
 
         const saveData = { ...formData, type: 'grade' };
         try {
-            const res = await fetch(`/api/admin/tuition/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(saveData),
-            });
-            if (!res.ok) {
-                const err = await res.json();
-                setError(err.error || err.details || 'Lỗi cập nhật');
-                return;
-            }
+            await api.put(`/admin/tuition/${id}`, saveData);
             router.push('/admin/tuition/grade');
         } catch (err) {
             setError((err as Error).message || 'Có lỗi xảy ra');

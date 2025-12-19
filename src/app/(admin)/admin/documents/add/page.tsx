@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 import {
     Box,
     Container,
@@ -52,10 +53,9 @@ export default function AddDocumentPage() {
     const loadCategories = useCallback(async () => {
         try {
             setCategoriesLoading(true);
-            const response = await fetch('/api/admin/categories/document');
-            if (!response.ok) throw new Error('Error loading categories');
+            setCategoriesLoading(true);
+            const { data } = await api.get('/admin/categories/document');
 
-            const { data } = await response.json();
             const categories: DocumentCategory[] = data || [];
 
             // Separate types and fields
@@ -187,17 +187,7 @@ export default function AddDocumentPage() {
                 submitData.append(`fileType_${i}`, formData.fileTypes[i]);
             }
 
-            const res = await fetch('/api/admin/documents', {
-                method: 'POST',
-                body: submitData,
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-                toast.error(err.error || 'Lỗi lưu tài liệu');
-                setSubmitLoading(false);
-                return;
-            }
+            await api.post('/admin/documents', submitData);
 
             toast.success(`Đã lưu ${formData.files.length} file vào 1 tài liệu thành công`);
             router.push('/admin/documents');

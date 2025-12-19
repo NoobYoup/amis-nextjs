@@ -35,6 +35,7 @@ import {
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { api } from '@/lib/api';
 
 interface NewsImage {
     id: string;
@@ -86,12 +87,11 @@ export default function NewsListPage() {
                 params.append('category', categoryFilter);
             }
 
-            const response = await fetch(`/api/admin/news?${params}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch news');
+            if (categoryFilter !== 'all') {
+                params.append('category', categoryFilter);
             }
 
-            const data = await response.json();
+            const data = await api.get(`/admin/news?${params}`);
             setNews(data.data);
             setTotalCount(data.pagination.total);
         } catch (error) {
@@ -115,13 +115,7 @@ export default function NewsListPage() {
         if (!newsToDelete) return;
 
         try {
-            const response = await fetch(`/api/admin/news/${newsToDelete.id}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete news');
-            }
+            await api.delete(`/admin/news/${newsToDelete.id}`);
 
             toast.success('Xóa tin tức thành công');
             setDeleteDialogOpen(false);

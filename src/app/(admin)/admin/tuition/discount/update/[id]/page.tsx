@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { api } from '@/lib/api';
 import {
     Box,
     Container,
@@ -31,9 +32,7 @@ export default function UpdateTuitionDiscountPage() {
     useEffect(() => {
         const loadTuition = async () => {
             try {
-                const res = await fetch(`/api/admin/tuition/${id}`);
-                if (!res.ok) throw new Error('Error loading');
-                const data = await res.json();
+                const data = await api.get(`/admin/tuition/${id}`);
                 setFormData({
                     description: data.description || '',
                     discount: data.discount || '',
@@ -61,16 +60,7 @@ export default function UpdateTuitionDiscountPage() {
 
         const saveData = { ...formData, type: 'discount' };
         try {
-            const res = await fetch(`/api/admin/tuition/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(saveData),
-            });
-            if (!res.ok) {
-                const err = await res.json();
-                setError(err.error || 'Lỗi cập nhật');
-                return;
-            }
+            await api.put(`/admin/tuition/${id}`, saveData);
             router.push('/admin/tuition/discount');
         } catch (err) {
             setError((err as Error).message || 'Có lỗi xảy ra');

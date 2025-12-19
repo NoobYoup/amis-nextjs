@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { api, setAuthToken, removeAuthToken, getUser, setUser } from '@/lib/api';
-import { mockApiResponses } from '@/lib/mockData';
 
 interface User {
     id: string;
@@ -36,11 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const login = async (email: string, password: string) => {
         try {
-            // TODO: Replace with real API call when backend is ready
-            // const data = await api.post('/auth/login', { email, password });
-            
-            // Using mock data for now
-            const data = mockApiResponses.login(email, password);
+            // Real API call
+            const data = await api.post('/login', { email, password });
             
             setAuthToken(data.token);
             setUser(data.user);

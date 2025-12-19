@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 import {
     Box,
     Container,
@@ -95,10 +96,9 @@ export default function DocumentsPage() {
     const loadCategories = useCallback(async () => {
         try {
             setCategoriesLoading(true);
-            const response = await fetch('/api/admin/categories/document');
-            if (!response.ok) throw new Error('Error loading categories');
+            setCategoriesLoading(true);
+            const { data } = await api.get('/admin/categories/document');
 
-            const { data } = await response.json();
             const categories: DocumentCategory[] = data || [];
 
             // Separate types and fields
@@ -132,9 +132,7 @@ export default function DocumentsPage() {
                 field: selectedField,
                 page: (page + 1).toString(),
             });
-            const res = await fetch(`/api/admin/documents?${params}`);
-            if (!res.ok) throw new Error('Error loading documents');
-            const { data, total } = await res.json();
+            const { data, total } = await api.get(`/admin/documents?${params}`);
 
             setDocuments(data);
             setTotal(total);
@@ -174,8 +172,7 @@ export default function DocumentsPage() {
 
     const handleConfirmDelete = async () => {
         try {
-            const res = await fetch(`/api/admin/documents/${selectedId}`, { method: 'DELETE' });
-            if (!res.ok) throw new Error('Error deleting');
+            await api.delete(`/admin/documents/${selectedId}`);
             loadDocuments();
             handleCloseDeleteDialog();
         } catch (err) {

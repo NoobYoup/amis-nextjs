@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -56,18 +57,7 @@ export default function NewsDetailPage() {
         const fetchNews = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`/api/client/news/${newsId}`);
-
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        setError('Không tìm thấy tin tức');
-                    } else {
-                        setError('Có lỗi xảy ra khi tải tin tức');
-                    }
-                    return;
-                }
-
-                const data = await response.json();
+                const data = await api.get(`/client/news/${newsId}`);
                 setNews(data);
                 setError('');
             } catch (err) {

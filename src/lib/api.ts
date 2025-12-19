@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 // Auth token management
 export const getAuthToken = (): string | null => {
@@ -41,6 +41,7 @@ export const api = {
         if (!(options.body instanceof FormData)) {
             headers['Content-Type'] = 'application/json';
         }
+        headers['Accept'] = 'application/json';
 
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             ...options,

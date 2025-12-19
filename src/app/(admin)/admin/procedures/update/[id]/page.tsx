@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { api } from '@/lib/api';
 import {
     Box,
     Container,
@@ -86,12 +87,8 @@ export default function UpdateProcedurePage() {
     useEffect(() => {
         const fetchProcedure = async () => {
             try {
-                const res = await fetch(`/api/admin/procedures/${procedureId}`);
-                if (!res.ok) {
-                    throw new Error('Failed to fetch procedure');
-                }
+                const data = await api.get(`/admin/procedures/${procedureId}`);
 
-                const data = await res.json();
                 setProcedure(data);
                 setFormData({
                     title: data.title,
@@ -315,17 +312,7 @@ export default function UpdateProcedurePage() {
                 submitData.append(`fileType_${i}`, newFileTypes[i]);
             }
 
-            const res = await fetch(`/api/admin/procedures/${procedureId}`, {
-                method: 'PUT',
-                body: submitData,
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-                setError(err.error || 'Lỗi cập nhật quy chế');
-                setSubmitLoading(false);
-                return;
-            }
+            await api.put(`/admin/procedures/${procedureId}`, submitData);
 
             toast.success('Cập nhật quy chế thành công');
             router.push('/admin/procedures');

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 import { Box, Container, Typography, TextField, Button, Paper, Stack, Alert } from '@mui/material';
 
 export default function AddCategoryPage() {
@@ -22,21 +23,7 @@ export default function AddCategoryPage() {
         setLoading(true);
 
         try {
-            const res = await fetch('/api/admin/categories/activity', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name: name.trim() }),
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-
-                setError(err.error || err.details || 'Lỗi thêm danh mục');
-                return;
-            }
-
+            await api.post('/admin/categories/activity', { name: name.trim() });
             router.push('/admin/categories/activity');
         } catch (err) {
             setError((err as Error).message || 'Lỗi không mong muốn');
