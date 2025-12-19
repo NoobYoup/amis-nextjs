@@ -1,32 +1,39 @@
 'use client';
 
-import React from 'react';
+import { ReactNode, useEffect } from 'react';
 import { Box } from '@mui/material';
 import Sidebar from '@/components/Sidebar';
-import SessionWrapper from '@/components/SessionWrapper';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
-interface AdminLayoutProps {
-    children: React.ReactNode;
-}
+export default function AdminLayout({ children }: { children: ReactNode }) {
+    const { isAuthenticated, isLoading, user } = useAuth();
+    const router = useRouter();
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-    return (
-        <SessionWrapper>
-            <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-                <Sidebar />
-                <Box
-                    component="main"
-                    sx={{
-                        flex: 1,
-                        overflow: 'auto',
-                        backgroundColor: 'var(--background)',
-                    }}
-                >
-                    {children}
-                </Box>
+    useEffect(() => {
+        if (!isLoading && (!isAuthenticated || user?.role !== 'admin')) {
+            router.push('/login');
+        }
+    }, [isAuthenticated, isLoading, user, router]);
+
+    if (isLoading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <p>Loading...</p>
             </Box>
-        </SessionWrapper>
-    );
-};
+        );
+    }
 
-export default AdminLayout;
+    if (!isAuthenticated || user?.role !== 'admin') {
+        return null;
+    }
+
+    return (
+        <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+            <Sidebar />
+            <Box component="main" sx={{ flexGrow: 1, p: 3, bgcolor: '#f5f5f5' }}>
+                {children}
+            </Box>
+        </Box>
+    );
+}

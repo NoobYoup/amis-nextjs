@@ -34,7 +34,7 @@ import {
     Notifications,
 } from '@mui/icons-material';
 import { SidebarMenuItem } from '@/types/sidebar';
-import { signOut } from 'next-auth/react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const SIDEBAR_WIDTH = 280;
 const SIDEBAR_COLLAPSED_WIDTH = 80;
@@ -106,6 +106,7 @@ const Sidebar: React.FC = () => {
     const router = useRouter();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const { logout } = useAuth();
 
     const toggleCollapse = useCallback(() => {
         setIsOpen(!isOpen);
@@ -150,11 +151,9 @@ const Sidebar: React.FC = () => {
         setExpandedItems(activeMainItems);
     }, [isMenuItemOrSubItemActive]);
 
-    // Define handleLogout nếu onLogout không được pass từ parent
-    const handleLogout = async () => {
-        await signOut({ redirect: false });
-        router.push('/login');
-        router.refresh();
+    // Handle logout with new AuthContext
+    const handleLogout = () => {
+        logout();
     };
 
     const sidebarContent = (
