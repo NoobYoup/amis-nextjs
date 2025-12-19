@@ -291,17 +291,12 @@ export default function DocumentsPage() {
                                             sx={{ bgcolor: 'var(--primary-color)', color: 'white', fontWeight: 600 }}
                                         />
                                     </TableCell>
-                                    {doc.number ? (
-                                        <TableCell sx={{ fontWeight: 600 }}>{doc.number}</TableCell>
-                                    ) : (
-                                        <TableCell sx={{ fontWeight: 600 }}>Trống</TableCell>
-                                    )}
-
+                                    <TableCell sx={{ fontWeight: 600 }}>{doc.number}</TableCell>
                                     <TableCell>{doc.field}</TableCell>
 
                                     <TableCell>{dayjs(doc.date).format('DD/MM/YYYY')}</TableCell>
                                     <TableCell>{dayjs(doc.updatedAt).format('DD/MM/YYYY')}</TableCell>
-                                    <TableCell sx={{ textAlign: 'center', display: 'flex' }}>
+                                    <TableCell sx={{ textAlign: 'center' }}>
                                         <IconButton
                                             size="small"
                                             href={`/admin/documents/update/${doc.id}`}

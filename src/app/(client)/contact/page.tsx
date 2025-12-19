@@ -183,28 +183,112 @@ export default function ContactPage() {
                 <Grid container spacing={4}>
                     {/* Contact Form */}
                     <Grid size={{ xs: 12, md: 7 }}>
-                        {/* Map */}
-                        <Card sx={{ overflow: 'hidden' }}>
-                            <Box
-                                sx={{
-                                    width: '100%',
-                                    height: '100%',
-                                    bgcolor: '#e0e0e0',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}
-                            >
-                                <iframe
-                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d582.6843920596709!2d106.64234205038215!3d10.748526588654048!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752e629e55c4f1%3A0xe706055cf174c128!2zNjIgxJAuIE1pbmggUGjhu6VuZywgUGjGsOG7nW5nIDIsIFF14bqtbiA2LCBUaMOgbmggcGjhu5EgSOG7kyBDaMOtIE1pbmgsIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1761076138889!5m2!1svi!2s"
-                                    width="100%"
-                                    height="300"
-                                    style={{ border: 0 }}
-                                    allowFullScreen
-                                    loading="lazy"
-                                    referrerPolicy="no-referrer-when-downgrade"
-                                    title="School Location"
-                                />
+                        <Card sx={{ p: 4 }}>
+                            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: 'var(--primary-color)' }}>
+                                Gửi tin nhắn
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: '#666', mb: 3 }}>
+                                Điền thông tin vào form dưới đây, chúng tôi sẽ phản hồi sớm nhất có thể
+                            </Typography>
+
+                            {/* {submitted && (
+                                <Alert icon={<CheckCircleIcon fontSize="inherit" />} severity="success" sx={{ mb: 3 }}>
+                                    Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất.
+                                </Alert>
+                            )} */}
+
+                            <Box component="form" onSubmit={handleSubmit}>
+                                <Grid container spacing={2}>
+                                    <Grid size={{ xs: 12, sm: 6 }}>
+                                        <TextField
+                                            fullWidth
+                                            required
+                                            label="Họ và tên"
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                            error={!!errors.name}
+                                            helperText={errors.name}
+                                            placeholder="Nguyễn Văn A"
+                                        />
+                                    </Grid>
+                                    <Grid size={{ xs: 12, sm: 6 }}>
+                                        <TextField
+                                            fullWidth
+                                            required
+                                            type="email"
+                                            label="Email"
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            error={!!errors.email}
+                                            helperText={errors.email}
+                                            placeholder="example@email.com"
+                                        />
+                                    </Grid>
+                                    <Grid size={{ xs: 12, sm: 6 }}>
+                                        <TextField
+                                            fullWidth
+                                            required
+                                            label="Số điện thoại"
+                                            name="phone"
+                                            value={formData.phone}
+                                            onChange={handleChange}
+                                            error={!!errors.phone}
+                                            helperText={errors.phone}
+                                            placeholder="0123456789"
+                                        />
+                                    </Grid>
+                                    <Grid size={{ xs: 12, sm: 6 }}>
+                                        <TextField
+                                            fullWidth
+                                            required
+                                            label="Tiêu đề"
+                                            name="subject"
+                                            value={formData.subject}
+                                            onChange={handleChange}
+                                            error={!!errors.subject}
+                                            helperText={errors.subject}
+                                            placeholder="Vấn đề cần liên hệ"
+                                        />
+                                    </Grid>
+                                    <Grid size={{ xs: 12 }}>
+                                        <TextField
+                                            fullWidth
+                                            required
+                                            multiline
+                                            rows={5}
+                                            label="Nội dung"
+                                            name="message"
+                                            value={formData.message}
+                                            onChange={handleChange}
+                                            error={!!errors.message}
+                                            helperText={errors.message || 'Tối thiểu 10 ký tự'}
+                                            placeholder="Nhập nội dung tin nhắn của bạn..."
+                                        />
+                                    </Grid>
+                                    <Grid size={{ xs: 12 }}>
+                                        <Button
+                                            type="submit"
+                                            variant="contained"
+                                            size="large"
+                                            fullWidth
+                                            endIcon={<SendIcon />}
+                                            sx={{
+                                                bgcolor: 'var(--primary-color)',
+                                                py: 1.5,
+                                                fontSize: '1rem',
+                                                fontWeight: 600,
+                                                '&:hover': {
+                                                    bgcolor: 'var(--accent-color)',
+                                                },
+                                            }}
+                                            onClick={handleSubmit}
+                                        >
+                                            Gửi tin nhắn
+                                        </Button>
+                                    </Grid>
+                                </Grid>
                             </Box>
                         </Card>
                     </Grid>
@@ -244,6 +328,31 @@ export default function ContactPage() {
                                         </Box>
                                     </Box>
                                 ))}
+                            </Box>
+                        </Card>
+
+                        {/* Map */}
+                        <Card sx={{ overflow: 'hidden' }}>
+                            <Box
+                                sx={{
+                                    width: '100%',
+                                    height: 300,
+                                    bgcolor: '#e0e0e0',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <iframe
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d582.6843920596709!2d106.64234205038215!3d10.748526588654048!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752e629e55c4f1%3A0xe706055cf174c128!2zNjIgxJAuIE1pbmggUGjhu6VuZywgUGjGsOG7nW5nIDIsIFF14bqtbiA2LCBUaMOgbmggcGjhu5EgSOG7kyBDaMOtIE1pbmgsIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1761076138889!5m2!1svi!2s"
+                                    width="100%"
+                                    height="300"
+                                    style={{ border: 0 }}
+                                    allowFullScreen
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                    title="School Location"
+                                />
                             </Box>
                         </Card>
                     </Grid>
